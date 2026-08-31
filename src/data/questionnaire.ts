@@ -11,17 +11,40 @@ export interface QuestionnaireQuestion {
  */
 export const questionnaireQuestions: QuestionnaireQuestion[] = [
   {
-    id: 'seo',
-    label: 'Avez-vous mis en place des actions de référencement (SEO) sur votre site ?',
+    id: 'maquettage',
+    label: 'Avez-vous fait ou allez-vous faire du maquettage pour votre projet ?',
   },
   {
     id: 'logo',
-    label: 'Avez-vous créé un logo personnalisé pour votre projet ?',
+    label: 'Avez-vous créé ou allez-vous créer un logo personnalisé pour votre projet ?',
+  },
+  {
+    id: 'bdd',
+    label: 'Avez-vous conçu ou allez-vous concevoir une base de données pour votre projet ?',
   },
   {
     id: 'architectureDossiers',
-    label:
-      "Votre projet backend a-t-il une architecture de dossiers dédiée (ex : public / src / templates) ?",
+    label: 'Votre projet backend a-t-il une architecture de dossiers dédiée (ex : public / src / templates) ?',
     helpText: "Répondez « non » si votre stack n'a pas cette organisation (ex : MERN, Node seul).",
+  },
+  {
+    id: 'auth',
+    label: 'Avez-vous mis en place ou allez-vous mettre en place une authentification / gestion des utilisateurs ?',
+  },
+  {
+    id: 'api',
+    label: 'Avez-vous développé ou allez-vous développer une API pour votre projet ?',
+  },
+  {
+    id: 'seo',
+    label: 'Avez-vous mis en place ou allez-vous mettre en place des actions de référencement (SEO) sur votre site ?',
+  },
+  {
+    id: 'testsAuto',
+    label: 'Avez-vous réalisé ou allez-vous réaliser des tests automatisés sur votre projet ?',
+  },
+  {
+    id: 'deploiement',
+    label: 'Avez-vous déployé ou allez-vous déployer votre projet en ligne ?',
   },
 ]

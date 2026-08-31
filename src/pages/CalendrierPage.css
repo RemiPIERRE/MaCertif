@@ -66,8 +66,8 @@
   font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--forest-dark);
-  background: var(--forest-tint);
+  color: var(--accent-dark);
+  background: var(--accent-tint);
   padding: 0.35rem 0.6rem;
   border-radius: var(--radius-sm);
   flex-shrink: 0;

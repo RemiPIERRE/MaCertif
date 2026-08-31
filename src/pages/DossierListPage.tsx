@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { dossierChapters } from '../data/dossierContent'
+import { questionnaireQuestions } from '../data/questionnaire'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { filterActiveTasks } from '../lib/activeTasks'
 import { computeProgress, getTaskStatus } from '../lib/progress'
@@ -31,9 +32,59 @@ function TaskRow({ task, reponses }: { task: DossierTask; reponses: DossierRepon
   )
 }
 
+function QuestionnaireCard({
+  questionnaire,
+  setQuestionnaire,
+}: {
+  questionnaire: Questionnaire
+  setQuestionnaire: (updater: (prev: Questionnaire) => Questionnaire) => void
+}) {
+  const setAnswer = (id: string, value: boolean) => setQuestionnaire((prev) => ({ ...prev, [id]: value }))
+
+  return (
+    <details className="card questionnaire-card" open>
+      <summary className="questionnaire-summary">
+        <span>Personnaliser mon dossier</span>
+        <span className="questionnaire-summary-hint">Retirer les tâches qui ne s'appliquent pas à mon projet</span>
+      </summary>
+      <p className="questionnaire-intro">
+        Répondez « non » à une question pour retirer les tâches liées de votre dossier et de votre progression. Vous
+        pouvez changer d'avis à tout moment.
+      </p>
+      <div className="questionnaire-list">
+        {questionnaireQuestions.map((q) => {
+          const value = questionnaire[q.id] !== false
+          return (
+            <div key={q.id} className="questionnaire-item">
+              <div>
+                <div className="questionnaire-label">{q.label}</div>
+                {q.helpText && <div className="questionnaire-help">{q.helpText}</div>}
+              </div>
+              <div className="questionnaire-toggle">
+                <button
+                  className={`btn ${value ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setAnswer(q.id, true)}
+                >
+                  Oui
+                </button>
+                <button
+                  className={`btn ${!value ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setAnswer(q.id, false)}
+                >
+                  Non
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </details>
+  )
+}
+
 export function DossierListPage() {
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
-  const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
+  const [questionnaire, setQuestionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
   const progress = computeProgress(reponses, questionnaire)
 
   return (
@@ -51,6 +102,8 @@ export function DossierListPage() {
           Consulter le dossier compilé
         </Link>
       </header>
+
+      <QuestionnaireCard questionnaire={questionnaire} setQuestionnaire={setQuestionnaire} />
 
       <div className="card dossier-progress-card">
         <ProgressBar

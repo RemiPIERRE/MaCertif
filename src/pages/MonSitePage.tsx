@@ -61,7 +61,7 @@ export function MonSitePage() {
                 {description ? (
                   <p className="site-item-description">{description}</p>
                 ) : (
-                  <p className="site-item-description empty">Pas encore de description — à rédiger dans Mon dossier.</p>
+                  <p className="site-item-description empty">Pas encore de description. À rédiger dans Mon dossier.</p>
                 )}
               </div>
               <Link className="btn btn-ghost site-item-link" to={`/dossier/${task.id}`}>

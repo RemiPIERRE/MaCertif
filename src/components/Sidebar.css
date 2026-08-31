@@ -27,7 +27,7 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-sm);
-  background: var(--forest);
+  background: var(--accent);
   color: #fff;
   font-weight: 800;
   font-size: 0.8rem;
@@ -85,6 +85,27 @@
   margin-top: auto;
   padding: 0.8rem 0.4rem 0.2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: var(--sidebar-text);
+  padding: 0.5rem 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0.7rem;
+  transition: background-color 0.12s ease;
+}
+
+.sidebar-theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .sidebar-footer p {

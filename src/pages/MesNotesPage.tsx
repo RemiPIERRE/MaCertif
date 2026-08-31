@@ -3,13 +3,13 @@ import { generateId } from '../lib/id'
 import { STORAGE_KEYS, type Note } from '../types/storage'
 import './MesNotesPage.css'
 
-const COLORS = ['forest', 'amber', 'red', 'plain'] as const
+const COLORS = ['violet', 'amber', 'red', 'plain'] as const
 
 export function MesNotesPage() {
   const [notes, setNotes] = useLocalStorage<Note[]>(STORAGE_KEYS.notes, [])
 
   const addNote = () => {
-    const note: Note = { id: generateId(), text: '', color: 'forest', createdAt: new Date().toISOString() }
+    const note: Note = { id: generateId(), text: '', color: 'violet', createdAt: new Date().toISOString() }
     setNotes((prev) => [note, ...prev])
   }
 

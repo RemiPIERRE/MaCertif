@@ -5,28 +5,43 @@ import { resolveOutline, type ResolvedItem } from '../lib/resolveOutline'
 import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos, type DossierReponses, type Questionnaire } from '../types/storage'
 import './DossierCompilePage.css'
 
-function ItemBlock({ item, reponses }: { item: ResolvedItem; reponses: DossierReponses }) {
-  if (item.kind === 'note') {
+function TaskBody({ item, reponses }: { item: Extract<ResolvedItem, { kind: 'task' }>; reponses: DossierReponses }) {
+  const { task, annexNumber } = item
+  if (annexNumber !== null) return <p className="compiled-annex-ref">Voir Annexe {annexNumber}.</p>
+  if (task.type === 'image') {
     return (
-      <div className="compiled-task">
-        <p className="compiled-note">{item.note}</p>
+      <div className="compiled-image-box">
+        Image à insérer ici : {reponses[task.id]?.text || <em>Description non renseignée</em>}
       </div>
     )
   }
-  const { task, annexNumber } = item
+  return <p>{reponses[task.id]?.text || <em>Non renseigné</em>}</p>
+}
+
+/**
+ * A single task in a list gets its own body directly under the parent heading
+ * (no redundant sub-heading repeating the same title); a note placeholder or a
+ * list with several items keeps its per-item heading.
+ */
+function ItemList({ items, reponses }: { items: ResolvedItem[]; reponses: DossierReponses }) {
+  if (items.length === 1 && items[0].kind === 'task') {
+    return <TaskBody item={items[0]} reponses={reponses} />
+  }
   return (
-    <div className="compiled-task">
-      <h4>{task.sectionTitle ?? task.title}</h4>
-      {annexNumber !== null ? (
-        <p className="compiled-annex-ref">→ Voir Annexe {annexNumber}.</p>
-      ) : task.type === 'image' ? (
-        <div className="compiled-image-box">
-          📷 Image à insérer ici : {reponses[task.id]?.text || <em>(description non renseignée)</em>}
-        </div>
-      ) : (
-        <p>{reponses[task.id]?.text || <em>(non renseigné)</em>}</p>
+    <>
+      {items.map((item, i) =>
+        item.kind === 'note' ? (
+          <div key={i} className="compiled-task">
+            <p className="compiled-note">{item.note}</p>
+          </div>
+        ) : (
+          <div key={i} className="compiled-task">
+            <h4>{item.task.sectionTitle ?? item.task.title}</h4>
+            <TaskBody item={item} reponses={reponses} />
+          </div>
+        ),
       )}
-    </div>
+    </>
   )
 }
 
@@ -63,7 +78,7 @@ export function DossierComplilePage() {
         </div>
         <div className="compile-header-actions">
           <Link className="btn btn-ghost" to="/dossier">
-            ← Retour au dossier
+            Retour au dossier
           </Link>
           <button className="btn btn-primary" onClick={handleExport} disabled={exporting}>
             {exporting ? 'Génération…' : 'Exporter au format Word'}
@@ -87,9 +102,7 @@ export function DossierComplilePage() {
           .map((section) => (
             <section key={section.title} className="compiled-chapter">
               <h2>{section.title}</h2>
-              {section.items.map((item, i) => (
-                <ItemBlock key={i} item={item} reponses={reponses} />
-              ))}
+              <ItemList items={section.items} reponses={reponses} />
             </section>
           ))}
 
@@ -104,12 +117,10 @@ export function DossierComplilePage() {
                 ? section.subsections.map((sub) => (
                     <div key={sub.title}>
                       <h3>{sub.title}</h3>
-                      {sub.items.map((item, i) => (
-                        <ItemBlock key={i} item={item} reponses={reponses} />
-                      ))}
+                      <ItemList items={sub.items} reponses={reponses} />
                     </div>
                   ))
-                : section.items.map((item, i) => <ItemBlock key={i} item={item} reponses={reponses} />)}
+                : <ItemList items={section.items} reponses={reponses} />}
             </section>
           ))}
 
@@ -122,7 +133,7 @@ export function DossierComplilePage() {
                   Annexe {annex.number} : {annex.task.sectionTitle ?? annex.task.title}
                 </h4>
                 <div className="compiled-image-box">
-                  📷 Image à insérer ici : {reponses[annex.task.id]?.text || <em>(description non renseignée)</em>}
+                  Image à insérer ici : {reponses[annex.task.id]?.text || <em>Description non renseignée</em>}
                 </div>
               </div>
             ))}

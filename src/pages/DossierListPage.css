@@ -10,6 +10,75 @@
   margin-bottom: 1.5rem;
 }
 
+.questionnaire-card {
+  padding: 0;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.questionnaire-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.95rem 1.3rem;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  user-select: none;
+}
+
+.questionnaire-summary::-webkit-details-marker {
+  display: none;
+}
+
+.questionnaire-summary-hint {
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.questionnaire-intro {
+  padding: 0 1.3rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.questionnaire-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1.3rem 1rem;
+}
+
+.questionnaire-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.questionnaire-item:first-child {
+  border-top: none;
+}
+
+.questionnaire-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.questionnaire-help {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 0.2rem;
+}
+
+.questionnaire-toggle {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
 .dossier-chapters {
   display: flex;
   flex-direction: column;
@@ -39,8 +108,8 @@
 .chapter-number {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: var(--forest-dark);
-  background: var(--forest-tint);
+  color: var(--accent-dark);
+  background: var(--accent-tint);
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 50%;
@@ -61,7 +130,7 @@
 }
 
 .chapter-count.complete {
-  color: var(--forest-dark);
+  color: var(--accent-dark);
 }
 
 .subchapter {
@@ -71,7 +140,7 @@
 .subchapter-title {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--forest-dark);
+  color: var(--accent-dark);
   margin: 0.6rem 0 0.4rem;
 }
 
@@ -102,7 +171,7 @@
 }
 
 .task-row:hover .task-row-title {
-  color: var(--forest-dark);
+  color: var(--accent-dark);
 }
 
 .task-row-status {
@@ -120,8 +189,8 @@
 }
 
 .task-row-status.status-complete {
-  background: var(--forest);
-  border-color: var(--forest);
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
 }
 

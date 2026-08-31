@@ -3,13 +3,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: var(--forest-tint);
-  border: 1px solid var(--forest);
+  background: var(--accent-tint);
+  border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   padding: 0.7rem 1rem;
   margin-bottom: 1.5rem;
   font-size: 0.85rem;
-  color: var(--forest-dark);
+  color: var(--accent-dark);
 }
 
 .continuity-banner-actions {
@@ -30,7 +30,7 @@
   border: none;
   font-size: 1.2rem;
   line-height: 1;
-  color: var(--forest-dark);
+  color: var(--accent-dark);
   cursor: pointer;
   padding: 0 0.2rem;
 }

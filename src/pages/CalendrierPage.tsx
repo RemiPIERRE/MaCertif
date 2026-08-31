@@ -27,7 +27,8 @@ export function CalendrierPage() {
     [profil.dateFinFormation, 'Fin formation'],
     [profil.dateDebutStage, 'Début stage'],
     [profil.dateFinStage, 'Fin stage'],
-    [profil.dateExamen, 'Examen'],
+    [profil.dateExamenDebut, 'Début examen'],
+    [profil.dateExamenFin, 'Fin examen'],
   ]
   const profilEvents: CalendarEvent[] = profilEventCandidates
     .filter(([date]) => Boolean(date))
@@ -69,18 +70,26 @@ export function CalendrierPage() {
       />
 
       <div className="card calendrier-form">
-        <h3>Date d'examen</h3>
-        <p className="calendrier-hint">
-          Purement informative : partagée avec la fiche Accueil, jamais insérée dans le document Word exporté.
-        </p>
-        <div className="field calendrier-exam-field">
-          <input
-            type="date"
-            value={profil.dateExamen}
-            onChange={(e) => setProfil((prev) => ({ ...prev, dateExamen: e.target.value }))}
-          />
-          {profil.dateExamen && <span className="deadline-countdown">{formatCountdown(profil.dateExamen)}</span>}
+        <h3>Dates d'examen</h3>
+        <div className="calendrier-form-row">
+          <div className="field">
+            <label>Début</label>
+            <input
+              type="date"
+              value={profil.dateExamenDebut}
+              onChange={(e) => setProfil((prev) => ({ ...prev, dateExamenDebut: e.target.value }))}
+            />
+          </div>
+          <div className="field">
+            <label>Fin</label>
+            <input
+              type="date"
+              value={profil.dateExamenFin}
+              onChange={(e) => setProfil((prev) => ({ ...prev, dateExamenFin: e.target.value }))}
+            />
+          </div>
         </div>
+        {profil.dateExamenDebut && <span className="deadline-countdown">{formatCountdown(profil.dateExamenDebut)}</span>}
       </div>
 
       <div className="card calendrier-form">

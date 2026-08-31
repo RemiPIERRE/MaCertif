@@ -27,8 +27,8 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.note-forest {
-  background: var(--forest-tint);
+.note-violet {
+  background: var(--accent-tint);
 }
 .note-amber {
   background: var(--amber-tint);
@@ -37,7 +37,7 @@
   background: var(--red-tint);
 }
 .note-plain {
-  background: var(--paper-raised);
+  background: var(--surface);
 }
 
 .note-card-toolbar {
@@ -61,8 +61,8 @@
   padding: 0;
 }
 
-.note-dot-forest {
-  background: var(--forest);
+.note-dot-violet {
+  background: var(--accent);
 }
 .note-dot-amber {
   background: var(--amber);

@@ -54,7 +54,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 0.3rem;
-  background: var(--paper-raised);
+  background: var(--surface);
 }
 
 .month-calendar-cell.empty {
@@ -63,8 +63,8 @@
 }
 
 .month-calendar-cell.today {
-  border-color: var(--forest);
-  background: var(--forest-tint);
+  border-color: var(--accent);
+  background: var(--accent-tint);
 }
 
 .month-calendar-daynum {
@@ -91,8 +91,8 @@
 }
 
 .event-profil {
-  background: var(--forest-tint);
-  color: var(--forest-dark);
+  background: var(--accent-tint);
+  color: var(--accent-dark);
 }
 
 .event-custom {
@@ -117,7 +117,7 @@
 }
 
 .legend-profil {
-  background: var(--forest);
+  background: var(--accent);
 }
 
 .legend-custom {

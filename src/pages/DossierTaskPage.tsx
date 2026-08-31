@@ -89,7 +89,7 @@ export function DossierTaskPage() {
             {task.type === 'image'
               ? `${text.length} / ${task.maxChars} caractères`
               : task.minChars !== null
-                ? `${text.length} caractères — cible indicative : ${task.minChars}+`
+                ? `${text.length} caractères (cible indicative : ${task.minChars}+)`
                 : `${text.length} caractères`}
           </span>
           {belowMin && (

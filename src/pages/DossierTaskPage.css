@@ -7,13 +7,13 @@
 }
 
 .task-breadcrumb a {
-  color: var(--forest-dark);
+  color: var(--accent-dark);
   text-decoration: none;
   font-weight: 600;
 }
 
 .example-box {
-  background: var(--forest-tint);
+  background: var(--accent-tint);
   border-left: 3px solid var(--amber);
   border-radius: var(--radius-sm);
   padding: 0.9rem 1.1rem;
@@ -70,8 +70,8 @@
 
 .task-editor textarea:focus {
   outline: none;
-  border-color: var(--forest);
-  box-shadow: 0 0 0 3px var(--forest-tint);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
 .task-editor-actions {

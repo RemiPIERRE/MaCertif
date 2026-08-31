@@ -29,9 +29,9 @@ export function ContinuityBanner() {
   return (
     <div className="continuity-banner">
       <span>
-        💾 Vous alternez entre plusieurs postes (maison / entreprise) ? Vos données ne vivent que dans ce
-        navigateur — exportez-les en fin de session et déposez le fichier sur un espace type OneDrive, puis
-        réimportez-le sur l'autre poste.
+        Vous alternez entre plusieurs postes (maison, entreprise) ? Vos données ne vivent que dans ce navigateur.
+        Exportez-les en fin de session, déposez le fichier sur un espace type OneDrive, puis réimportez-le sur
+        l'autre poste.
       </span>
       <div className="continuity-banner-actions">
         <button className="btn btn-secondary continuity-banner-export" onClick={downloadExport}>

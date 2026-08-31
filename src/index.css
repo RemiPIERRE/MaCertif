@@ -1,34 +1,60 @@
 :root {
   color-scheme: light;
 
-  --ink: #16211c;
-  --ink-soft: #3d4a43;
-  --paper: #f6f7f3;
-  --paper-raised: #ffffff;
-  --line: #dde1da;
-  --line-strong: #c3cac0;
+  --bg: #f3f4fb;
+  --surface: #ffffff;
+  --ink: #171a35;
+  --ink-soft: #565b85;
+  --line: #e1e3f2;
+  --line-strong: #c6cae8;
 
-  --forest: #2f6f5e;
-  --forest-dark: #234f43;
-  --forest-tint: #e5f0ec;
+  --navy: #1b2140;
+  --navy-2: #262c52;
 
-  --amber: #c9821f;
-  --amber-tint: #faf0dd;
+  --accent: #6552d0;
+  --accent-dark: #4d3cb0;
+  --accent-tint: #ece9fb;
 
-  --red: #b3452f;
-  --red-tint: #fbeae5;
+  --amber: #b8790f;
+  --amber-tint: #f7ecd8;
 
-  --sidebar-bg: #16241f;
-  --sidebar-text: #cfd9d3;
-  --sidebar-text-dim: #8ea296;
-  --sidebar-active: #2f6f5e;
+  --red: #b8342c;
+  --red-tint: #f8e3e1;
+
+  --sidebar-bg: #171b38;
+  --sidebar-text: #c7cae6;
+  --sidebar-text-dim: #7f84ac;
+  --sidebar-active: #4d3cb0;
 
   --radius-sm: 4px;
   --radius-md: 8px;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
-  --shadow-sm: 0 1px 2px rgba(22, 33, 28, 0.06);
+  --shadow-sm: 0 1px 2px rgba(23, 26, 53, 0.06);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0d1026;
+  --surface: #161a37;
+  --ink: #e7e8f7;
+  --ink-soft: #9da1c9;
+  --line: #2a2e57;
+  --line-strong: #3d4270;
+
+  --accent: #8677f2;
+  --accent-dark: #a598f7;
+  --accent-tint: #262b52;
+
+  --amber: #d9a441;
+  --amber-tint: #362c17;
+
+  --red: #e2695f;
+  --red-tint: #3a2020;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 * {
@@ -44,7 +70,7 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
@@ -65,7 +91,7 @@ p {
 }
 
 a {
-  color: var(--forest-dark);
+  color: var(--accent-dark);
 }
 
 button {
@@ -86,11 +112,11 @@ button {
 }
 
 .btn-primary {
-  background: var(--forest);
+  background: var(--accent);
   color: #fff;
 }
 .btn-primary:hover {
-  background: var(--forest-dark);
+  background: var(--accent-dark);
 }
 .btn-primary:disabled {
   background: var(--line-strong);
@@ -98,13 +124,13 @@ button {
 }
 
 .btn-secondary {
-  background: var(--paper-raised);
+  background: var(--surface);
   border-color: var(--line-strong);
   color: var(--ink);
 }
 .btn-secondary:hover {
-  border-color: var(--forest);
-  color: var(--forest-dark);
+  border-color: var(--accent);
+  color: var(--accent-dark);
 }
 
 .btn-ghost {
@@ -112,8 +138,8 @@ button {
   color: var(--ink-soft);
 }
 .btn-ghost:hover {
-  background: var(--forest-tint);
-  color: var(--forest-dark);
+  background: var(--accent-tint);
+  color: var(--accent-dark);
 }
 
 .btn-danger {
@@ -125,7 +151,7 @@ button {
 }
 
 .card {
-  background: var(--paper-raised);
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -151,15 +177,15 @@ button {
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
-  background: var(--paper-raised);
+  background: var(--surface);
   color: var(--ink);
 }
 
 .field input:focus,
 .field textarea:focus {
   outline: none;
-  border-color: var(--forest);
-  box-shadow: 0 0 0 3px var(--forest-tint);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
 .tag {
@@ -174,9 +200,9 @@ button {
   border-radius: 999px;
 }
 
-.tag-forest {
-  background: var(--forest-tint);
-  color: var(--forest-dark);
+.tag-violet {
+  background: var(--accent-tint);
+  color: var(--accent-dark);
 }
 .tag-amber {
   background: var(--amber-tint);

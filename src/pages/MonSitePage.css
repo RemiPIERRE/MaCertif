@@ -6,7 +6,7 @@
 
 .site-summary strong {
   font-family: var(--font-mono);
-  color: var(--forest-dark);
+  color: var(--accent-dark);
 }
 
 .site-list {
@@ -23,8 +23,8 @@
 }
 
 .site-item.ready {
-  border-color: var(--forest);
-  background: var(--forest-tint);
+  border-color: var(--accent);
+  background: var(--accent-tint);
 }
 
 .site-item-checkbox {
@@ -34,7 +34,7 @@
 .site-item-checkbox input {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: var(--forest);
+  accent-color: var(--accent);
 }
 
 .site-item-body {

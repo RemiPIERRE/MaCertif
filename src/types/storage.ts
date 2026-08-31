@@ -8,8 +8,9 @@ export interface ProfilInfos {
   dateFinFormation: string
   dateDebutStage: string
   dateFinStage: string
-  /** Informative only — never inserted into the Word export. */
-  dateExamen: string
+  /** Informative only, never inserted into the Word export: an exam usually spans several days. */
+  dateExamenDebut: string
+  dateExamenFin: string
 }
 
 export const EMPTY_PROFIL: ProfilInfos = {
@@ -22,7 +23,8 @@ export const EMPTY_PROFIL: ProfilInfos = {
   dateFinFormation: '',
   dateDebutStage: '',
   dateFinStage: '',
-  dateExamen: '',
+  dateExamenDebut: '',
+  dateExamenFin: '',
 }
 
 export interface DossierReponse {

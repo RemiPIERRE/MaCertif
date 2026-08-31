@@ -17,40 +17,69 @@ import {
   VerticalAlign,
   WidthType,
 } from 'docx'
-import { resolveOutline, type ResolvedItem, type ResolvedSection } from './resolveOutline'
-import { isTaskComplete } from './progress'
+import { resolveOutline, type ResolvedItem } from './resolveOutline'
 import type { DossierReponses, ProfilInfos, Questionnaire } from '../types/storage'
 
 const ACCENT = '641E0A'
 const GREY = '6B6B6B'
 const IMAGE_BG = 'F2F2F2'
+const FONT = 'Arial'
+
+/** One default Word tab stop (0.5in), used for the "indent by N tabs" requirement. */
+const TAB = 720
 
 function formatDate(value: string): string {
-  if (!value) return '—'
+  if (!value) return 'Non renseignée'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-function heading(text: string, level: (typeof HeadingLevel)[keyof typeof HeadingLevel], size: number) {
+/** Titre 1 (chapitre) : 20pt, centré, gras. */
+function heading1(text: string) {
   return new Paragraph({
-    heading: level,
-    spacing: { before: 320, after: 160 },
-    children: [new TextRun({ text, bold: true, color: ACCENT, size })],
+    heading: HeadingLevel.HEADING_1,
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 320, after: 200 },
+    children: [new TextRun({ text, bold: true, color: ACCENT, size: 40, font: FONT })],
+  })
+}
+
+/** Titre 2 (sous-chapitre) : 18pt, gras, indenté de deux tabulations. */
+function heading2(text: string) {
+  return new Paragraph({
+    heading: HeadingLevel.HEADING_2,
+    indent: { left: TAB * 2 },
+    spacing: { before: 280, after: 160 },
+    children: [new TextRun({ text, bold: true, color: ACCENT, size: 36, font: FONT })],
+  })
+}
+
+/** Titre 3 (détail de sous-chapitre) : 16pt, gras, indenté d'une tabulation. */
+function heading3(text: string) {
+  return new Paragraph({
+    heading: HeadingLevel.HEADING_3,
+    indent: { left: TAB },
+    spacing: { before: 240, after: 140 },
+    children: [new TextRun({ text, bold: true, color: ACCENT, size: 32, font: FONT })],
   })
 }
 
 function bodyParagraph(text: string) {
   const lines = text.split(/\n+/).filter(Boolean)
   if (lines.length === 0) {
-    return [new Paragraph({ children: [new TextRun({ text: '(non renseigné)', italics: true, color: GREY })] })]
+    return [
+      new Paragraph({
+        children: [new TextRun({ text: 'Non renseigné', italics: true, color: GREY, size: 24, font: FONT })],
+      }),
+    ]
   }
   return lines.map(
     (line) =>
       new Paragraph({
         spacing: { after: 200, line: 300 },
-        alignment: AlignmentType.JUSTIFIED,
-        children: [new TextRun({ text: line })],
+        alignment: AlignmentType.LEFT,
+        children: [new TextRun({ text: line, size: 24, font: FONT })],
       }),
   )
 }
@@ -58,14 +87,16 @@ function bodyParagraph(text: string) {
 function notePara(note: string) {
   return new Paragraph({
     spacing: { after: 200, line: 300 },
-    children: [new TextRun({ text: note, italics: true, color: GREY })],
+    children: [new TextRun({ text: note, italics: true, color: GREY, size: 24, font: FONT })],
   })
 }
 
 function annexReferencePara(annexNumber: number) {
   return new Paragraph({
     spacing: { after: 200 },
-    children: [new TextRun({ text: `→ Voir Annexe ${annexNumber}.`, italics: true, color: GREY })],
+    children: [
+      new TextRun({ text: `Voir Annexe ${annexNumber}.`, italics: true, color: GREY, size: 24, font: FONT }),
+    ],
   })
 }
 
@@ -86,13 +117,15 @@ function imagePlaceholder(description: string) {
             },
             children: [
               new Paragraph({
-                children: [new TextRun({ text: '📷 Image à insérer ici :', bold: true })],
+                children: [new TextRun({ text: '📷 Image à insérer ici :', bold: true, size: 24, font: FONT })],
               }),
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: description.trim() || '(description non renseignée)',
+                    text: description.trim() || 'Description non renseignée',
                     italics: !description.trim(),
+                    size: 24,
+                    font: FONT,
                   }),
                 ],
               }),
@@ -102,53 +135,6 @@ function imagePlaceholder(description: string) {
       }),
     ],
     margins: { top: 100, bottom: 300 },
-  })
-}
-
-function styledTableHeaderCell(text: string) {
-  return new TableCell({
-    shading: { type: ShadingType.SOLID, color: ACCENT, fill: ACCENT },
-    verticalAlign: VerticalAlign.CENTER,
-    margins: { top: 120, bottom: 120, left: 150, right: 150 },
-    children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: 'FFFFFF' })] })],
-  })
-}
-
-function styledTableCell(text: string) {
-  return new TableCell({
-    verticalAlign: VerticalAlign.CENTER,
-    margins: { top: 100, bottom: 100, left: 150, right: 150 },
-    children: [new Paragraph({ children: [new TextRun({ text })] })],
-  })
-}
-
-function countTaskItems(section: ResolvedSection, reponses: DossierReponses) {
-  const allItems: ResolvedItem[] = section.subsections.length
-    ? section.subsections.flatMap((s) => s.items)
-    : section.items
-  const taskItems = allItems.filter((i): i is Extract<ResolvedItem, { kind: 'task' }> => i.kind === 'task')
-  const done = taskItems.filter((i) => isTaskComplete(i.task, reponses)).length
-  return { done, total: taskItems.length }
-}
-
-function buildRecapTable(sections: ResolvedSection[], reponses: DossierReponses) {
-  const numbered = sections.filter((s) => s.number !== null)
-  const rows = numbered.map((section) => {
-    const { done, total } = countTaskItems(section, reponses)
-    return new TableRow({
-      children: [
-        styledTableCell(`${section.number}. ${section.title}`),
-        styledTableCell(total === 0 ? '—' : `${done} / ${total}`),
-      ],
-    })
-  })
-
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: [
-      new TableRow({ children: [styledTableHeaderCell('Chapitre'), styledTableHeaderCell('Tâches complétées')] }),
-      ...rows,
-    ],
   })
 }
 
@@ -173,7 +159,9 @@ function buildHeader(profil: ProfilInfos) {
                 verticalAlign: VerticalAlign.CENTER,
                 children: [
                   new Paragraph({
-                    children: [new TextRun({ text: profil.nomOrganisme || 'Organisme de formation', bold: true, color: GREY, size: 18 })],
+                    children: [
+                      new TextRun({ text: profil.nomOrganisme || 'Organisme de formation', bold: true, color: GREY, size: 18, font: FONT }),
+                    ],
                   }),
                 ],
               }),
@@ -183,7 +171,7 @@ function buildHeader(profil: ProfilInfos) {
                 children: [
                   new Paragraph({
                     alignment: AlignmentType.RIGHT,
-                    children: [new TextRun({ text: 'Dossier de Projet', bold: true, color: ACCENT, size: 26 })],
+                    children: [new TextRun({ text: 'Dossier de Projet', bold: true, color: ACCENT, size: 26, font: FONT })],
                   }),
                 ],
               }),
@@ -213,16 +201,14 @@ function buildFooter(profil: ProfilInfos) {
             children: [
               new TableCell({
                 width: { size: 34, type: WidthType.PERCENTAGE },
-                children: [new Paragraph({ children: [new TextRun({ text: profil.nomProjet || 'Mon projet', size: 16, color: GREY })] })],
+                children: [new Paragraph({ children: [new TextRun({ text: profil.nomProjet || 'Mon projet', size: 16, color: GREY, font: FONT })] })],
               }),
               new TableCell({
                 width: { size: 32, type: WidthType.PERCENTAGE },
                 children: [
                   new Paragraph({
                     alignment: AlignmentType.CENTER,
-                    children: [
-                      new TextRun({ children: [PageNumber.CURRENT], size: 16, color: GREY }),
-                    ],
+                    children: [new TextRun({ children: [PageNumber.CURRENT], size: 16, color: GREY, font: FONT })],
                   }),
                 ],
               }),
@@ -231,7 +217,7 @@ function buildFooter(profil: ProfilInfos) {
                 children: [
                   new Paragraph({
                     alignment: AlignmentType.RIGHT,
-                    children: [new TextRun({ text: profil.nomOrganisme || 'Organisme de formation', size: 16, color: GREY })],
+                    children: [new TextRun({ text: profil.nomOrganisme || 'Organisme de formation', size: 16, color: GREY, font: FONT })],
                   }),
                 ],
               }),
@@ -248,29 +234,29 @@ function buildCoverPage(profil: ProfilInfos) {
     new Paragraph({ spacing: { before: 1600 }, children: [] }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: 'DOSSIER DE PROJET', bold: true, color: ACCENT, size: 30 })],
+      children: [new TextRun({ text: 'DOSSIER DE PROJET', bold: true, color: ACCENT, size: 30, font: FONT })],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { before: 400, after: 200 },
-      children: [new TextRun({ text: profil.nomProjet || 'Nom du projet', bold: true, size: 56 })],
+      children: [new TextRun({ text: profil.nomProjet || 'Nom du projet', bold: true, size: 56, font: FONT })],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 800 },
-      children: [new TextRun({ text: profil.sousTitreProjet || '', italics: true, size: 26, color: GREY })],
+      children: [new TextRun({ text: profil.sousTitreProjet || '', italics: true, size: 26, color: GREY, font: FONT })],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { before: 1000 },
       children: [
-        new TextRun({ text: `${profil.prenom} ${profil.nom}`.trim() || 'Candidat·e', bold: true, size: 28 }),
+        new TextRun({ text: `${profil.prenom} ${profil.nom}`.trim() || 'Candidat', bold: true, size: 28, font: FONT }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
-      children: [new TextRun({ text: profil.nomOrganisme || 'Organisme de formation', size: 22, color: GREY })],
+      children: [new TextRun({ text: profil.nomOrganisme || 'Organisme de formation', size: 22, color: GREY, font: FONT })],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -280,6 +266,7 @@ function buildCoverPage(profil: ProfilInfos) {
           text: `Stage du ${formatDate(profil.dateDebutStage)} au ${formatDate(profil.dateFinStage)}`,
           size: 20,
           color: GREY,
+          font: FONT,
         }),
       ],
     }),
@@ -290,6 +277,7 @@ function buildCoverPage(profil: ProfilInfos) {
           text: `Formation du ${formatDate(profil.dateDebutFormation)} au ${formatDate(profil.dateFinFormation)}`,
           size: 20,
           color: GREY,
+          font: FONT,
         }),
       ],
     }),
@@ -297,23 +285,27 @@ function buildCoverPage(profil: ProfilInfos) {
   ]
 }
 
-function renderItem(item: ResolvedItem, reponses: DossierReponses): (Paragraph | Table)[] {
-  if (item.kind === 'note') {
-    return [notePara(item.note)]
-  }
+function renderTaskBody(item: Extract<ResolvedItem, { kind: 'task' }>, reponses: DossierReponses): (Paragraph | Table)[] {
   const { task, annexNumber } = item
-  const blocks: (Paragraph | Table)[] = [heading(task.sectionTitle ?? task.title, HeadingLevel.HEADING_3, 22)]
-  if (annexNumber !== null) {
-    blocks.push(annexReferencePara(annexNumber))
-    return blocks
-  }
+  if (annexNumber !== null) return [annexReferencePara(annexNumber)]
   const text = reponses[task.id]?.text ?? ''
-  if (task.type === 'image') {
-    blocks.push(imagePlaceholder(text))
-  } else {
-    blocks.push(...bodyParagraph(text))
+  return task.type === 'image' ? [imagePlaceholder(text)] : bodyParagraph(text)
+}
+
+/**
+ * Renders a list of items under a parent heading (section or subsection). When the
+ * list holds exactly one task, its own heading would just repeat the parent's title
+ * (e.g. section "1. Présentation de l'entreprise" with a single task of the same
+ * name) — so it's skipped and the content goes straight under the parent heading.
+ */
+function renderItemList(items: ResolvedItem[], reponses: DossierReponses): (Paragraph | Table)[] {
+  if (items.length === 1 && items[0].kind === 'task') {
+    return renderTaskBody(items[0], reponses)
   }
-  return blocks
+  return items.flatMap((item) => {
+    if (item.kind === 'note') return [notePara(item.note)]
+    return [heading3(item.task.sectionTitle ?? item.task.title), ...renderTaskBody(item, reponses)]
+  })
 }
 
 export async function generateDossierDocx(
@@ -328,34 +320,30 @@ export async function generateDossierDocx(
 
   // Front matter: unnumbered sections (Remerciements, Introduction personnelle)
   for (const section of outline.sections.filter((s) => s.number === null)) {
-    body.push(heading(section.title, HeadingLevel.HEADING_1, 28))
-    for (const item of section.items) body.push(...renderItem(item, reponses))
+    body.push(heading1(section.title))
+    body.push(...renderItemList(section.items, reponses))
   }
 
-  body.push(heading('Sommaire', HeadingLevel.HEADING_1, 30))
+  body.push(heading1('Sommaire'))
   body.push(new TableOfContents('Sommaire', { hyperlink: true, headingStyleRange: '1-3' }))
   body.push(new Paragraph({ children: [], pageBreakBefore: true }))
 
-  body.push(heading('Récapitulatif du dossier', HeadingLevel.HEADING_1, 30))
-  body.push(buildRecapTable(outline.sections, reponses))
-  body.push(new Paragraph({ children: [], pageBreakBefore: true }))
-
   for (const section of outline.sections.filter((s) => s.number !== null)) {
-    body.push(heading(`${section.number}. ${section.title}`, HeadingLevel.HEADING_1, 30))
+    body.push(heading1(`${section.number}. ${section.title}`))
     if (section.subsections.length) {
       for (const sub of section.subsections) {
-        body.push(heading(sub.title, HeadingLevel.HEADING_2, 26))
-        for (const item of sub.items) body.push(...renderItem(item, reponses))
+        body.push(heading2(sub.title))
+        body.push(...renderItemList(sub.items, reponses))
       }
     } else {
-      for (const item of section.items) body.push(...renderItem(item, reponses))
+      body.push(...renderItemList(section.items, reponses))
     }
   }
 
   if (outline.annexes.length) {
-    body.push(heading('Annexes', HeadingLevel.HEADING_1, 30))
+    body.push(heading1('Annexes'))
     for (const annex of outline.annexes) {
-      body.push(heading(`Annexe ${annex.number} : ${annex.task.sectionTitle ?? annex.task.title}`, HeadingLevel.HEADING_2, 26))
+      body.push(heading2(`Annexe ${annex.number} : ${annex.task.sectionTitle ?? annex.task.title}`))
       body.push(imagePlaceholder(reponses[annex.task.id]?.text ?? ''))
     }
   }
@@ -364,7 +352,7 @@ export async function generateDossierDocx(
     styles: {
       default: {
         document: {
-          run: { font: 'Calibri', size: 22 },
+          run: { font: FONT, size: 24 },
         },
       },
     },

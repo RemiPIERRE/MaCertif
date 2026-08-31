@@ -20,7 +20,7 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--forest);
+  background: var(--accent);
   border-radius: 999px;
   transition: width 0.2s ease;
 }

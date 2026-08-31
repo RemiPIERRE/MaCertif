@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { downloadExport, importFromFile, ImportError } from '../lib/exportImport'
 import { computeProgress } from '../lib/progress'
-import { questionnaireQuestions } from '../data/questionnaire'
 import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos, type DossierReponses, type Questionnaire } from '../types/storage'
 import { ProgressBar } from '../components/ProgressBar'
 import './AccueilPage.css'
@@ -26,7 +25,7 @@ function DateField({
 }
 
 function formatDateFr(value: string): string {
-  if (!value) return '—'
+  if (!value) return 'à définir'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -35,13 +34,12 @@ function formatDateFr(value: string): string {
 export function AccueilPage() {
   const [profil, setProfil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
-  const [questionnaire, setQuestionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
+  const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
   const [importMessage, setImportMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [editing, setEditing] = useState(() => !(profil.nom.trim() || profil.prenom.trim()))
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const update = (patch: Partial<ProfilInfos>) => setProfil((prev) => ({ ...prev, ...patch }))
-  const setQuestionAnswer = (id: string, value: boolean) => setQuestionnaire((prev) => ({ ...prev, [id]: value }))
   const progress = computeProgress(reponses, questionnaire)
 
   const handleImportClick = () => fileInputRef.current?.click()
@@ -81,7 +79,7 @@ export function AccueilPage() {
               </div>
               <div className="field">
                 <label>Nom</label>
-                <input value={profil.nom} onChange={(e) => update({ nom: e.target.value })} placeholder="Dupont" />
+                <input value={profil.nom} onChange={(e) => update({ nom: e.target.value })} placeholder="PIERRE" />
               </div>
             </div>
 
@@ -90,7 +88,7 @@ export function AccueilPage() {
               <input
                 value={profil.nomProjet}
                 onChange={(e) => update({ nomProjet: e.target.value })}
-                placeholder="Association Fidelia"
+                placeholder="Le P'tit Grain de Folie"
               />
             </div>
             <div className="field">
@@ -98,7 +96,7 @@ export function AccueilPage() {
               <input
                 value={profil.sousTitreProjet}
                 onChange={(e) => update({ sousTitreProjet: e.target.value })}
-                placeholder="Site vitrine associatif"
+                placeholder="Site vitrine de restaurant"
               />
             </div>
             <div className="field">
@@ -106,7 +104,7 @@ export function AccueilPage() {
               <input
                 value={profil.nomOrganisme}
                 onChange={(e) => update({ nomOrganisme: e.target.value })}
-                placeholder="Certif Academy"
+                placeholder="ENI"
               />
             </div>
 
@@ -122,11 +120,10 @@ export function AccueilPage() {
               <DateField label="Fin" value={profil.dateFinStage} onChange={(v) => update({ dateFinStage: v })} />
             </div>
 
-            <h4 className="accueil-subheading">Date d'examen</h4>
-            <p className="accueil-hint">Purement informative : jamais insérée dans le document Word exporté.</p>
+            <h4 className="accueil-subheading">Dates d'examen</h4>
             <div className="field-grid">
-              <DateField label="Date" value={profil.dateExamen} onChange={(v) => update({ dateExamen: v })} />
-              <div />
+              <DateField label="Début" value={profil.dateExamenDebut} onChange={(v) => update({ dateExamenDebut: v })} />
+              <DateField label="Fin" value={profil.dateExamenFin} onChange={(v) => update({ dateExamenFin: v })} />
             </div>
 
             <button className="btn btn-primary" onClick={() => setEditing(false)}>
@@ -143,19 +140,19 @@ export function AccueilPage() {
             </div>
             <dl className="accueil-recap-list">
               <div>
-                <dt>Candidat·e</dt>
-                <dd>{`${profil.prenom} ${profil.nom}`.trim() || '—'}</dd>
+                <dt>Candidat</dt>
+                <dd>{`${profil.prenom} ${profil.nom}`.trim() || 'à définir'}</dd>
               </div>
               <div>
                 <dt>Projet</dt>
                 <dd>
-                  {profil.nomProjet || '—'}
-                  {profil.sousTitreProjet && <span className="accueil-recap-sub"> — {profil.sousTitreProjet}</span>}
+                  {profil.nomProjet || 'à définir'}
+                  {profil.sousTitreProjet && <span className="accueil-recap-sub"> · {profil.sousTitreProjet}</span>}
                 </dd>
               </div>
               <div>
                 <dt>Organisme de formation</dt>
-                <dd>{profil.nomOrganisme || '—'}</dd>
+                <dd>{profil.nomOrganisme || 'à définir'}</dd>
               </div>
               <div>
                 <dt>Formation</dt>
@@ -171,7 +168,9 @@ export function AccueilPage() {
               </div>
               <div>
                 <dt>Examen</dt>
-                <dd>{formatDateFr(profil.dateExamen)}</dd>
+                <dd>
+                  Du {formatDateFr(profil.dateExamenDebut)} au {formatDateFr(profil.dateExamenFin)}
+                </dd>
               </div>
             </dl>
           </section>
@@ -192,12 +191,13 @@ export function AccueilPage() {
           </section>
 
           <section className="card accueil-backup">
-            <h3>💾 Travailler sur plusieurs postes</h3>
+            <h3>Travailler sur plusieurs postes</h3>
             <p>
-              Tout est stocké dans <strong>ce navigateur uniquement</strong> — rien n'est envoyé sur un serveur.
-              Si vous avancez le soir chez vous et la journée en entreprise, pensez à <strong>exporter vos données en
-              fin de session</strong> et à déposer le fichier JSON dans un espace personnel type OneDrive. Sur l'autre
-              poste, il suffit de le réimporter pour retrouver exactement où vous en étiez.
+              Tout est stocké dans <strong>ce navigateur uniquement</strong>, rien n'est envoyé sur un serveur. Si
+              vous avancez le soir chez vous et la journée en entreprise, pensez à{' '}
+              <strong>exporter vos données en fin de session</strong> et à déposer le fichier JSON dans un espace
+              personnel type OneDrive. Sur l'autre poste, il suffit de le réimporter pour retrouver exactement où
+              vous en étiez.
             </p>
             <div className="accueil-backup-actions">
               <button className="btn btn-secondary" onClick={downloadExport}>
@@ -214,41 +214,6 @@ export function AccueilPage() {
           </section>
         </div>
       </div>
-
-      <section className="card accueil-questionnaire">
-        <h3>Personnaliser mon dossier</h3>
-        <p className="accueil-hint">
-          Certaines tâches ne s'appliquent pas à tous les projets. Répondez « non » pour les retirer de votre
-          dossier et de votre progression — vous pouvez changer d'avis à tout moment.
-        </p>
-        <div className="questionnaire-list">
-          {questionnaireQuestions.map((q) => {
-            const value = questionnaire[q.id] !== false
-            return (
-              <div key={q.id} className="questionnaire-item">
-                <div>
-                  <div className="questionnaire-label">{q.label}</div>
-                  {q.helpText && <div className="questionnaire-help">{q.helpText}</div>}
-                </div>
-                <div className="questionnaire-toggle">
-                  <button
-                    className={`btn ${value ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setQuestionAnswer(q.id, true)}
-                  >
-                    Oui
-                  </button>
-                  <button
-                    className={`btn ${!value ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setQuestionAnswer(q.id, false)}
-                  >
-                    Non
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
     </div>
   )
 }
