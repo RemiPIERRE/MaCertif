@@ -1,9 +1,9 @@
 /**
  * The professional structure of the compiled dossier / Word export — distinct from
  * `dossierChapters` (used for the day-to-day "Mon dossier" editing flow). Reflects
- * the official DWWM (ENI) plan: 11 numbered chapters, an unnumbered "Remerciements"
- * and "Introduction personnelle" up front, and an Annexes section at the end for
- * images that don't need to interrupt the reading flow.
+ * the official DWWM (ENI) plan: an unnumbered "Remerciements", the table of contents,
+ * an unnumbered "Introduction", 11 numbered chapters, and an Annexes section at the
+ * end for images that don't need to interrupt the reading flow.
  */
 
 export type ExportItem =
@@ -16,7 +16,7 @@ export interface ExportSubsection {
 }
 
 export interface ExportSection {
-  /** null for the unnumbered front-matter sections (Remerciements, Introduction). */
+  /** null for the unnumbered Remerciements/Introduction sections. */
   number: number | null
   title: string
   subsections?: ExportSubsection[]
@@ -31,23 +31,21 @@ function annexTask(taskId: string): ExportItem {
   return { kind: 'task', taskId, annex: true }
 }
 
-export const exportSections: ExportSection[] = [
-  {
-    number: null,
-    title: 'Remerciements',
-    items: [task('remerciements')],
-  },
-  {
-    number: null,
-    title: 'Introduction personnelle',
-    items: [
-      {
-        kind: 'note',
-        title: 'Introduction personnelle',
-        note: "Cette section est un récit personnel de votre parcours : elle se prête mal à une consigne stricte. Rédigez-la directement ici, dans Word (une à deux pages), avant de remettre votre dossier.",
-      },
-    ],
-  },
+/** Rendered before the table of contents. */
+export const remerciementsSection: ExportSection = {
+  number: null,
+  title: 'Remerciements',
+  items: [task('remerciements')],
+}
+
+/** Rendered right after the table of contents. */
+export const introductionSection: ExportSection = {
+  number: null,
+  title: 'Introduction',
+  items: [task('introduction-personnelle')],
+}
+
+export const numberedSections: ExportSection[] = [
   {
     number: 1,
     title: "Présentation de l'entreprise",
@@ -80,7 +78,7 @@ export const exportSections: ExportSection[] = [
     subsections: [
       { title: 'Origine du projet', items: [task('cdc-historique')] },
       { title: 'Expression du besoin', items: [task('cdc-besoin')] },
-      { title: 'Étude de marché et benchmarking', items: [task('cdc-marche'), task('cdc-concurrents')] },
+      { title: 'Étude de marché et positionnement', items: [task('cdc-marche'), task('cdc-concurrents')] },
       { title: 'Cible', items: [task('cdc-cible')] },
       {
         title: 'Fonctionnalités et objectifs',
@@ -101,7 +99,7 @@ export const exportSections: ExportSection[] = [
     title: 'Spécifications techniques',
     subsections: [
       {
-        title: 'Outils et langages front-end',
+        title: 'Outils front-end',
         items: [task('outil-ide'), task('outil-html'), task('outil-css'), task('outil-js'), task('outil-frameworks')],
       },
       { title: 'Maquettage et interface', items: [task('maquettage-pages'), task('maquettage-responsive')] },
@@ -113,7 +111,7 @@ export const exportSections: ExportSection[] = [
         title: "Captures d'interface",
         items: [annexTask('capture-accueil'), annexTask('capture-connexion'), annexTask('capture-smartphone')],
       },
-      { title: 'Langages utilisés', items: [task('backend-frontend-langages'), task('backend-langages')] },
+      { title: 'Langages et technologies', items: [task('backend-frontend-langages'), task('backend-langages')] },
       {
         title: 'Base de données',
         items: [task('bdd-technologie'), task('bdd-outil-admin'), task('bdd-methodologie'), task('bdd-entites'), task('bdd-schema')],

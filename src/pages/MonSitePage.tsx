@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import { dossierChapters } from '../data/dossierContent'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { filterActiveTasks } from '../lib/activeTasks'
-import { STORAGE_KEYS, type DossierReponses, type SiteCoches, type Questionnaire } from '../types/storage'
+import { findTaskContext } from '../lib/taskLookup'
+import { STORAGE_KEYS, type DossierReponses, type SiteCoches, type Questionnaire, type CustomSiteRef } from '../types/storage'
 import type { DossierTask } from '../types/dossier'
 import './MonSitePage.css'
 
@@ -11,10 +12,16 @@ interface ImageEntry {
   task: DossierTask
 }
 
+const KIND_LABEL: Record<CustomSiteRef['kind'], string> = {
+  annexe: 'Annexe',
+  inline: 'Image inline',
+}
+
 export function MonSitePage() {
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
   const [coches, setCoches] = useLocalStorage<SiteCoches>(STORAGE_KEYS.site, {})
   const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
+  const [customRefs, setCustomRefs] = useLocalStorage<CustomSiteRef[]>(STORAGE_KEYS.siteCustomRefs, [])
 
   const entries: ImageEntry[] = dossierChapters.flatMap((chapter) => {
     const tasks = chapter.subchapters ? chapter.subchapters.flatMap((s) => s.tasks) : (chapter.tasks ?? [])
@@ -24,8 +31,14 @@ export function MonSitePage() {
   })
 
   const readyCount = entries.filter((e) => coches[e.task.id]).length
+  const customReadyCount = customRefs.filter((r) => r.ready).length
+  const totalCount = entries.length + customRefs.length
+  const totalReady = readyCount + customReadyCount
 
   const toggle = (taskId: string) => setCoches((prev) => ({ ...prev, [taskId]: !prev[taskId] }))
+  const toggleCustom = (id: string) =>
+    setCustomRefs((prev) => prev.map((r) => (r.id === id ? { ...r, ready: !r.ready } : r)))
+  const removeCustom = (id: string) => setCustomRefs((prev) => prev.filter((r) => r.id !== id))
 
   return (
     <div>
@@ -41,7 +54,7 @@ export function MonSitePage() {
 
       <div className="card site-summary">
         <strong>
-          {readyCount} / {entries.length}
+          {totalReady} / {totalCount}
         </strong>{' '}
         images prêtes
       </div>
@@ -71,6 +84,39 @@ export function MonSitePage() {
           )
         })}
       </div>
+
+      {customRefs.length > 0 && (
+        <>
+          <h3 className="site-custom-heading">Références ajoutées depuis vos tâches</h3>
+          <div className="site-list">
+            {customRefs.map((ref) => {
+              const context = findTaskContext(ref.taskId)
+              return (
+                <div key={ref.id} className={`card site-item${ref.ready ? ' ready' : ''}`}>
+                  <label className="site-item-checkbox">
+                    <input type="checkbox" checked={ref.ready} onChange={() => toggleCustom(ref.id)} />
+                  </label>
+                  <div className="site-item-body">
+                    <div className="site-item-chapter">
+                      {context ? `${context.chapter.number}. ${context.chapter.title}` : 'Tâche introuvable'}
+                      {' · '}
+                      <span className="tag tag-violet">{KIND_LABEL[ref.kind]}</span>
+                    </div>
+                    <div className="site-item-title">{ref.label}</div>
+                    <p className="site-item-description empty">À préparer.</p>
+                  </div>
+                  <Link className="btn btn-ghost site-item-link" to={`/dossier/${ref.taskId}`}>
+                    Voir la tâche
+                  </Link>
+                  <button className="btn-icon-delete" onClick={() => removeCustom(ref.id)} aria-label="Supprimer">
+                    ×
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { dossierChapters } from '../data/dossierContent'
 import { questionnaireQuestions } from '../data/questionnaire'
@@ -6,6 +7,7 @@ import { filterActiveTasks } from '../lib/activeTasks'
 import { computeProgress, getTaskStatus } from '../lib/progress'
 import { STORAGE_KEYS, type DossierReponses, type Questionnaire } from '../types/storage'
 import { ProgressBar } from '../components/ProgressBar'
+import { IconChevronDown } from '../components/icons'
 import type { DossierTask } from '../types/dossier'
 import './DossierListPage.css'
 
@@ -40,10 +42,15 @@ function QuestionnaireCard({
   setQuestionnaire: (updater: (prev: Questionnaire) => Questionnaire) => void
 }) {
   const setAnswer = (id: string, value: boolean) => setQuestionnaire((prev) => ({ ...prev, [id]: value }))
+  // Frozen at mount: collapses by default only if the questionnaire was already filled
+  // in a previous visit. Answering questions during this visit must not fight the
+  // user by collapsing the card mid-interaction.
+  const [defaultOpen] = useState(() => Object.keys(questionnaire).length === 0)
 
   return (
-    <details className="card questionnaire-card" open>
+    <details className="card questionnaire-card" open={defaultOpen}>
       <summary className="questionnaire-summary">
+        <IconChevronDown className="questionnaire-chevron" />
         <span>Personnaliser mon dossier</span>
         <span className="questionnaire-summary-hint">Retirer les tâches qui ne s'appliquent pas à mon projet</span>
       </summary>

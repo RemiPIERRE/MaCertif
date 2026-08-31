@@ -11,6 +11,28 @@ export interface QuestionnaireQuestion {
  */
 export const questionnaireQuestions: QuestionnaireQuestion[] = [
   {
+    id: 'surMesure',
+    label: "Avez-vous développé votre projet sur-mesure (code métier propre), plutôt qu'avec un CMS clé-en-main (WordPress, etc.) ?",
+    helpText: 'Répondez « non » si votre projet repose sur un CMS : les tâches sur le framework, l\'architecture de code et la conception de base de données ne s\'appliquent alors pas.',
+  },
+  {
+    id: 'concurrence',
+    label: 'Votre projet a-t-il des concurrents identifiables sur son marché ?',
+    helpText: "Répondez « non » pour un projet sans marché concurrentiel (ex : site vitrine associatif).",
+  },
+  {
+    id: 'html',
+    label: 'Votre site repose-t-il sur du HTML classique (page web traditionnelle) ?',
+  },
+  {
+    id: 'css',
+    label: 'Utilisez-vous du CSS (ou un préprocesseur/framework CSS) pour la mise en forme ?',
+  },
+  {
+    id: 'javascript',
+    label: 'Utilisez-vous JavaScript ou TypeScript côté frontend ?',
+  },
+  {
     id: 'maquettage',
     label: 'Avez-vous fait ou allez-vous faire du maquettage pour votre projet ?',
   },
@@ -24,7 +46,7 @@ export const questionnaireQuestions: QuestionnaireQuestion[] = [
   },
   {
     id: 'architectureDossiers',
-    label: 'Votre projet backend a-t-il une architecture de dossiers dédiée (ex : public / src / templates) ?',
+    label: 'Votre projet backend a-t-il une architecture de dossiers dédiée (séparation vues / logique métier / modèles) ?',
     helpText: "Répondez « non » si votre stack n'a pas cette organisation (ex : MERN, Node seul).",
   },
   {

@@ -97,17 +97,17 @@ export function DossierComplilePage() {
           <p className="compiled-doc-meta">{profil.nomOrganisme}</p>
         </div>
 
-        {outline.sections
-          .filter((s) => s.number === null)
-          .map((section) => (
-            <section key={section.title} className="compiled-chapter">
-              <h2>{section.title}</h2>
-              <ItemList items={section.items} reponses={reponses} />
-            </section>
-          ))}
+        <section className="compiled-chapter">
+          <h2>{outline.remerciements.title}</h2>
+          <ItemList items={outline.remerciements.items} reponses={reponses} />
+        </section>
 
-        {outline.sections
-          .filter((s) => s.number !== null)
+        <section className="compiled-chapter">
+          <h2>{outline.introduction.title}</h2>
+          <ItemList items={outline.introduction.items} reponses={reponses} />
+        </section>
+
+        {outline.numbered
           .map((section) => (
             <section key={section.title} className="compiled-chapter">
               <h2>

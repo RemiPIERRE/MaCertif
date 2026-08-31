@@ -58,9 +58,9 @@ export function applyImportPayload(raw: string) {
   for (const key of ALL_KEYS) {
     if (key in parsed.data) {
       window.localStorage.setItem(key, JSON.stringify(parsed.data[key]))
+      window.dispatchEvent(new CustomEvent('macertif:storage', { detail: { key } }))
     }
   }
-  window.dispatchEvent(new CustomEvent('macertif:storage', { detail: { key: 'import' } }))
 }
 
 export function importFromFile(file: File): Promise<void> {

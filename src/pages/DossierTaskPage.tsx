@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { findTaskContext, getAdjacentTasks } from '../lib/taskLookup'
+import { AnnexRefPanel } from '../components/AnnexRefPanel'
 import { STORAGE_KEYS, type DossierReponses, type Questionnaire } from '../types/storage'
 import './DossierTaskPage.css'
 
@@ -116,6 +117,8 @@ export function DossierTaskPage() {
           {isDirty && !savedFlash && <span className="task-editor-dirty">Modifications non sauvegardées</span>}
         </div>
       </div>
+
+      <AnnexRefPanel taskId={taskId} />
 
       <div className="task-nav">
         <button className="btn btn-secondary" disabled={!prev} onClick={() => goTo(prev?.id)}>

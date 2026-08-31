@@ -35,11 +35,12 @@ function formatDate(value: string): string {
   return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-/** Titre 1 (chapitre) : 20pt, centré, gras. */
+/** Titre 1 (chapitre) : 20pt, centré, gras. Chaque chapitre démarre sur une nouvelle page. */
 function heading1(text: string) {
   return new Paragraph({
     heading: HeadingLevel.HEADING_1,
     alignment: AlignmentType.CENTER,
+    pageBreakBefore: true,
     spacing: { before: 320, after: 200 },
     children: [new TextRun({ text, bold: true, color: ACCENT, size: 40, font: FONT })],
   })
@@ -281,7 +282,6 @@ function buildCoverPage(profil: ProfilInfos) {
         }),
       ],
     }),
-    new Paragraph({ children: [], pageBreakBefore: true }),
   ]
 }
 
@@ -318,17 +318,16 @@ export async function generateDossierDocx(
 
   body.push(...buildCoverPage(profil))
 
-  // Front matter: unnumbered sections (Remerciements, Introduction personnelle)
-  for (const section of outline.sections.filter((s) => s.number === null)) {
-    body.push(heading1(section.title))
-    body.push(...renderItemList(section.items, reponses))
-  }
+  body.push(heading1(outline.remerciements.title))
+  body.push(...renderItemList(outline.remerciements.items, reponses))
 
   body.push(heading1('Sommaire'))
   body.push(new TableOfContents('Sommaire', { hyperlink: true, headingStyleRange: '1-3' }))
-  body.push(new Paragraph({ children: [], pageBreakBefore: true }))
 
-  for (const section of outline.sections.filter((s) => s.number !== null)) {
+  body.push(heading1(outline.introduction.title))
+  body.push(...renderItemList(outline.introduction.items, reponses))
+
+  for (const section of outline.numbered) {
     body.push(heading1(`${section.number}. ${section.title}`))
     if (section.subsections.length) {
       for (const sub of section.subsections) {

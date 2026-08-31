@@ -68,3 +68,8 @@
 .site-item-link {
   flex-shrink: 0;
 }
+
+.site-custom-heading {
+  font-size: 0.95rem;
+  margin: 2rem 0 0.9rem;
+}

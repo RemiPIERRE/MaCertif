@@ -20,11 +20,12 @@ export interface DossierTask {
   /** Generic example text shown in the blue "Exemple" box. Filled in later (phase 2). */
   example: string | null
   /**
-   * Id of a questionnaire question (see src/data/questionnaire.ts) gating this task.
-   * When the user answers "non" to that question, the task is excluded from the
+   * Id(s) of questionnaire question(s) (see src/data/questionnaire.ts) gating this
+   * task. When an array, every question must be answered "oui" for the task to
+   * stay active. Answering "non" to any of them excludes the task from the
    * dossier, Mon site and progress calculations.
    */
-  conditionalOn?: string
+  conditionalOn?: string | string[]
 }
 
 export interface DossierSubchapter {

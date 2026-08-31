@@ -12,25 +12,16 @@
 
 @media (max-width: 900px) {
   .app-shell {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: static;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .sidebar-footer {
-    display: none;
+    display: block;
   }
   .app-content {
-    padding: 1.5rem;
+    padding: 4.5rem 1.25rem 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-content {
+    padding: 4.25rem 1rem 2.5rem;
   }
 }
 

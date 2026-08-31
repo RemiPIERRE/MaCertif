@@ -1,4 +1,4 @@
-import { exportSections, type ExportItem } from '../data/exportOutline'
+import { remerciementsSection, introductionSection, numberedSections, type ExportItem } from '../data/exportOutline'
 import { getTaskById } from './taskLookup'
 import { isTaskActive } from './activeTasks'
 import type { DossierTask } from '../types/dossier'
@@ -32,7 +32,9 @@ export interface ResolvedSection {
 }
 
 export interface ResolvedOutline {
-  sections: ResolvedSection[]
+  remerciements: ResolvedSection
+  introduction: ResolvedSection
+  numbered: ResolvedSection[]
   annexes: { number: number; task: DossierTask }[]
 }
 
@@ -59,7 +61,7 @@ export function resolveOutline(questionnaire: Questionnaire): ResolvedOutline {
     return result
   }
 
-  const sections: ResolvedSection[] = exportSections.map((section) => {
+  function resolveSection(section: typeof remerciementsSection) {
     if (section.subsections) {
       const subsections = section.subsections
         .map((sub) => ({ title: sub.title, items: resolveItems(sub.items) }))
@@ -67,7 +69,12 @@ export function resolveOutline(questionnaire: Questionnaire): ResolvedOutline {
       return { number: section.number, title: section.title, items: [], subsections }
     }
     return { number: section.number, title: section.title, items: resolveItems(section.items ?? []), subsections: [] }
-  })
+  }
 
-  return { sections, annexes }
+  return {
+    remerciements: resolveSection(remerciementsSection),
+    introduction: resolveSection(introductionSection),
+    numbered: numberedSections.map(resolveSection),
+    annexes,
+  }
 }

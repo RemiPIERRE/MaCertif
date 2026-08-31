@@ -23,6 +23,17 @@
   gap: 0 1rem;
 }
 
+@media (max-width: 520px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+  .accueil-form,
+  .accueil-progress,
+  .accueil-backup {
+    padding: 1.1rem 1.2rem;
+  }
+}
+
 .accueil-subheading {
   font-size: 0.85rem;
   color: var(--accent-dark);

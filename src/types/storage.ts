@@ -53,10 +53,24 @@ export interface Deadline {
 /** Answers to the personalisation questionnaire, keyed by question id. true = task shown. */
 export type Questionnaire = Record<string, boolean>
 
+/**
+ * A pense-bête created from a text or image task: "I'll need an annex/inline image
+ * here", named but not written yet. Shows up in Mon site as "à préparer".
+ */
+export interface CustomSiteRef {
+  id: string
+  taskId: string
+  label: string
+  kind: 'annexe' | 'inline'
+  ready: boolean
+  createdAt: string
+}
+
 export const STORAGE_KEYS = {
   profil: 'profil:infos',
   dossier: 'dossier:reponses',
   site: 'site:coches',
+  siteCustomRefs: 'site:custom-refs',
   notes: 'notes:items',
   calendrier: 'calendrier:deadlines',
   questionnaire: 'profil:questionnaire',
