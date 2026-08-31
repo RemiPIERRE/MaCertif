@@ -1,0 +1,52 @@
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1;
+  min-width: 0;
+  padding: 2.25rem 3rem 4rem;
+  max-width: 1000px;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .sidebar-footer {
+    display: none;
+  }
+  .app-content {
+    padding: 1.5rem;
+  }
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--forest-dark);
+  margin-bottom: 0.35rem;
+}
+
+.page-lede {
+  max-width: 60ch;
+}

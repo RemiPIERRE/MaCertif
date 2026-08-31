@@ -1,0 +1,92 @@
+.task-breadcrumb {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-bottom: 1rem;
+}
+
+.task-breadcrumb a {
+  color: var(--forest-dark);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.example-box {
+  background: var(--forest-tint);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.example-box .tag {
+  margin-bottom: 0.4rem;
+}
+
+.example-box p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.task-editor {
+  padding: 1.3rem;
+  margin-bottom: 1.2rem;
+}
+
+.task-editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.task-counter {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.task-counter.warn {
+  color: var(--amber);
+}
+
+.task-counter-hint {
+  font-size: 0.78rem;
+  color: var(--amber);
+}
+
+.task-editor textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  padding: 0.8rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+}
+
+.task-editor textarea:focus {
+  outline: none;
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px var(--forest-tint);
+}
+
+.task-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+.task-editor-dirty {
+  font-size: 0.8rem;
+  color: var(--amber);
+}
+
+.task-nav {
+  display: flex;
+  justify-content: space-between;
+}

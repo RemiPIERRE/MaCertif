@@ -1,0 +1,71 @@
+.accueil-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .accueil-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.accueil-form,
+.accueil-progress,
+.accueil-backup {
+  padding: 1.5rem 1.6rem;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1rem;
+}
+
+.accueil-subheading {
+  font-size: 0.85rem;
+  color: var(--forest-dark);
+  margin-top: 0.5rem;
+}
+
+.accueil-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.accueil-progress-number {
+  font-family: var(--font-mono);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--forest-dark);
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+
+.accueil-cta {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.accueil-backup-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.accueil-import-ok {
+  color: var(--forest-dark);
+  font-size: 0.85rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0;
+}
+
+.accueil-import-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0;
+}

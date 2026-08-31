@@ -1,0 +1,93 @@
+.calendrier-form {
+  padding: 1.5rem 1.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.calendrier-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.calendrier-chip {
+  border: 1px dashed var(--line-strong);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.calendrier-form-row {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 0 1rem;
+}
+
+.deadline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.calendrier-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.deadline-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.1rem;
+}
+
+.deadline-item.past {
+  opacity: 0.55;
+}
+
+.deadline-date-badge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--forest-dark);
+  background: var(--forest-tint);
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  text-transform: capitalize;
+}
+
+.deadline-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.deadline-label {
+  font-weight: 600;
+}
+
+.deadline-note {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.deadline-countdown {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--amber);
+  flex-shrink: 0;
+}
+
+.btn-icon-delete {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-icon-delete:hover {
+  color: var(--red);
+}

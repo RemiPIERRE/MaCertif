@@ -1,0 +1,84 @@
+.compile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.compile-header-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.compiled-doc {
+  padding: 2.5rem 3rem;
+}
+
+.compiled-doc-cover {
+  text-align: center;
+  padding-bottom: 2.5rem;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.compiled-doc-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #641e0a;
+  font-size: 0.8rem;
+}
+
+.compiled-doc-cover h2 {
+  font-size: 2rem;
+  margin: 0.4rem 0;
+}
+
+.compiled-doc-subtitle {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.compiled-doc-meta {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.compiled-chapter {
+  margin-bottom: 2rem;
+}
+
+.compiled-chapter > h2 {
+  color: #641e0a;
+  border-bottom: 2px solid #641e0a;
+  padding-bottom: 0.3rem;
+}
+
+.compiled-chapter h3 {
+  color: #641e0a;
+  font-size: 1.05rem;
+  margin-top: 1.4rem;
+}
+
+.compiled-task {
+  margin: 1rem 0;
+}
+
+.compiled-task h4 {
+  font-size: 0.92rem;
+  margin-bottom: 0.35rem;
+}
+
+.compiled-task p {
+  white-space: pre-wrap;
+}
+
+.compiled-image-box {
+  border: 1.5px dashed #a3a3a3;
+  background: #f2f2f2;
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
