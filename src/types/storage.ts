@@ -8,6 +8,8 @@ export interface ProfilInfos {
   dateFinFormation: string
   dateDebutStage: string
   dateFinStage: string
+  /** Informative only — never inserted into the Word export. */
+  dateExamen: string
 }
 
 export const EMPTY_PROFIL: ProfilInfos = {
@@ -20,6 +22,7 @@ export const EMPTY_PROFIL: ProfilInfos = {
   dateFinFormation: '',
   dateDebutStage: '',
   dateFinStage: '',
+  dateExamen: '',
 }
 
 export interface DossierReponse {
@@ -45,10 +48,14 @@ export interface Deadline {
   note: string
 }
 
+/** Answers to the personalisation questionnaire, keyed by question id. true = task shown. */
+export type Questionnaire = Record<string, boolean>
+
 export const STORAGE_KEYS = {
   profil: 'profil:infos',
   dossier: 'dossier:reponses',
   site: 'site:coches',
   notes: 'notes:items',
   calendrier: 'calendrier:deadlines',
+  questionnaire: 'profil:questionnaire',
 } as const

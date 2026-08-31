@@ -1,0 +1,138 @@
+.month-calendar {
+  padding: 1.3rem 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.month-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.month-calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.month-calendar-title-text {
+  font-weight: 700;
+  text-transform: capitalize;
+  font-size: 1.05rem;
+}
+
+.month-calendar-today {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.55rem;
+}
+
+.month-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.4rem;
+}
+
+.month-calendar-weekdays > div {
+  text-align: center;
+  padding: 0.3rem 0;
+}
+
+.month-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.month-calendar-cell {
+  min-height: 74px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem;
+  background: var(--paper-raised);
+}
+
+.month-calendar-cell.empty {
+  background: transparent;
+  border-color: transparent;
+}
+
+.month-calendar-cell.today {
+  border-color: var(--forest);
+  background: var(--forest-tint);
+}
+
+.month-calendar-daynum {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.month-calendar-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 0.2rem;
+}
+
+.month-calendar-event {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-profil {
+  background: var(--forest-tint);
+  color: var(--forest-dark);
+}
+
+.event-custom {
+  background: var(--amber-tint);
+  color: var(--amber);
+}
+
+.month-calendar-legend {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 0.9rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  margin-right: 0.3rem;
+}
+
+.legend-profil {
+  background: var(--forest);
+}
+
+.legend-custom {
+  background: var(--amber);
+}
+
+@media (max-width: 700px) {
+  .month-calendar-cell {
+    min-height: 52px;
+  }
+  .month-calendar-event {
+    font-size: 0;
+    height: 6px;
+    border-radius: 50%;
+    width: 6px;
+    padding: 0;
+  }
+}

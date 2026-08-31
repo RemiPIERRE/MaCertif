@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { findTaskContext, getAdjacentTasks } from '../lib/taskLookup'
-import { STORAGE_KEYS, type DossierReponses } from '../types/storage'
+import { STORAGE_KEYS, type DossierReponses, type Questionnaire } from '../types/storage'
 import './DossierTaskPage.css'
 
 export function DossierTaskPage() {
   const { taskId = '' } = useParams()
   const navigate = useNavigate()
   const [reponses, setReponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
+  const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
   const context = findTaskContext(taskId)
   const [text, setText] = useState(() => reponses[taskId]?.text ?? '')
   const [savedFlash, setSavedFlash] = useState(false)
@@ -28,8 +29,9 @@ export function DossierTaskPage() {
   }
 
   const { task, chapter, subchapter } = context
-  const { prev, next } = getAdjacentTasks(taskId)
+  const { prev, next } = getAdjacentTasks(taskId, questionnaire)
   const isDirty = text !== (reponses[taskId]?.text ?? '')
+  const belowMin = task.minChars !== null && text.length < task.minChars
 
   const save = (currentText: string = text) => {
     setReponses((prevState) => ({
@@ -45,10 +47,6 @@ export function DossierTaskPage() {
     if (isDirty) save()
     navigate(`/dossier/${id}`)
   }
-
-  const hasBounds = task.minChars !== null && task.maxChars !== null
-  const belowMin = task.minChars !== null && text.length < task.minChars
-  const canSave = !belowMin
 
   return (
     <div>
@@ -90,16 +88,20 @@ export function DossierTaskPage() {
           <span className={`task-counter${belowMin ? ' warn' : ''}`}>
             {task.type === 'image'
               ? `${text.length} / ${task.maxChars} caractères`
-              : hasBounds
-                ? `${text.length} caractères — entre ${task.minChars} et ${task.maxChars}`
+              : task.minChars !== null
+                ? `${text.length} caractères — cible indicative : ${task.minChars}+`
                 : `${text.length} caractères`}
           </span>
-          {belowMin && <span className="task-counter-hint">Encore {task.minChars! - text.length} caractères minimum</span>}
+          {belowMin && (
+            <span className="task-counter-hint">
+              Encore {task.minChars! - text.length} caractères pour atteindre la cible (non bloquant)
+            </span>
+          )}
         </div>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          maxLength={task.maxChars ?? undefined}
+          maxLength={task.type === 'image' ? (task.maxChars ?? undefined) : undefined}
           rows={task.type === 'image' ? 4 : 12}
           placeholder={
             task.type === 'image'
@@ -108,7 +110,7 @@ export function DossierTaskPage() {
           }
         />
         <div className="task-editor-actions">
-          <button className="btn btn-primary" onClick={() => save()} disabled={!canSave}>
+          <button className="btn btn-primary" onClick={() => save()}>
             {savedFlash ? 'Sauvegardé ✓' : 'Sauvegarder'}
           </button>
           {isDirty && !savedFlash && <span className="task-editor-dirty">Modifications non sauvegardées</span>}

@@ -114,14 +114,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
   color: transparent;
 }
 
-.task-row-status.complete {
+.task-row-status.status-complete {
   background: var(--forest);
   border-color: var(--forest);
   color: #fff;
+}
+
+.task-row-status.status-incomplete {
+  background: var(--amber-tint);
+  border-color: var(--amber);
+  color: var(--amber);
 }
 
 .task-row-title {

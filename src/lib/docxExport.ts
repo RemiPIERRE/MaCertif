@@ -17,10 +17,9 @@ import {
   VerticalAlign,
   WidthType,
 } from 'docx'
-import { dossierChapters } from '../data/dossierContent'
+import { resolveOutline, type ResolvedItem, type ResolvedSection } from './resolveOutline'
 import { isTaskComplete } from './progress'
-import type { DossierTask } from '../types/dossier'
-import type { DossierReponses, ProfilInfos } from '../types/storage'
+import type { DossierReponses, ProfilInfos, Questionnaire } from '../types/storage'
 
 const ACCENT = '641E0A'
 const GREY = '6B6B6B'
@@ -54,6 +53,20 @@ function bodyParagraph(text: string) {
         children: [new TextRun({ text: line })],
       }),
   )
+}
+
+function notePara(note: string) {
+  return new Paragraph({
+    spacing: { after: 200, line: 300 },
+    children: [new TextRun({ text: note, italics: true, color: GREY })],
+  })
+}
+
+function annexReferencePara(annexNumber: number) {
+  return new Paragraph({
+    spacing: { after: 200 },
+    children: [new TextRun({ text: `→ Voir Annexe ${annexNumber}.`, italics: true, color: GREY })],
+  })
 }
 
 function imagePlaceholder(description: string) {
@@ -109,14 +122,23 @@ function styledTableCell(text: string) {
   })
 }
 
-function buildRecapTable(reponses: DossierReponses) {
-  const rows = dossierChapters.map((chapter) => {
-    const tasks = chapter.subchapters ? chapter.subchapters.flatMap((s) => s.tasks) : (chapter.tasks ?? [])
-    const done = tasks.filter((t) => isTaskComplete(t, reponses)).length
+function countTaskItems(section: ResolvedSection, reponses: DossierReponses) {
+  const allItems: ResolvedItem[] = section.subsections.length
+    ? section.subsections.flatMap((s) => s.items)
+    : section.items
+  const taskItems = allItems.filter((i): i is Extract<ResolvedItem, { kind: 'task' }> => i.kind === 'task')
+  const done = taskItems.filter((i) => isTaskComplete(i.task, reponses)).length
+  return { done, total: taskItems.length }
+}
+
+function buildRecapTable(sections: ResolvedSection[], reponses: DossierReponses) {
+  const numbered = sections.filter((s) => s.number !== null)
+  const rows = numbered.map((section) => {
+    const { done, total } = countTaskItems(section, reponses)
     return new TableRow({
       children: [
-        styledTableCell(`${chapter.number}. ${chapter.title}`),
-        styledTableCell(`${done} / ${tasks.length}`),
+        styledTableCell(`${section.number}. ${section.title}`),
+        styledTableCell(total === 0 ? '—' : `${done} / ${total}`),
       ],
     })
   })
@@ -275,44 +297,66 @@ function buildCoverPage(profil: ProfilInfos) {
   ]
 }
 
-export async function generateDossierDocx(profil: ProfilInfos, reponses: DossierReponses): Promise<Blob> {
+function renderItem(item: ResolvedItem, reponses: DossierReponses): (Paragraph | Table)[] {
+  if (item.kind === 'note') {
+    return [notePara(item.note)]
+  }
+  const { task, annexNumber } = item
+  const blocks: (Paragraph | Table)[] = [heading(task.sectionTitle ?? task.title, HeadingLevel.HEADING_3, 22)]
+  if (annexNumber !== null) {
+    blocks.push(annexReferencePara(annexNumber))
+    return blocks
+  }
+  const text = reponses[task.id]?.text ?? ''
+  if (task.type === 'image') {
+    blocks.push(imagePlaceholder(text))
+  } else {
+    blocks.push(...bodyParagraph(text))
+  }
+  return blocks
+}
+
+export async function generateDossierDocx(
+  profil: ProfilInfos,
+  reponses: DossierReponses,
+  questionnaire: Questionnaire,
+): Promise<Blob> {
+  const outline = resolveOutline(questionnaire)
   const body: (Paragraph | Table)[] = []
 
   body.push(...buildCoverPage(profil))
 
+  // Front matter: unnumbered sections (Remerciements, Introduction personnelle)
+  for (const section of outline.sections.filter((s) => s.number === null)) {
+    body.push(heading(section.title, HeadingLevel.HEADING_1, 28))
+    for (const item of section.items) body.push(...renderItem(item, reponses))
+  }
+
   body.push(heading('Sommaire', HeadingLevel.HEADING_1, 30))
-  body.push(
-    new TableOfContents('Sommaire', {
-      hyperlink: true,
-      headingStyleRange: '1-3',
-    }),
-  )
+  body.push(new TableOfContents('Sommaire', { hyperlink: true, headingStyleRange: '1-3' }))
   body.push(new Paragraph({ children: [], pageBreakBefore: true }))
 
   body.push(heading('Récapitulatif du dossier', HeadingLevel.HEADING_1, 30))
-  body.push(buildRecapTable(reponses))
+  body.push(buildRecapTable(outline.sections, reponses))
   body.push(new Paragraph({ children: [], pageBreakBefore: true }))
 
-  for (const chapter of dossierChapters) {
-    body.push(heading(`${chapter.number}. ${chapter.title}`, HeadingLevel.HEADING_1, 30))
-
-    const renderTask = (task: DossierTask) => {
-      body.push(heading(task.title, HeadingLevel.HEADING_3, 22))
-      const text = reponses[task.id]?.text ?? ''
-      if (task.type === 'image') {
-        body.push(imagePlaceholder(text))
-      } else {
-        body.push(...bodyParagraph(text))
-      }
-    }
-
-    if (chapter.subchapters) {
-      for (const sub of chapter.subchapters) {
-        body.push(heading(`${sub.code} ${sub.title}`, HeadingLevel.HEADING_2, 26))
-        for (const task of sub.tasks) renderTask(task)
+  for (const section of outline.sections.filter((s) => s.number !== null)) {
+    body.push(heading(`${section.number}. ${section.title}`, HeadingLevel.HEADING_1, 30))
+    if (section.subsections.length) {
+      for (const sub of section.subsections) {
+        body.push(heading(sub.title, HeadingLevel.HEADING_2, 26))
+        for (const item of sub.items) body.push(...renderItem(item, reponses))
       }
     } else {
-      for (const task of chapter.tasks ?? []) renderTask(task)
+      for (const item of section.items) body.push(...renderItem(item, reponses))
+    }
+  }
+
+  if (outline.annexes.length) {
+    body.push(heading('Annexes', HeadingLevel.HEADING_1, 30))
+    for (const annex of outline.annexes) {
+      body.push(heading(`Annexe ${annex.number} : ${annex.task.sectionTitle ?? annex.task.title}`, HeadingLevel.HEADING_2, 26))
+      body.push(imagePlaceholder(reponses[annex.task.id]?.text ?? ''))
     }
   }
 

@@ -3,6 +3,22 @@
   margin-bottom: 1.5rem;
 }
 
+.calendrier-hint {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: -0.4rem;
+}
+
+.calendrier-exam-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.calendrier-exam-field input {
+  max-width: 200px;
+}
+
 .calendrier-suggestions {
   display: flex;
   flex-wrap: wrap;
