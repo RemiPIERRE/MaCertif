@@ -84,7 +84,7 @@ export function AccueilPage() {
               <input
                 value={profil.nomProjet}
                 onChange={(e) => update({ nomProjet: e.target.value })}
-                placeholder="Le P'tit Grain de Folie"
+                placeholder="Conception d'un site vitrine avec back-office"
               />
             </div>
             <div className="field">
@@ -92,7 +92,7 @@ export function AccueilPage() {
               <input
                 value={profil.sousTitreProjet}
                 onChange={(e) => update({ sousTitreProjet: e.target.value })}
-                placeholder="Site vitrine de restaurant"
+                placeholder="Le P'tit Grain de Folie"
               />
             </div>
             <div className="field">
