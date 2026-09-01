@@ -71,11 +71,11 @@ export function AccueilPage() {
             <div className="field-grid">
               <div className="field">
                 <label>Prénom</label>
-                <input value={profil.prenom} onChange={(e) => update({ prenom: e.target.value })} placeholder="Camille" />
+                <input value={profil.prenom} onChange={(e) => update({ prenom: e.target.value })} placeholder="Sylvain" />
               </div>
               <div className="field">
                 <label>Nom</label>
-                <input value={profil.nom} onChange={(e) => update({ nom: e.target.value })} placeholder="PIERRE" />
+                <input value={profil.nom} onChange={(e) => update({ nom: e.target.value })} placeholder="DURIF" />
               </div>
             </div>
 
