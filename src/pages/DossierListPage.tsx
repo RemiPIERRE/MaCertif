@@ -41,7 +41,7 @@ function QuestionnaireCard({
   questionnaire: Questionnaire
   setQuestionnaire: (updater: (prev: Questionnaire) => Questionnaire) => void
 }) {
-  const setAnswer = (id: string, value: boolean) => setQuestionnaire((prev) => ({ ...prev, [id]: value }))
+  const setAnswer = (id: string, value: boolean | string) => setQuestionnaire((prev) => ({ ...prev, [id]: value }))
   // Frozen at mount: collapses by default only if the questionnaire was already filled
   // in a previous visit. Answering questions during this visit must not fight the
   // user by collapsing the card mid-interaction.
@@ -60,27 +60,41 @@ function QuestionnaireCard({
       </p>
       <div className="questionnaire-list">
         {questionnaireQuestions.map((q) => {
-          const value = questionnaire[q.id] !== false
+          const answer = questionnaire[q.id]
           return (
             <div key={q.id} className="questionnaire-item">
               <div>
                 <div className="questionnaire-label">{q.label}</div>
                 {q.helpText && <div className="questionnaire-help">{q.helpText}</div>}
               </div>
-              <div className="questionnaire-toggle">
-                <button
-                  className={`btn ${value ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setAnswer(q.id, true)}
-                >
-                  Oui
-                </button>
-                <button
-                  className={`btn ${!value ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setAnswer(q.id, false)}
-                >
-                  Non
-                </button>
-              </div>
+              {q.options ? (
+                <div className="questionnaire-toggle questionnaire-choice">
+                  {q.options.map((opt) => (
+                    <button
+                      key={opt.value}
+                      className={`btn ${answer === opt.value ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setAnswer(q.id, opt.value)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="questionnaire-toggle">
+                  <button
+                    className={`btn ${answer !== false ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setAnswer(q.id, true)}
+                  >
+                    Oui
+                  </button>
+                  <button
+                    className={`btn ${answer === false ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => setAnswer(q.id, false)}
+                  >
+                    Non
+                  </button>
+                </div>
+              )}
             </div>
           )
         })}

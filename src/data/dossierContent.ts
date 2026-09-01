@@ -1,4 +1,4 @@
-import type { DossierChapter, DossierTask } from '../types/dossier'
+import type { ConditionalFlag, DossierChapter, DossierTask } from '../types/dossier'
 
 let counter = 0
 const next = () => ++counter
@@ -6,7 +6,7 @@ const next = () => ++counter
 interface TaskOptions {
   sectionTitle?: string
   minChars?: number
-  conditionalOn?: string | string[]
+  conditionalOn?: ConditionalFlag | ConditionalFlag[]
 }
 
 /** Standard "texte" task: an indicative minimum, no upper bound (never blocks saving). */
@@ -53,6 +53,9 @@ function imageTask(id: string, title: string, opts: TaskOptions = {}): DossierTa
     conditionalOn: opts.conditionalOn,
   }
 }
+
+/** Shorthand: hidden when the roles question is answered "admin-only". */
+const NOT_ADMIN_ONLY: ConditionalFlag = { question: 'roles', excludes: ['admin-only'] }
 
 export const dossierChapters: DossierChapter[] = [
   {
@@ -158,8 +161,8 @@ export const dossierChapters: DossierChapter[] = [
         title: 'Rôles et espace utilisateur',
         tasks: [
           textTask('cdc-role-admin', "Expliquez le rôle et les permissions de l'administrateur sur votre site.", { sectionTitle: 'Rôle administrateur', conditionalOn: 'auth' }),
-          textTask('cdc-role-user', "Expliquez le rôle de l'utilisateur et ce qu'il peut faire sur votre site.", { sectionTitle: 'Rôle utilisateur', conditionalOn: 'auth' }),
-          textTask('cdc-espace-utilisateur', "Décrivez l'espace utilisateur de votre site.", { sectionTitle: 'Espace utilisateur', conditionalOn: 'auth' }),
+          textTask('cdc-role-user', "Expliquez le ou les rôles utilisateurs et ce qu'ils peuvent faire sur votre site.", { sectionTitle: 'Rôle utilisateur', conditionalOn: ['auth', NOT_ADMIN_ONLY] }),
+          textTask('cdc-espace-utilisateur', "Décrivez l'espace utilisateur de votre site.", { sectionTitle: 'Espace utilisateur', conditionalOn: ['auth', NOT_ADMIN_ONLY] }),
         ],
       },
       {
@@ -167,9 +170,9 @@ export const dossierChapters: DossierChapter[] = [
         code: '5.7',
         title: 'Arborescence',
         tasks: [
-          imageTask('cdc-arbo-visiteur', 'Illustrez l\'arborescence du site pour un visiteur non enregistré.', { sectionTitle: 'Arborescence du visiteur' }),
+          imageTask('cdc-arbo-visiteur', 'Illustrez l\'arborescence du site pour un visiteur non enregistré.', { sectionTitle: 'Arborescence du visiteur', conditionalOn: 'hasVisiteurPublic' }),
           imageTask('cdc-arbo-admin', "Illustrez l'arborescence du site pour l'administrateur.", { sectionTitle: "Arborescence de l'administrateur", conditionalOn: 'auth' }),
-          imageTask('cdc-arbo-user', "Illustrez l'arborescence du site pour un utilisateur enregistré.", { sectionTitle: "Arborescence de l'utilisateur enregistré", conditionalOn: 'auth' }),
+          imageTask('cdc-arbo-user', "Illustrez l'arborescence du site pour un utilisateur enregistré.", { sectionTitle: "Arborescence de l'utilisateur enregistré", conditionalOn: ['auth', NOT_ADMIN_ONLY] }),
         ],
       },
     ],
@@ -185,10 +188,10 @@ export const dossierChapters: DossierChapter[] = [
         title: 'Outils front-end',
         tasks: [
           textTask('outil-ide', "Présentez l'IDE (environnement de développement) que vous avez utilisé.", { sectionTitle: 'IDE' }),
-          textTask('outil-html', 'Présentez le langage HTML et son rôle dans votre projet.', { sectionTitle: 'HTML', conditionalOn: 'html' }),
-          textTask('outil-css', 'Présentez le langage CSS et son rôle dans votre projet.', { sectionTitle: 'CSS', conditionalOn: 'css' }),
-          textTask('outil-js', 'Présentez le langage JavaScript (ou TypeScript) et son rôle dans votre projet.', { sectionTitle: 'JavaScript / TypeScript', conditionalOn: 'javascript' }),
-          textTask('outil-frameworks', 'Présentez les frameworks, bibliothèques ou moteurs de templates front-end que vous avez utilisés (React, Vue, Twig...).', { sectionTitle: 'Frameworks front-end' }),
+          textTask('outil-html', 'Présentez le langage HTML et son rôle dans votre projet.', { sectionTitle: 'HTML', conditionalOn: ['hasFrontend', 'html'] }),
+          textTask('outil-css', 'Présentez le langage CSS et son rôle dans votre projet.', { sectionTitle: 'CSS', conditionalOn: ['hasFrontend', 'css'] }),
+          textTask('outil-js', 'Présentez le langage JavaScript (ou TypeScript) et son rôle dans votre projet.', { sectionTitle: 'JavaScript / TypeScript', conditionalOn: ['hasFrontend', 'javascript'] }),
+          textTask('outil-frameworks', 'Présentez les frameworks, bibliothèques ou moteurs de templates front-end que vous avez utilisés (React, Vue, Twig...).', { sectionTitle: 'Frameworks front-end', conditionalOn: 'hasFrontend' }),
         ],
       },
       {
@@ -196,8 +199,8 @@ export const dossierChapters: DossierChapter[] = [
         code: '6.2',
         title: 'Maquettage et interface',
         tasks: [
-          textTask('maquettage-pages', 'Expliquez comment vous avez maquetté vos pages.', { sectionTitle: 'Maquettage', conditionalOn: 'maquettage' }),
-          textTask('maquettage-responsive', 'Expliquez comment vous avez géré le responsive (ordinateur, tablette, mobile).', { sectionTitle: 'Responsive design' }),
+          textTask('maquettage-pages', 'Expliquez comment vous avez maquetté vos pages.', { sectionTitle: 'Maquettage', conditionalOn: ['hasFrontend', 'maquettage'] }),
+          textTask('maquettage-responsive', 'Expliquez comment vous avez géré le responsive (ordinateur, tablette, mobile).', { sectionTitle: 'Responsive design', conditionalOn: 'hasFrontend' }),
         ],
       },
       {
@@ -205,9 +208,9 @@ export const dossierChapters: DossierChapter[] = [
         code: '6.3',
         title: 'Identité visuelle',
         tasks: [
-          textTask('identite-couleurs', 'Décrivez la palette de couleurs utilisée et vos choix.', { sectionTitle: 'Palette de couleurs' }),
-          textTask('identite-typo', 'Décrivez la typographie utilisée et vos choix.', { sectionTitle: 'Typographie' }),
-          textTask('identite-logo', "Décrivez votre logo et la manière dont vous l'avez créé.", { sectionTitle: 'Logo', conditionalOn: 'logo' }),
+          textTask('identite-couleurs', 'Décrivez la palette de couleurs utilisée et vos choix.', { sectionTitle: 'Palette de couleurs', conditionalOn: 'hasFrontend' }),
+          textTask('identite-typo', 'Décrivez la typographie utilisée et vos choix.', { sectionTitle: 'Typographie', conditionalOn: 'hasFrontend' }),
+          textTask('identite-logo', "Décrivez votre logo et la manière dont vous l'avez créé.", { sectionTitle: 'Logo', conditionalOn: ['hasFrontend', 'logo'] }),
         ],
       },
       {
@@ -215,9 +218,9 @@ export const dossierChapters: DossierChapter[] = [
         code: '6.4',
         title: "Captures d'interface",
         tasks: [
-          imageTask('capture-accueil', 'Illustrez la page d\'accueil de votre site.', { sectionTitle: "Page d'accueil" }),
-          imageTask('capture-connexion', 'Illustrez la page de connexion de votre site.', { sectionTitle: 'Page de connexion', conditionalOn: 'auth' }),
-          imageTask('capture-smartphone', 'Illustrez le rendu de votre site sur smartphone.', { sectionTitle: 'Version mobile' }),
+          imageTask('capture-accueil', 'Illustrez la page d\'accueil de votre site.', { sectionTitle: "Page d'accueil", conditionalOn: 'hasFrontend' }),
+          imageTask('capture-connexion', 'Illustrez la page de connexion de votre site.', { sectionTitle: 'Page de connexion', conditionalOn: ['hasFrontend', 'auth'] }),
+          imageTask('capture-smartphone', 'Illustrez le rendu de votre site sur smartphone.', { sectionTitle: 'Version mobile', conditionalOn: 'hasFrontend' }),
         ],
       },
     ],
@@ -227,7 +230,7 @@ export const dossierChapters: DossierChapter[] = [
     number: 7,
     title: 'Langages et technologies',
     tasks: [
-      textTask('backend-frontend-langages', 'Présentez le ou les langages que vous avez utilisés côté frontend.', { sectionTitle: 'Langages frontend' }),
+      textTask('backend-frontend-langages', 'Présentez le ou les langages que vous avez utilisés côté frontend.', { sectionTitle: 'Langages frontend', conditionalOn: 'hasFrontend' }),
       textTask('backend-langages', 'Présentez le ou les langages que vous avez utilisés côté backend.', { sectionTitle: 'Langages backend' }),
     ],
   },
@@ -295,8 +298,8 @@ export const dossierChapters: DossierChapter[] = [
         code: '10.1',
         title: 'Frontend',
         tasks: [
-          imageTask('code-capture-frontend', 'Illustrez un extrait de code frontend intéressant depuis votre IDE.', { sectionTitle: 'Extrait de code frontend' }),
-          textTask('code-explication-frontend', 'Expliquez le fonctionnement du code frontend présenté.', { sectionTitle: 'Explication du code frontend' }),
+          imageTask('code-capture-frontend', 'Illustrez un extrait de code frontend intéressant depuis votre IDE.', { sectionTitle: 'Extrait de code frontend', conditionalOn: 'hasFrontend' }),
+          textTask('code-explication-frontend', 'Expliquez le fonctionnement du code frontend présenté.', { sectionTitle: 'Explication du code frontend', conditionalOn: 'hasFrontend' }),
         ],
       },
       {
@@ -308,54 +311,74 @@ export const dossierChapters: DossierChapter[] = [
           textTask('code-explication-backend', 'Expliquez le fonctionnement du code backend présenté.', { sectionTitle: 'Explication du code backend', conditionalOn: 'surMesure' }),
         ],
       },
+    ],
+  },
+  {
+    id: 'securite',
+    number: 11,
+    title: 'Sécurité',
+    subchapters: [
       {
-        id: 'code-securite',
-        code: '10.3',
-        title: 'Sécurité des mots de passe',
+        id: 'securite-authentification',
+        code: '11.1',
+        title: 'Authentification et contrôle d\'accès',
         tasks: [
+          textTask('securite-auth-hash', "Expliquez comment l'authentification est sécurisée : stockage et hashage des mots de passe (bcrypt, Argon2...).", { sectionTitle: 'Sécurisation des mots de passe', conditionalOn: 'auth' }),
+          textTask('securite-controle-acces', "Expliquez comment votre application empêche un utilisateur non autorisé d'accéder à une route ou une action réservée à un autre rôle.", { sectionTitle: 'Contrôle d\'accès par rôle', conditionalOn: 'auth' }),
           imageTask('code-capture-reset', 'Illustrez le code de réinitialisation du mot de passe depuis votre IDE.', { sectionTitle: 'Extrait de code : réinitialisation du mot de passe', conditionalOn: 'auth' }),
           textTask('code-explication-reset', 'Expliquez le fonctionnement de la réinitialisation du mot de passe.', { sectionTitle: 'Fonctionnement de la réinitialisation du mot de passe', conditionalOn: 'auth' }),
+        ],
+      },
+      {
+        id: 'securite-donnees',
+        code: '11.2',
+        title: 'Protection des données et des échanges',
+        tasks: [
+          textTask('securite-validation-donnees', 'Expliquez les contrôles de validation des données mis en place côté client et côté serveur, et pourquoi les deux sont nécessaires.', { sectionTitle: 'Validation des données' }),
+          textTask('securite-antispam', 'Expliquez comment vous protégez vos formulaires publics contre le spam (captcha, honeypot, limitation de fréquence...).', { sectionTitle: 'Protection anti-spam', conditionalOn: 'formulairesPublics' }),
+          textTask('https', "Expliquez ce qu'est le protocole HTTPS et comment vous l'avez mis en place.", { sectionTitle: 'Sécurisation HTTPS', conditionalOn: 'deploiement' }),
+          textTask('securite-api-externe', "Expliquez comment vous protégez l'accès aux services externes que vous utilisez (clés API non exposées côté client).", { sectionTitle: 'Protection des accès externes', conditionalOn: 'apiExterne' }),
         ],
       },
     ],
   },
   {
     id: 'seo-hebergement',
-    number: 11,
+    number: 12,
     title: 'SEO et hébergement',
     tasks: [
       textTask('seo-definition', "Expliquez ce qu'est le SEO et ses bénéfices pour votre projet.", { sectionTitle: 'Le SEO et ses bénéfices', conditionalOn: 'seo' }),
       textTask('seo-mise-en-place', 'Expliquez comment vous avez mis en place le SEO sur votre projet.', { sectionTitle: 'Mise en place du SEO', conditionalOn: 'seo' }),
       textTask('hebergeur', 'Présentez l\'hébergeur utilisé et son historique en quelques mots.', { sectionTitle: 'Hébergement', conditionalOn: 'deploiement' }),
-      textTask('https', "Expliquez ce qu'est le protocole HTTPS et comment vous l'avez mis en place.", { sectionTitle: 'Sécurisation HTTPS', conditionalOn: 'deploiement' }),
     ],
   },
   {
     id: 'developpement-dynamique',
-    number: 12,
+    number: 13,
     title: 'Développement dynamique et gestion de contenu',
     tasks: [
       textTask('dev-dynamique', 'Expliquez comment vous avez développé la partie dynamique du site.', { sectionTitle: 'Développement dynamique' }),
       textTask('dev-gestion-contenu', 'Expliquez ce que vous avez mis en place pour gérer le contenu du site.', { sectionTitle: 'Gestion de contenu' }),
       textTask('dev-acces-donnees', "Expliquez comment vous avez mis en place et utilisé les composants d'accès aux données.", { sectionTitle: 'Accès aux données', conditionalOn: 'api' }),
+      textTask('api-documentation', 'Présentez la documentation de votre API : principaux points d\'accès, formats de requêtes et de réponses.', { sectionTitle: "Documentation de l'API", conditionalOn: 'api' }),
       textTask('dev-methode-backend', 'Présentez votre méthode de développement de la partie backend.', { sectionTitle: 'Méthode de développement backend', conditionalOn: 'surMesure' }),
       textTask('dev-backend-contenu', 'Expliquez comment vous avez conçu la partie backend de gestion de contenu.', { sectionTitle: 'Backend de gestion de contenu', conditionalOn: 'surMesure' }),
     ],
   },
   {
     id: 'tests',
-    number: 13,
+    number: 14,
     title: 'Tests',
     tasks: [
       textTask('tests-utilisateurs', 'Expliquez en quoi consistent vos tests utilisateurs et comment vous les avez menés.', { sectionTitle: 'Tests utilisateurs' }),
       textTask('tests-integrite', "Expliquez comment vous avez vérifié l'intégrité des données enregistrées.", { sectionTitle: "Tests d'intégrité des données", conditionalOn: 'testsAuto' }),
       textTask('tests-injections', 'Présentez les tests menés contre les injections et leurs résultats.', { sectionTitle: "Tests d'injection", conditionalOn: 'testsAuto' }),
-      textTask('tests-responsive', 'Expliquez comment vous avez testé le responsive de votre site.', { sectionTitle: 'Tests de responsive design' }),
+      textTask('tests-responsive', 'Expliquez comment vous avez testé le responsive de votre site.', { sectionTitle: 'Tests de responsive design', conditionalOn: 'hasFrontend' }),
     ],
   },
   {
     id: 'veille',
-    number: 14,
+    number: 15,
     title: 'Veille technologique',
     tasks: [
       textTask('veille-sites', 'Présentez des sites intéressants issus de votre veille en sécurité informatique.', { sectionTitle: 'Veille de sécurité informatique' }),
@@ -363,12 +386,12 @@ export const dossierChapters: DossierChapter[] = [
   },
   {
     id: 'difficultes-anglais',
-    number: 15,
+    number: 16,
     title: 'Difficultés rencontrées et anglais technique',
     subchapters: [
       {
         id: 'difficultes-blocage',
-        code: '15.1',
+        code: '16.1',
         title: 'Le blocage',
         tasks: [
           textTask('blocage-situation', 'Décrivez une situation de travail ayant nécessité une recherche approfondie.', { sectionTitle: 'Une situation de blocage' }),
@@ -376,7 +399,7 @@ export const dossierChapters: DossierChapter[] = [
       },
       {
         id: 'difficultes-anglais-ressource',
-        code: '15.2',
+        code: '16.2',
         title: 'Ressource anglophone',
         tasks: [
           freeTextTask('anglais-extrait', 'Citez un extrait en anglais issu de vos recherches.', { sectionTitle: 'Extrait en anglais' }),
@@ -390,7 +413,7 @@ export const dossierChapters: DossierChapter[] = [
   },
   {
     id: 'valorisation',
-    number: 16,
+    number: 17,
     title: 'Valorisation',
     tasks: [
       textTask('valorisation-elements', 'Mettez en avant les éléments développés, si possible non techniques.', { sectionTitle: 'Valorisation du projet' }),
@@ -399,7 +422,7 @@ export const dossierChapters: DossierChapter[] = [
   },
   {
     id: 'perspectives',
-    number: 17,
+    number: 18,
     title: 'Perspectives',
     tasks: [
       textTask('perspectives-evolution', "Décrivez les perspectives d'évolution : nouvelles opportunités, travail restant, fonctionnalités à venir.", { sectionTitle: 'Perspectives et évolutions futures' }),

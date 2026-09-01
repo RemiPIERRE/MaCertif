@@ -20,13 +20,16 @@ export interface DossierTask {
   /** Generic example text shown in the blue "Exemple" box. Filled in later (phase 2). */
   example: string | null
   /**
-   * Id(s) of questionnaire question(s) (see src/data/questionnaire.ts) gating this
-   * task. When an array, every question must be answered "oui" for the task to
-   * stay active. Answering "non" to any of them excludes the task from the
-   * dossier, Mon site and progress calculations.
+   * Gate(s) on questionnaire question(s) (see src/data/questionnaire.ts). A plain
+   * string is a boolean question that must not be answered "non". An object gates
+   * on a multi-choice question: the task is hidden only when the answer is one of
+   * `excludes`. When an array, every rule must be satisfied. Unanswered questions
+   * always satisfy their rule (nothing disappears until the user actively answers).
    */
-  conditionalOn?: string | string[]
+  conditionalOn?: ConditionalFlag | ConditionalFlag[]
 }
+
+export type ConditionalFlag = string | { question: string; excludes: string[] }
 
 export interface DossierSubchapter {
   id: string

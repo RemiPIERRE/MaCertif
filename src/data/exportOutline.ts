@@ -2,7 +2,7 @@
  * The professional structure of the compiled dossier / Word export — distinct from
  * `dossierChapters` (used for the day-to-day "Mon dossier" editing flow). Reflects
  * the official DWWM (ENI) plan: an unnumbered "Remerciements", the table of contents,
- * an unnumbered "Introduction", 11 numbered chapters, and an Annexes section at the
+ * an unnumbered "Introduction", 12 numbered chapters, and an Annexes section at the
  * end for images that don't need to interrupt the reading flow.
  */
 
@@ -122,7 +122,7 @@ export const numberedSections: ExportSection[] = [
       },
       {
         title: 'SEO et hébergement',
-        items: [task('seo-definition'), task('seo-mise-en-place'), task('hebergeur'), task('https')],
+        items: [task('seo-definition'), task('seo-mise-en-place'), task('hebergeur')],
       },
       {
         title: 'Développement dynamique et gestion de contenu',
@@ -130,6 +130,7 @@ export const numberedSections: ExportSection[] = [
           task('dev-dynamique'),
           task('dev-gestion-contenu'),
           task('dev-acces-donnees'),
+          task('api-documentation'),
           task('dev-methode-backend'),
           task('dev-backend-contenu'),
         ],
@@ -142,24 +143,44 @@ export const numberedSections: ExportSection[] = [
     subsections: [
       { title: 'Frontend', items: [task('code-capture-frontend'), task('code-explication-frontend')] },
       { title: 'Backend', items: [task('code-capture-backend'), task('code-explication-backend')] },
-      {
-        title: 'Sécurité des mots de passe',
-        items: [task('code-capture-reset'), task('code-explication-reset')],
-      },
     ],
   },
   {
     number: 8,
+    title: 'Sécurité',
+    subsections: [
+      {
+        title: "Authentification et contrôle d'accès",
+        items: [
+          task('securite-auth-hash'),
+          task('securite-controle-acces'),
+          task('code-capture-reset'),
+          task('code-explication-reset'),
+        ],
+      },
+      {
+        title: 'Protection des données et des échanges',
+        items: [
+          task('securite-validation-donnees'),
+          task('securite-antispam'),
+          task('https'),
+          task('securite-api-externe'),
+        ],
+      },
+    ],
+  },
+  {
+    number: 9,
     title: "Jeu d'essai / Tests",
     items: [task('tests-utilisateurs'), task('tests-integrite'), task('tests-injections'), task('tests-responsive')],
   },
   {
-    number: 9,
+    number: 10,
     title: 'Veille de sécurité',
     items: [task('veille-sites')],
   },
   {
-    number: 10,
+    number: 11,
     title: 'Recherche et traduction anglophone',
     subsections: [
       { title: 'Une situation de blocage', items: [task('blocage-situation')] },
@@ -167,7 +188,7 @@ export const numberedSections: ExportSection[] = [
     ],
   },
   {
-    number: 11,
+    number: 12,
     title: 'Bilan et perspectives',
     items: [task('valorisation-elements'), annexTask('valorisation-retroplanning'), task('perspectives-evolution')],
   },

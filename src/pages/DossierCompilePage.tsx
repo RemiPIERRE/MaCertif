@@ -19,28 +19,35 @@ function TaskBody({ item, reponses }: { item: Extract<ResolvedItem, { kind: 'tas
 }
 
 /**
- * A single task in a list gets its own body directly under the parent heading
- * (no redundant sub-heading repeating the same title); a note placeholder or a
- * list with several items keeps its per-item heading.
+ * A single item in a list gets its own body directly under the parent heading (no
+ * redundant, un-numbered sub-heading repeating the same title); a list with several
+ * items numbers each one `${numberPrefix}.${index}`, mirroring the Word export.
  */
-function ItemList({ items, reponses }: { items: ResolvedItem[]; reponses: DossierReponses }) {
-  if (items.length === 1 && items[0].kind === 'task') {
-    return <TaskBody item={items[0]} reponses={reponses} />
+function ItemList({ items, reponses, numberPrefix }: { items: ResolvedItem[]; reponses: DossierReponses; numberPrefix: string }) {
+  if (items.length === 1) {
+    const only = items[0]
+    return only.kind === 'note' ? <p className="compiled-note">{only.note}</p> : <TaskBody item={only} reponses={reponses} />
   }
   return (
     <>
-      {items.map((item, i) =>
-        item.kind === 'note' ? (
+      {items.map((item, i) => {
+        const number = `${numberPrefix}.${i + 1}`
+        return item.kind === 'note' ? (
           <div key={i} className="compiled-task">
+            <h4>
+              {number} {item.title}
+            </h4>
             <p className="compiled-note">{item.note}</p>
           </div>
         ) : (
           <div key={i} className="compiled-task">
-            <h4>{item.task.sectionTitle ?? item.task.title}</h4>
+            <h4>
+              {number} {item.task.sectionTitle ?? item.task.title}
+            </h4>
             <TaskBody item={item} reponses={reponses} />
           </div>
-        ),
-      )}
+        )
+      })}
     </>
   )
 }
@@ -67,24 +74,23 @@ export function DossierComplilePage() {
 
   return (
     <div>
-      <header className="page-header compile-header">
-        <div>
-          <div className="page-eyebrow">Ma certification</div>
-          <h1>Dossier compilé</h1>
-          <p className="page-lede">
-            Aperçu fidèle au plan du document final : titres professionnels, regroupement thématique et annexes.
-            Pensez à mettre en forme le document une fois exporté (couleurs, images) avant de le remettre au jury.
-          </p>
-        </div>
-        <div className="compile-header-actions">
-          <Link className="btn btn-ghost" to="/dossier">
-            Retour au dossier
-          </Link>
-          <button className="btn btn-primary" onClick={handleExport} disabled={exporting}>
-            {exporting ? 'Génération…' : 'Exporter au format Word'}
-          </button>
-        </div>
+      <header className="page-header">
+        <div className="page-eyebrow">Ma certification</div>
+        <h1>Dossier compilé</h1>
+        <p className="page-lede">
+          Aperçu fidèle au plan du document final : titres professionnels, regroupement thématique et annexes.
+          Pensez à mettre en forme le document une fois exporté (couleurs, images) avant de le remettre au jury.
+        </p>
       </header>
+
+      <div className="compile-actions">
+        <Link className="btn btn-ghost" to="/dossier">
+          Retour au dossier
+        </Link>
+        <button className="btn btn-primary" onClick={handleExport} disabled={exporting}>
+          {exporting ? 'Génération…' : 'Exporter au format Word'}
+        </button>
+      </div>
 
       <article className="compiled-doc card">
         <div className="compiled-doc-cover">
@@ -99,30 +105,34 @@ export function DossierComplilePage() {
 
         <section className="compiled-chapter">
           <h2>{outline.remerciements.title}</h2>
-          <ItemList items={outline.remerciements.items} reponses={reponses} />
+          <ItemList items={outline.remerciements.items} reponses={reponses} numberPrefix="" />
         </section>
 
         <section className="compiled-chapter">
           <h2>{outline.introduction.title}</h2>
-          <ItemList items={outline.introduction.items} reponses={reponses} />
+          <ItemList items={outline.introduction.items} reponses={reponses} numberPrefix="" />
         </section>
 
-        {outline.numbered
-          .map((section) => (
-            <section key={section.title} className="compiled-chapter">
-              <h2>
-                {section.number}. {section.title}
-              </h2>
-              {section.subsections.length
-                ? section.subsections.map((sub) => (
+        {outline.numbered.map((section) => (
+          <section key={section.title} className="compiled-chapter">
+            <h2>
+              {section.number}. {section.title}
+            </h2>
+            {section.subsections.length
+              ? section.subsections.map((sub, si) => {
+                  const subNumber = `${section.number}.${si + 1}`
+                  return (
                     <div key={sub.title}>
-                      <h3>{sub.title}</h3>
-                      <ItemList items={sub.items} reponses={reponses} />
+                      <h3>
+                        {subNumber} {sub.title}
+                      </h3>
+                      <ItemList items={sub.items} reponses={reponses} numberPrefix={subNumber} />
                     </div>
-                  ))
-                : <ItemList items={section.items} reponses={reponses} />}
-            </section>
-          ))}
+                  )
+                })
+              : <ItemList items={section.items} reponses={reponses} numberPrefix={String(section.number)} />}
+          </section>
+        ))}
 
         {outline.annexes.length > 0 && (
           <section className="compiled-chapter">

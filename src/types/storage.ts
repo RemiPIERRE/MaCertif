@@ -50,8 +50,12 @@ export interface Deadline {
   note: string
 }
 
-/** Answers to the personalisation questionnaire, keyed by question id. true = task shown. */
-export type Questionnaire = Record<string, boolean>
+/**
+ * Answers to the personalisation questionnaire, keyed by question id. Boolean
+ * questions store `false` for "non" (anything else, including unanswered, counts
+ * as active); choice questions store the selected option's string value.
+ */
+export type Questionnaire = Record<string, boolean | string>
 
 /**
  * A pense-bête created from a text or image task: "I'll need an annex/inline image

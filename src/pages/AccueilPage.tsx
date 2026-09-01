@@ -62,10 +62,6 @@ export function AccueilPage() {
       <header className="page-header">
         <div className="page-eyebrow">Accueil</div>
         <h1>{profil.prenom || profil.nom ? `Bonjour ${profil.prenom || profil.nom}` : 'Bienvenue dans MaCertif'}</h1>
-        <p className="page-lede">
-          Renseignez vos informations une fois : elles alimenteront la page de garde et le pied de page de votre
-          dossier exporté.
-        </p>
       </header>
 
       <div className="accueil-grid">

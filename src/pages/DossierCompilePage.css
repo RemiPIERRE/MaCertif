@@ -1,18 +1,23 @@
-.compile-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem;
-}
-
-.compile-header-actions {
+.compile-actions {
   display: flex;
   gap: 0.6rem;
-  flex-shrink: 0;
+  margin-bottom: 1.5rem;
 }
 
 .compiled-doc {
   padding: 2.5rem 3rem;
+}
+
+@media (max-width: 700px) {
+  .compile-actions {
+    flex-direction: column;
+  }
+  .compiled-doc {
+    padding: 1.5rem 1.1rem;
+  }
+  .compiled-doc-cover h2 {
+    font-size: 1.5rem;
+  }
 }
 
 .compiled-doc-cover {

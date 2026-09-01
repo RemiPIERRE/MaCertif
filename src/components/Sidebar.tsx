@@ -91,7 +91,6 @@ export function Sidebar() {
             {theme === 'dark' ? <IconSun /> : <IconMoon />}
             {theme === 'dark' ? 'Thème clair' : 'Thème sombre'}
           </button>
-          <p>Toutes vos données restent dans ce navigateur.</p>
         </div>
       </aside>
     </>

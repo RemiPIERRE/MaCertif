@@ -72,6 +72,16 @@
   border-top: none;
 }
 
+@media (max-width: 560px) {
+  .questionnaire-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .questionnaire-toggle {
+    justify-content: flex-start;
+  }
+}
+
 .questionnaire-label {
   font-weight: 600;
   font-size: 0.92rem;
@@ -87,6 +97,12 @@
   display: flex;
   gap: 0.4rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.questionnaire-choice {
+  max-width: 320px;
 }
 
 .dossier-chapters {

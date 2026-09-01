@@ -17,6 +17,7 @@ export function DossierTaskPage() {
 
   useEffect(() => {
     setText(reponses[taskId]?.text ?? '')
+    window.scrollTo({ top: 0 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId])
 

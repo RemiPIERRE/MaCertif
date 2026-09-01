@@ -293,18 +293,27 @@ function renderTaskBody(item: Extract<ResolvedItem, { kind: 'task' }>, reponses:
 }
 
 /**
- * Renders a list of items under a parent heading (section or subsection). When the
- * list holds exactly one task, its own heading would just repeat the parent's title
- * (e.g. section "1. Présentation de l'entreprise" with a single task of the same
- * name) — so it's skipped and the content goes straight under the parent heading.
+ * Renders a list of items under a parent heading (section or subsection), numbering
+ * each one `${numberPrefix}.${index}` at the given depth. When the list holds
+ * exactly one item, its own heading would just repeat the parent's title (e.g.
+ * section "1. Présentation de l'entreprise" with a single task of the same name)
+ * — so it's skipped and the content goes straight under the parent heading.
  */
-function renderItemList(items: ResolvedItem[], reponses: DossierReponses): (Paragraph | Table)[] {
-  if (items.length === 1 && items[0].kind === 'task') {
-    return renderTaskBody(items[0], reponses)
+function renderItemList(
+  items: ResolvedItem[],
+  reponses: DossierReponses,
+  numberPrefix: string,
+  depth: 2 | 3,
+): (Paragraph | Table)[] {
+  if (items.length === 1) {
+    const only = items[0]
+    return only.kind === 'note' ? [notePara(only.note)] : renderTaskBody(only, reponses)
   }
-  return items.flatMap((item) => {
-    if (item.kind === 'note') return [notePara(item.note)]
-    return [heading3(item.task.sectionTitle ?? item.task.title), ...renderTaskBody(item, reponses)]
+  const headingFn = depth === 2 ? heading2 : heading3
+  return items.flatMap((item, index) => {
+    const number = `${numberPrefix}.${index + 1}`
+    if (item.kind === 'note') return [headingFn(`${number} ${item.title}`), notePara(item.note)]
+    return [headingFn(`${number} ${item.task.sectionTitle ?? item.task.title}`), ...renderTaskBody(item, reponses)]
   })
 }
 
@@ -319,23 +328,24 @@ export async function generateDossierDocx(
   body.push(...buildCoverPage(profil))
 
   body.push(heading1(outline.remerciements.title))
-  body.push(...renderItemList(outline.remerciements.items, reponses))
+  body.push(...renderItemList(outline.remerciements.items, reponses, '', 2))
 
   body.push(heading1('Sommaire'))
   body.push(new TableOfContents('Sommaire', { hyperlink: true, headingStyleRange: '1-3' }))
 
   body.push(heading1(outline.introduction.title))
-  body.push(...renderItemList(outline.introduction.items, reponses))
+  body.push(...renderItemList(outline.introduction.items, reponses, '', 2))
 
   for (const section of outline.numbered) {
     body.push(heading1(`${section.number}. ${section.title}`))
     if (section.subsections.length) {
-      for (const sub of section.subsections) {
-        body.push(heading2(sub.title))
-        body.push(...renderItemList(sub.items, reponses))
-      }
+      section.subsections.forEach((sub, si) => {
+        const subNumber = `${section.number}.${si + 1}`
+        body.push(heading2(`${subNumber} ${sub.title}`))
+        body.push(...renderItemList(sub.items, reponses, subNumber, 3))
+      })
     } else {
-      body.push(...renderItemList(section.items, reponses))
+      body.push(...renderItemList(section.items, reponses, `${section.number}`, 2))
     }
   }
 
