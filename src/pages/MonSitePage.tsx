@@ -3,7 +3,7 @@ import { dossierChapters } from '../data/dossierContent'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { filterActiveTasks } from '../lib/activeTasks'
 import { findTaskContext } from '../lib/taskLookup'
-import { STORAGE_KEYS, type DossierReponses, type SiteCoches, type Questionnaire, type CustomSiteRef } from '../types/storage'
+import { STORAGE_KEYS, type DossierReponses, type SiteCoches, type Caracteristiques, type CustomSiteRef } from '../types/storage'
 import type { DossierTask } from '../types/dossier'
 import './MonSitePage.css'
 
@@ -20,12 +20,12 @@ const KIND_LABEL: Record<CustomSiteRef['kind'], string> = {
 export function MonSitePage() {
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
   const [coches, setCoches] = useLocalStorage<SiteCoches>(STORAGE_KEYS.site, {})
-  const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
+  const [caracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
   const [customRefs, setCustomRefs] = useLocalStorage<CustomSiteRef[]>(STORAGE_KEYS.siteCustomRefs, [])
 
   const entries: ImageEntry[] = dossierChapters.flatMap((chapter) => {
     const tasks = chapter.subchapters ? chapter.subchapters.flatMap((s) => s.tasks) : (chapter.tasks ?? [])
-    return filterActiveTasks(tasks, questionnaire)
+    return filterActiveTasks(tasks, caracteristiques)
       .filter((t) => t.type === 'image')
       .map((task) => ({ chapterTitle: `${chapter.number}. ${chapter.title}`, task }))
   })

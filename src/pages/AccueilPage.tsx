@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { downloadExport, importFromFile, ImportError } from '../lib/exportImport'
 import { computeProgress } from '../lib/progress'
-import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos, type DossierReponses, type Questionnaire } from '../types/storage'
+import { filledSlidesStats, formatMinutes, pacingStatus, presentationDuration } from '../lib/oralTime'
+import { createDefaultPresentation } from '../data/oralDefaults'
+import { STORAGE_KEYS, EMPTY_PROFIL, type Caracteristiques, type ProfilInfos, type DossierReponses } from '../types/storage'
+import type { OralSection } from '../types/oral'
 import { ProgressBar } from '../components/ProgressBar'
 import './AccueilPage.css'
 
@@ -34,13 +37,24 @@ function formatDateFr(value: string): string {
 export function AccueilPage() {
   const [profil, setProfil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
-  const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
+  const [caracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
+  const [oralSections] = useLocalStorage<OralSection[]>(STORAGE_KEYS.oralPresentation, createDefaultPresentation())
   const [importMessage, setImportMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [editing, setEditing] = useState(() => !(profil.nom.trim() || profil.prenom.trim()))
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const update = (patch: Partial<ProfilInfos>) => setProfil((prev) => ({ ...prev, ...patch }))
-  const progress = computeProgress(reponses, questionnaire)
+  const progress = computeProgress(reponses, caracteristiques)
+
+  const oralStats = filledSlidesStats(oralSections)
+  const oralDuration = presentationDuration(oralSections)
+  const oralStatus = pacingStatus(oralDuration)
+  const oralPercent = oralStats.total === 0 ? 0 : Math.round((oralStats.filled / oralStats.total) * 1000) / 10
+
+  // Weighted by real item counts across both modules, not an average of two percentages.
+  const combinedFilled = progress.completedCount + oralStats.filled
+  const combinedTotal = progress.totalCount + oralStats.total
+  const combinedPercent = combinedTotal === 0 ? 0 : Math.round((combinedFilled / combinedTotal) * 1000) / 10
 
   const handleImportClick = () => fileInputRef.current?.click()
 
@@ -174,16 +188,41 @@ export function AccueilPage() {
 
         <div className="accueil-side">
           <section className="card accueil-progress">
-            <h3>Mon avancement</h3>
-            <div className="accueil-progress-number">{progress.percent}%</div>
+            <h3>Mon avancement global</h3>
+            <div className="accueil-progress-number">{combinedPercent}%</div>
             <p>
-              {progress.completedCount} / {progress.totalCount} tâches complétées
-              {progress.incompleteCount > 0 && ` (${progress.incompleteCount} en dessous du minimum indicatif)`}.
+              {combinedFilled} / {combinedTotal} éléments remplis, dossier et oral confondus.
             </p>
-            <ProgressBar percent={progress.percent} />
-            <Link className="btn btn-primary accueil-cta" to="/dossier">
-              Continuer mon dossier
-            </Link>
+            <ProgressBar percent={combinedPercent} />
+
+            <div className="accueil-progress-split">
+              <div className="accueil-progress-mini">
+                <div className="accueil-progress-mini-label">Dossier</div>
+                <div className="accueil-progress-mini-value">{progress.percent}%</div>
+                <ProgressBar percent={progress.percent} />
+                <p className="accueil-progress-mini-hint">
+                  {progress.completedCount} / {progress.totalCount} tâches
+                  {progress.incompleteCount > 0 && ` (${progress.incompleteCount} sous la cible)`}
+                </p>
+                <Link className="btn btn-secondary accueil-cta" to="/dossier">
+                  Continuer mon dossier
+                </Link>
+              </div>
+              <div className="accueil-progress-mini">
+                <div className="accueil-progress-mini-label">Oral</div>
+                <div className="accueil-progress-mini-value">{oralPercent}%</div>
+                <ProgressBar percent={oralPercent} />
+                <p className="accueil-progress-mini-hint">
+                  {oralStats.filled} / {oralStats.total} slides
+                </p>
+                <p className={`accueil-oral-duration accueil-oral-duration-${oralStatus}`}>
+                  Durée estimée : {formatMinutes((oralDuration.minMinutes + oralDuration.maxMinutes) / 2)}
+                </p>
+                <Link className="btn btn-secondary accueil-cta" to="/oral">
+                  Continuer mon oral
+                </Link>
+              </div>
+            </div>
           </section>
 
           <section className="card accueil-backup">

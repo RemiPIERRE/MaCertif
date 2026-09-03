@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { dossierChapters } from '../data/dossierContent'
-import { questionnaireQuestions } from '../data/questionnaire'
+import { caracteristiques as caracteristiqueDefinitions, caracteristiqueCategories } from '../data/caracteristiques'
+import { competences as competenceDefinitions } from '../data/competences'
 import { useLocalStorage } from '../lib/useLocalStorage'
+import { useDisclaimer } from '../lib/useDisclaimer'
 import { filterActiveTasks } from '../lib/activeTasks'
 import { computeProgress, getTaskStatus } from '../lib/progress'
-import { STORAGE_KEYS, type DossierReponses, type Questionnaire } from '../types/storage'
+import { STORAGE_KEYS, type Caracteristiques, type Competences, type DossierReponses } from '../types/storage'
 import { ProgressBar } from '../components/ProgressBar'
 import { IconChevronDown } from '../components/icons'
+import { DisclaimerModal } from '../components/DisclaimerModal'
 import type { DossierTask } from '../types/dossier'
 import './DossierListPage.css'
 
@@ -34,67 +37,108 @@ function TaskRow({ task, reponses }: { task: DossierTask; reponses: DossierRepon
   )
 }
 
-function QuestionnaireCard({
-  questionnaire,
-  setQuestionnaire,
+function CaracteristiquesCard({
+  caracteristiques,
+  setCaracteristiques,
 }: {
-  questionnaire: Questionnaire
-  setQuestionnaire: (updater: (prev: Questionnaire) => Questionnaire) => void
+  caracteristiques: Caracteristiques
+  setCaracteristiques: (updater: (prev: Caracteristiques) => Caracteristiques) => void
 }) {
-  const setAnswer = (id: string, value: boolean | string) => setQuestionnaire((prev) => ({ ...prev, [id]: value }))
-  // Frozen at mount: collapses by default only if the questionnaire was already filled
-  // in a previous visit. Answering questions during this visit must not fight the
-  // user by collapsing the card mid-interaction.
-  const [defaultOpen] = useState(() => Object.keys(questionnaire).length === 0)
+  const setAnswer = (id: string, value: boolean) => setCaracteristiques((prev) => ({ ...prev, [id]: value }))
+  // Frozen at mount: collapses by default only if some characteristics were already
+  // checked in a previous visit. Answering during this visit must not fight the user
+  // by collapsing the card mid-interaction.
+  const [defaultOpen] = useState(() => Object.keys(caracteristiques).length === 0)
 
   return (
     <details className="card questionnaire-card" open={defaultOpen}>
       <summary className="questionnaire-summary">
         <IconChevronDown className="questionnaire-chevron" />
         <span>Personnaliser mon dossier</span>
-        <span className="questionnaire-summary-hint">Retirer les tâches qui ne s'appliquent pas à mon projet</span>
+        <span className="questionnaire-summary-hint">Afficher les tâches qui correspondent à mon projet</span>
       </summary>
       <p className="questionnaire-intro">
-        Répondez « non » à une question pour retirer les tâches liées de votre dossier et de votre progression. Vous
-        pouvez changer d'avis à tout moment.
+        Cochez « oui » à chaque caractéristique qui correspond à votre projet pour afficher les tâches liées. Rien
+        n'est exclusif : si vous avez travaillé sur plusieurs projets pendant votre formation, cochez tout ce qui
+        s'applique. Vos réponses ne suppriment jamais un texte déjà rédigé, elles le masquent seulement — décochez
+        puis recochez pour le faire réapparaître tel quel.
       </p>
-      <div className="questionnaire-list">
-        {questionnaireQuestions.map((q) => {
-          const answer = questionnaire[q.id]
+      {caracteristiqueCategories.map((categorie) => {
+        const items = caracteristiqueDefinitions.filter((c) => c.categorie === categorie)
+        if (items.length === 0) return null
+        return (
+          <div key={categorie} className="caracteristiques-category">
+            <div className="caracteristiques-category-title">{categorie}</div>
+            <div className="questionnaire-list">
+              {items.map((c) => {
+                const answer = caracteristiques[c.id] === true
+                return (
+                  <div key={c.id} className="questionnaire-item">
+                    <div>
+                      <div className="questionnaire-label">{c.label}</div>
+                    </div>
+                    <div className="questionnaire-toggle">
+                      <button className={`btn ${answer ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAnswer(c.id, true)}>
+                        Oui
+                      </button>
+                      <button className={`btn ${!answer ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAnswer(c.id, false)}>
+                        Non
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </details>
+  )
+}
+
+function CompetencesCard({
+  competences,
+  setCompetences,
+}: {
+  competences: Competences
+  setCompetences: (updater: (prev: Competences) => Competences) => void
+}) {
+  const setEntry = (id: string, patch: Partial<{ validee: boolean; texte: string }>) =>
+    setCompetences((prev) => ({ ...prev, [id]: { validee: prev[id]?.validee ?? false, texte: prev[id]?.texte ?? '', ...patch } }))
+
+  return (
+    <details className="card questionnaire-card">
+      <summary className="questionnaire-summary">
+        <IconChevronDown className="questionnaire-chevron" />
+        <span>Compétences du référentiel (C1 à C8)</span>
+        <span className="questionnaire-summary-hint">Purement déclaratif, à rédiger vous-même</span>
+      </summary>
+      <p className="questionnaire-intro">
+        Pour chaque compétence validée pendant votre projet, cochez la case et rédigez vous-même le passage qui la
+        couvre. Rien n'est calculé automatiquement à partir des autres tâches.
+      </p>
+      <div className="competences-list">
+        {competenceDefinitions.map((def) => {
+          const entry = competences[def.id]
           return (
-            <div key={q.id} className="questionnaire-item">
-              <div>
-                <div className="questionnaire-label">{q.label}</div>
-                {q.helpText && <div className="questionnaire-help">{q.helpText}</div>}
-              </div>
-              {q.options ? (
-                <div className="questionnaire-toggle questionnaire-choice">
-                  {q.options.map((opt) => (
-                    <button
-                      key={opt.value}
-                      className={`btn ${answer === opt.value ? 'btn-primary' : 'btn-secondary'}`}
-                      onClick={() => setAnswer(q.id, opt.value)}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="questionnaire-toggle">
-                  <button
-                    className={`btn ${answer !== false ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setAnswer(q.id, true)}
-                  >
-                    Oui
-                  </button>
-                  <button
-                    className={`btn ${answer === false ? 'btn-primary' : 'btn-secondary'}`}
-                    onClick={() => setAnswer(q.id, false)}
-                  >
-                    Non
-                  </button>
-                </div>
-              )}
+            <div key={def.id} className="competence-item">
+              <label className="competence-checkbox">
+                <input
+                  type="checkbox"
+                  checked={entry?.validee ?? false}
+                  onChange={(e) => setEntry(def.id, { validee: e.target.checked })}
+                />
+                <span>
+                  <strong>{def.code}</strong> — {def.label}
+                </span>
+              </label>
+              <textarea
+                className="competence-textarea"
+                value={entry?.texte ?? ''}
+                onChange={(e) => setEntry(def.id, { texte: e.target.value })}
+                placeholder="Décrivez le passage de votre projet qui couvre cette compétence…"
+                rows={3}
+              />
             </div>
           )
         })}
@@ -105,11 +149,14 @@ function QuestionnaireCard({
 
 export function DossierListPage() {
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
-  const [questionnaire, setQuestionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
-  const progress = computeProgress(reponses, questionnaire)
+  const [caracteristiques, setCaracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
+  const [competences, setCompetences] = useLocalStorage<Competences>(STORAGE_KEYS.competences, {})
+  const progress = computeProgress(reponses, caracteristiques)
+  const disclaimer = useDisclaimer('disclaimer:dossier')
 
   return (
     <div>
+      {disclaimer.visible && <DisclaimerModal onDismissForever={disclaimer.dismissForever} onAcknowledge={disclaimer.acknowledge} />}
       <header className="page-header dossier-header">
         <div>
           <div className="page-eyebrow">Ma certification</div>
@@ -124,7 +171,8 @@ export function DossierListPage() {
         </Link>
       </header>
 
-      <QuestionnaireCard questionnaire={questionnaire} setQuestionnaire={setQuestionnaire} />
+      <CaracteristiquesCard caracteristiques={caracteristiques} setCaracteristiques={setCaracteristiques} />
+      <CompetencesCard competences={competences} setCompetences={setCompetences} />
 
       <div className="card dossier-progress-card">
         <ProgressBar
@@ -138,7 +186,7 @@ export function DossierListPage() {
       <div className="dossier-chapters">
         {dossierChapters.map((chapter) => {
           const rawTasks = chapter.subchapters ? chapter.subchapters.flatMap((s) => s.tasks) : (chapter.tasks ?? [])
-          const chapterTasks = filterActiveTasks(rawTasks, questionnaire)
+          const chapterTasks = filterActiveTasks(rawTasks, caracteristiques)
           if (chapterTasks.length === 0) return null
           const doneCount = chapterTasks.filter((t) => getTaskStatus(t, reponses) === 'complete').length
           return (
@@ -153,7 +201,7 @@ export function DossierListPage() {
 
               {chapter.subchapters ? (
                 chapter.subchapters.map((sub) => {
-                  const subTasks = filterActiveTasks(sub.tasks, questionnaire)
+                  const subTasks = filterActiveTasks(sub.tasks, caracteristiques)
                   if (subTasks.length === 0) return null
                   return (
                     <div key={sub.id} className="subchapter">

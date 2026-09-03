@@ -2,13 +2,19 @@
  * The professional structure of the compiled dossier / Word export — distinct from
  * `dossierChapters` (used for the day-to-day "Mon dossier" editing flow). Reflects
  * the official DWWM (ENI) plan: an unnumbered "Remerciements", the table of contents,
- * an unnumbered "Introduction", 12 numbered chapters, and an Annexes section at the
+ * an unnumbered "Introduction", numbered chapters, and an Annexes section at the
  * end for images that don't need to interrupt the reading flow.
+ *
+ * Chapter numbers are NOT hardcoded here: a candidate whose characteristics hide an
+ * entire chapter (e.g. no WordPress at all) must never see a numbering gap or an
+ * empty heading in their own document, so `resolveOutline` numbers only the
+ * chapters that actually have content for that candidate, in this array's order.
  */
 
 export type ExportItem =
   | { kind: 'task'; taskId: string; annex?: boolean }
   | { kind: 'note'; title: string; note: string }
+  | { kind: 'competences' }
 
 export interface ExportSubsection {
   title: string
@@ -16,8 +22,6 @@ export interface ExportSubsection {
 }
 
 export interface ExportSection {
-  /** null for the unnumbered Remerciements/Introduction sections. */
-  number: number | null
   title: string
   subsections?: ExportSubsection[]
   items?: ExportItem[]
@@ -32,48 +36,35 @@ function annexTask(taskId: string): ExportItem {
 }
 
 /** Rendered before the table of contents. */
-export const remerciementsSection: ExportSection = {
-  number: null,
+export const remerciementsSection: ExportSubsection = {
   title: 'Remerciements',
   items: [task('remerciements')],
 }
 
 /** Rendered right after the table of contents. */
-export const introductionSection: ExportSection = {
-  number: null,
+export const introductionSection: ExportSubsection = {
   title: 'Introduction',
   items: [task('introduction-personnelle')],
 }
 
 export const numberedSections: ExportSection[] = [
   {
-    number: 1,
     title: "Présentation de l'entreprise",
     items: [task('entreprise-presentation')],
   },
   {
-    number: 2,
     title: "Présentation du poste et de l'environnement technique",
     items: [task('poste-presentation')],
   },
   {
-    number: 3,
     title: 'Liste des compétences du référentiel couvertes par le projet',
-    items: [
-      {
-        kind: 'note',
-        title: 'Compétences couvertes',
-        note: "Section à venir (Phase 2) : une checklist des compétences du référentiel (C1 à C8) sera ajoutée ici, à cocher avec votre tuteur de stage. En attendant, listez-les directement dans Word.",
-      },
-    ],
+    items: [{ kind: 'competences' }],
   },
   {
-    number: 4,
     title: 'Résumé du projet',
     items: [task('cdc-presentation-site')],
   },
   {
-    number: 5,
     title: 'Cahier des charges',
     subsections: [
       { title: 'Origine du projet', items: [task('cdc-historique')] },
@@ -95,7 +86,6 @@ export const numberedSections: ExportSection[] = [
     ],
   },
   {
-    number: 6,
     title: 'Spécifications techniques',
     subsections: [
       {
@@ -113,12 +103,20 @@ export const numberedSections: ExportSection[] = [
       },
       { title: 'Langages et technologies', items: [task('backend-frontend-langages'), task('backend-langages')] },
       {
-        title: 'Base de données',
+        title: 'Base de données relationnelle',
         items: [task('bdd-technologie'), task('bdd-outil-admin'), task('bdd-methodologie'), task('bdd-entites'), task('bdd-schema')],
+      },
+      {
+        title: 'Base de données non relationnelle',
+        items: [task('bdd-nosql-technologie'), task('bdd-nosql-modele'), task('bdd-nosql-relations'), annexTask('bdd-nosql-schema')],
       },
       {
         title: 'Framework et architecture',
         items: [task('framework-architecture-generale'), task('framework-nom'), task('framework-organisation-dossiers')],
+      },
+      {
+        title: 'Gestion des rôles utilisateurs',
+        items: [task('roles-admin'), task('roles-user'), task('roles-autres')],
       },
       {
         title: 'SEO et hébergement',
@@ -138,7 +136,10 @@ export const numberedSections: ExportSection[] = [
     ],
   },
   {
-    number: 7,
+    title: 'WordPress',
+    items: [task('wp-plugins'), task('wp-securite'), task('wp-roles'), task('wp-personnalisation'), task('wp-cpt')],
+  },
+  {
     title: 'Réalisations',
     subsections: [
       { title: 'Frontend', items: [task('code-capture-frontend'), task('code-explication-frontend')] },
@@ -146,7 +147,6 @@ export const numberedSections: ExportSection[] = [
     ],
   },
   {
-    number: 8,
     title: 'Sécurité',
     subsections: [
       {
@@ -170,17 +170,14 @@ export const numberedSections: ExportSection[] = [
     ],
   },
   {
-    number: 9,
     title: "Jeu d'essai / Tests",
     items: [task('tests-utilisateurs'), task('tests-integrite'), task('tests-injections'), task('tests-responsive')],
   },
   {
-    number: 10,
     title: 'Veille de sécurité',
     items: [task('veille-sites')],
   },
   {
-    number: 11,
     title: 'Recherche et traduction anglophone',
     subsections: [
       { title: 'Une situation de blocage', items: [task('blocage-situation')] },
@@ -188,7 +185,6 @@ export const numberedSections: ExportSection[] = [
     ],
   },
   {
-    number: 12,
     title: 'Bilan et perspectives',
     items: [task('valorisation-elements'), annexTask('valorisation-retroplanning'), task('perspectives-evolution')],
   },

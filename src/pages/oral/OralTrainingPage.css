@@ -1,0 +1,156 @@
+.training-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.training-chrono {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+
+.training-prompteur-card,
+.training-slide-card {
+  padding: 1.5rem 1.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.training-scroll-container {
+  height: 320px;
+  overflow: hidden;
+  position: relative;
+}
+
+.training-reading-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30%;
+  height: 0;
+  border-top: 2px solid var(--accent);
+  z-index: 2;
+}
+
+.training-reading-line::before,
+.training-reading-line::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+}
+
+.training-reading-line::before {
+  left: -1px;
+  border-left: 7px solid var(--accent);
+}
+
+.training-reading-line::after {
+  right: -1px;
+  border-right: 7px solid var(--accent);
+}
+
+.training-scroll-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  font-size: 1.3rem;
+  line-height: 1.7;
+  will-change: transform;
+}
+
+.training-scroll-text p {
+  color: var(--ink);
+  margin: 0 0 1em;
+}
+
+.training-block-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.training-block {
+  font-size: 1.15rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+}
+
+.training-block-texte {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  white-space: pre-wrap;
+}
+
+.training-block-image {
+  background: var(--accent-tint);
+  border: 1px dashed var(--accent);
+  color: var(--accent-dark);
+  font-style: italic;
+}
+
+.training-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 2rem;
+}
+
+.training-footer .btn {
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+}
+
+.training-recap-card {
+  max-width: 420px;
+  margin: 2.5rem auto 0;
+  padding: 2.2rem 2rem;
+  text-align: center;
+}
+
+.training-recap-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  margin-bottom: 0.6rem;
+}
+
+.training-recap-chrono {
+  font-family: var(--font-mono);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.training-recap-status {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0.4rem 0 0.3rem;
+}
+
+.training-recap-red .training-recap-status {
+  color: var(--red);
+}
+
+.training-recap-orange .training-recap-status {
+  color: var(--amber);
+}
+
+.training-recap-green .training-recap-status {
+  color: #1f8a4c;
+}
+
+.training-recap-hint {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0 0 1.4rem;
+}

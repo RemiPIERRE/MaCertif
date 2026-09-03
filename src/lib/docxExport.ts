@@ -18,7 +18,8 @@ import {
   WidthType,
 } from 'docx'
 import { resolveOutline, type ResolvedItem } from './resolveOutline'
-import type { DossierReponses, ProfilInfos, Questionnaire } from '../types/storage'
+import { competences as competenceDefinitions } from '../data/competences'
+import type { Caracteristiques, Competences, DossierReponses, ProfilInfos } from '../types/storage'
 
 const ACCENT = '641E0A'
 const GREY = '6B6B6B'
@@ -89,6 +90,37 @@ function notePara(note: string) {
   return new Paragraph({
     spacing: { after: 200, line: 300 },
     children: [new TextRun({ text: note, italics: true, color: GREY, size: 24, font: FONT })],
+  })
+}
+
+/** Chapter 3: one paragraph per DWWM competency (C1-C8), self-declared by the candidate. */
+function competencesBody(competences: Competences): Paragraph[] {
+  return competenceDefinitions.flatMap((def) => {
+    const entry = competences[def.id]
+    const validee = entry?.validee ?? false
+    const texte = entry?.texte.trim() ?? ''
+    return [
+      new Paragraph({
+        spacing: { before: 200, after: 80 },
+        children: [
+          new TextRun({ text: `${def.code} — ${def.label}`, bold: true, color: ACCENT, size: 24, font: FONT }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 100 },
+        children: [
+          new TextRun({ text: validee ? 'Validée pendant le projet' : 'Non validée', italics: true, color: validee ? ACCENT : GREY, size: 20, font: FONT }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 200, line: 300 },
+        children: [
+          texte
+            ? new TextRun({ text: texte, size: 24, font: FONT })
+            : new TextRun({ text: 'Non renseigné', italics: true, color: GREY, size: 24, font: FONT }),
+        ],
+      }),
+    ]
   })
 }
 
@@ -302,17 +334,21 @@ function renderTaskBody(item: Extract<ResolvedItem, { kind: 'task' }>, reponses:
 function renderItemList(
   items: ResolvedItem[],
   reponses: DossierReponses,
+  competences: Competences,
   numberPrefix: string,
   depth: 2 | 3,
 ): (Paragraph | Table)[] {
   if (items.length === 1) {
     const only = items[0]
-    return only.kind === 'note' ? [notePara(only.note)] : renderTaskBody(only, reponses)
+    if (only.kind === 'note') return [notePara(only.note)]
+    if (only.kind === 'competences') return competencesBody(competences)
+    return renderTaskBody(only, reponses)
   }
   const headingFn = depth === 2 ? heading2 : heading3
   return items.flatMap((item, index) => {
     const number = `${numberPrefix}.${index + 1}`
     if (item.kind === 'note') return [headingFn(`${number} ${item.title}`), notePara(item.note)]
+    if (item.kind === 'competences') return competencesBody(competences)
     return [headingFn(`${number} ${item.task.sectionTitle ?? item.task.title}`), ...renderTaskBody(item, reponses)]
   })
 }
@@ -320,21 +356,22 @@ function renderItemList(
 export async function generateDossierDocx(
   profil: ProfilInfos,
   reponses: DossierReponses,
-  questionnaire: Questionnaire,
+  caracteristiques: Caracteristiques,
+  competences: Competences,
 ): Promise<Blob> {
-  const outline = resolveOutline(questionnaire)
+  const outline = resolveOutline(caracteristiques)
   const body: (Paragraph | Table)[] = []
 
   body.push(...buildCoverPage(profil))
 
   body.push(heading1(outline.remerciements.title))
-  body.push(...renderItemList(outline.remerciements.items, reponses, '', 2))
+  body.push(...renderItemList(outline.remerciements.items, reponses, competences, '', 2))
 
   body.push(heading1('Sommaire'))
   body.push(new TableOfContents('Sommaire', { hyperlink: true, headingStyleRange: '1-3' }))
 
   body.push(heading1(outline.introduction.title))
-  body.push(...renderItemList(outline.introduction.items, reponses, '', 2))
+  body.push(...renderItemList(outline.introduction.items, reponses, competences, '', 2))
 
   for (const section of outline.numbered) {
     body.push(heading1(`${section.number}. ${section.title}`))
@@ -342,10 +379,10 @@ export async function generateDossierDocx(
       section.subsections.forEach((sub, si) => {
         const subNumber = `${section.number}.${si + 1}`
         body.push(heading2(`${subNumber} ${sub.title}`))
-        body.push(...renderItemList(sub.items, reponses, subNumber, 3))
+        body.push(...renderItemList(sub.items, reponses, competences, subNumber, 3))
       })
     } else {
-      body.push(...renderItemList(section.items, reponses, `${section.number}`, 2))
+      body.push(...renderItemList(section.items, reponses, competences, `${section.number}`, 2))
     }
   }
 

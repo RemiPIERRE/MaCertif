@@ -61,6 +61,62 @@
   margin-top: 0.5rem;
 }
 
+.accueil-progress-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.3rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 380px) {
+  .accueil-progress-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.accueil-progress-mini-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+
+.accueil-progress-mini-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+  line-height: 1.3;
+  margin-bottom: 0.4rem;
+}
+
+.accueil-progress-mini-hint {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0.4rem 0 0;
+}
+
+.accueil-oral-duration {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 0.2rem 0 0;
+}
+
+.accueil-oral-duration-red {
+  color: var(--red);
+}
+
+.accueil-oral-duration-orange {
+  color: var(--amber);
+}
+
+.accueil-oral-duration-green {
+  color: #1f8a4c;
+}
+
 .accueil-backup-actions {
   display: flex;
   gap: 0.6rem;

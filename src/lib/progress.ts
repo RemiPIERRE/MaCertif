@@ -1,7 +1,7 @@
 import { allTasks } from '../data/dossierContent'
 import { filterActiveTasks } from './activeTasks'
 import type { DossierTask } from '../types/dossier'
-import type { DossierReponses, Questionnaire } from '../types/storage'
+import type { Caracteristiques, DossierReponses } from '../types/storage'
 
 export type TaskStatus = 'empty' | 'incomplete' | 'complete'
 
@@ -27,8 +27,8 @@ export interface ProgressStats {
   percent: number
 }
 
-export function computeProgress(reponses: DossierReponses, questionnaire: Questionnaire = {}): ProgressStats {
-  const activeTasks = filterActiveTasks(allTasks, questionnaire)
+export function computeProgress(reponses: DossierReponses, caracteristiques: Caracteristiques = {}): ProgressStats {
+  const activeTasks = filterActiveTasks(allTasks, caracteristiques)
   let completedCount = 0
   let incompleteCount = 0
   for (const task of activeTasks) {

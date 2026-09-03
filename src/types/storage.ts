@@ -51,11 +51,28 @@ export interface Deadline {
 }
 
 /**
- * Answers to the personalisation questionnaire, keyed by question id. Boolean
- * questions store `false` for "non" (anything else, including unanswered, counts
- * as active); choice questions store the selected option's string value.
+ * Answers to the old (V2.0) personalisation questionnaire, keyed by question id.
+ * Superseded by `Caracteristiques` (see data/caracteristiques.ts) for gating dossier
+ * tasks — kept only so old exports (V1.5-V2.0) still carry a recognised, validated
+ * shape on import. Nothing in the live app reads or writes this key any more.
  */
 export type Questionnaire = Record<string, boolean | string>
+
+/**
+ * Independent oui/non characteristics of the candidate's project(s), keyed by
+ * characteristic id (see data/caracteristiques.ts). `true` = "oui"; absent or
+ * `false` = "non" (nothing disappears from Mon dossier until actively checked).
+ */
+export type Caracteristiques = Record<string, boolean>
+
+/** One DWWM referential competency (C1-C8): self-declared, never computed automatically. */
+export interface Competence {
+  validee: boolean
+  texte: string
+}
+
+/** Keyed by competency id (see data/competences.ts). */
+export type Competences = Record<string, Competence>
 
 /**
  * A pense-bête created from a text or image task: "I'll need an annex/inline image
@@ -78,4 +95,9 @@ export const STORAGE_KEYS = {
   notes: 'notes:items',
   calendrier: 'calendrier:deadlines',
   questionnaire: 'profil:questionnaire',
+  caracteristiques: 'dossier:caracteristiques',
+  competences: 'dossier:competences',
+  oralPresentation: 'oral:presentation',
+  oralAnnexes: 'oral:annexes',
+  oralTheme: 'oral:theme',
 } as const

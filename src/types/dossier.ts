@@ -20,16 +20,13 @@ export interface DossierTask {
   /** Generic example text shown in the blue "Exemple" box. Filled in later (phase 2). */
   example: string | null
   /**
-   * Gate(s) on questionnaire question(s) (see src/data/questionnaire.ts). A plain
-   * string is a boolean question that must not be answered "non". An object gates
-   * on a multi-choice question: the task is hidden only when the answer is one of
-   * `excludes`. When an array, every rule must be satisfied. Unanswered questions
-   * always satisfy their rule (nothing disappears until the user actively answers).
+   * Characteristic id(s) (see src/data/caracteristiques.ts) that make this task
+   * relevant. No tags = always shown. With tags, the task is shown as soon as ANY
+   * one of them is checked "oui" in the candidate's Caracteristiques (never all of
+   * them at once — characteristics are independent, not combined with AND).
    */
-  conditionalOn?: ConditionalFlag | ConditionalFlag[]
+  tags?: string[]
 }
-
-export type ConditionalFlag = string | { question: string; excludes: string[] }
 
 export interface DossierSubchapter {
   id: string

@@ -3,14 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { findTaskContext, getAdjacentTasks } from '../lib/taskLookup'
 import { AnnexRefPanel } from '../components/AnnexRefPanel'
-import { STORAGE_KEYS, type DossierReponses, type Questionnaire } from '../types/storage'
+import { STORAGE_KEYS, type Caracteristiques, type DossierReponses } from '../types/storage'
 import './DossierTaskPage.css'
 
 export function DossierTaskPage() {
   const { taskId = '' } = useParams()
   const navigate = useNavigate()
   const [reponses, setReponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
-  const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
+  const [caracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
   const context = findTaskContext(taskId)
   const [text, setText] = useState(() => reponses[taskId]?.text ?? '')
   const [savedFlash, setSavedFlash] = useState(false)
@@ -31,7 +31,7 @@ export function DossierTaskPage() {
   }
 
   const { task, chapter, subchapter } = context
-  const { prev, next } = getAdjacentTasks(taskId, questionnaire)
+  const { prev, next } = getAdjacentTasks(taskId, caracteristiques)
   const isDirty = text !== (reponses[taskId]?.text ?? '')
   const belowMin = task.minChars !== null && text.length < task.minChars
 

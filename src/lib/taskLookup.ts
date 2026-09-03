@@ -1,7 +1,7 @@
 import { allTasks, dossierChapters } from '../data/dossierContent'
 import { filterActiveTasks } from './activeTasks'
 import type { DossierChapter, DossierSubchapter, DossierTask } from '../types/dossier'
-import type { Questionnaire } from '../types/storage'
+import type { Caracteristiques } from '../types/storage'
 
 export interface TaskContext {
   task: DossierTask
@@ -31,9 +31,9 @@ export function findTaskContext(taskId: string): TaskContext | null {
 /** Prev/next only ever land on active (non-disabled) tasks. */
 export function getAdjacentTasks(
   taskId: string,
-  questionnaire: Questionnaire = {},
+  caracteristiques: Caracteristiques = {},
 ): { prev: DossierTask | null; next: DossierTask | null } {
-  const active = filterActiveTasks(allTasks, questionnaire)
+  const active = filterActiveTasks(allTasks, caracteristiques)
   const index = active.findIndex((t) => t.id === taskId)
   if (index === -1) return { prev: null, next: null }
   return {

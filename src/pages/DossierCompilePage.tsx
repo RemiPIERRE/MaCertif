@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { resolveOutline, type ResolvedItem } from '../lib/resolveOutline'
-import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos, type DossierReponses, type Questionnaire } from '../types/storage'
+import { competences as competenceDefinitions } from '../data/competences'
+import { STORAGE_KEYS, EMPTY_PROFIL, type Caracteristiques, type Competences, type ProfilInfos, type DossierReponses } from '../types/storage'
 import './DossierCompilePage.css'
 
 function TaskBody({ item, reponses }: { item: Extract<ResolvedItem, { kind: 'task' }>; reponses: DossierReponses }) {
@@ -18,28 +19,67 @@ function TaskBody({ item, reponses }: { item: Extract<ResolvedItem, { kind: 'tas
   return <p>{reponses[task.id]?.text || <em>Non renseigné</em>}</p>
 }
 
+function CompetencesBody({ competences }: { competences: Competences }) {
+  return (
+    <>
+      {competenceDefinitions.map((def) => {
+        const entry = competences[def.id]
+        const validee = entry?.validee ?? false
+        const texte = entry?.texte.trim() ?? ''
+        return (
+          <div key={def.id} className="compiled-competence">
+            <h4>
+              {def.code} — {def.label}
+            </h4>
+            <p className={validee ? 'compiled-competence-status validee' : 'compiled-competence-status'}>
+              {validee ? 'Validée pendant le projet' : 'Non validée'}
+            </p>
+            <p>{texte || <em>Non renseigné</em>}</p>
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
 /**
  * A single item in a list gets its own body directly under the parent heading (no
  * redundant, un-numbered sub-heading repeating the same title); a list with several
  * items numbers each one `${numberPrefix}.${index}`, mirroring the Word export.
  */
-function ItemList({ items, reponses, numberPrefix }: { items: ResolvedItem[]; reponses: DossierReponses; numberPrefix: string }) {
+function ItemList({
+  items,
+  reponses,
+  competences,
+  numberPrefix,
+}: {
+  items: ResolvedItem[]
+  reponses: DossierReponses
+  competences: Competences
+  numberPrefix: string
+}) {
   if (items.length === 1) {
     const only = items[0]
-    return only.kind === 'note' ? <p className="compiled-note">{only.note}</p> : <TaskBody item={only} reponses={reponses} />
+    if (only.kind === 'note') return <p className="compiled-note">{only.note}</p>
+    if (only.kind === 'competences') return <CompetencesBody competences={competences} />
+    return <TaskBody item={only} reponses={reponses} />
   }
   return (
     <>
       {items.map((item, i) => {
         const number = `${numberPrefix}.${i + 1}`
-        return item.kind === 'note' ? (
-          <div key={i} className="compiled-task">
-            <h4>
-              {number} {item.title}
-            </h4>
-            <p className="compiled-note">{item.note}</p>
-          </div>
-        ) : (
+        if (item.kind === 'note') {
+          return (
+            <div key={i} className="compiled-task">
+              <h4>
+                {number} {item.title}
+              </h4>
+              <p className="compiled-note">{item.note}</p>
+            </div>
+          )
+        }
+        if (item.kind === 'competences') return <CompetencesBody key={i} competences={competences} />
+        return (
           <div key={i} className="compiled-task">
             <h4>
               {number} {item.task.sectionTitle ?? item.task.title}
@@ -55,16 +95,17 @@ function ItemList({ items, reponses, numberPrefix }: { items: ResolvedItem[]; re
 export function DossierComplilePage() {
   const [profil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
-  const [questionnaire] = useLocalStorage<Questionnaire>(STORAGE_KEYS.questionnaire, {})
+  const [caracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
+  const [competences] = useLocalStorage<Competences>(STORAGE_KEYS.competences, {})
   const [exporting, setExporting] = useState(false)
 
-  const outline = resolveOutline(questionnaire)
+  const outline = resolveOutline(caracteristiques)
 
   const handleExport = async () => {
     setExporting(true)
     try {
       const { generateDossierDocx, downloadDocxBlob } = await import('../lib/docxExport')
-      const blob = await generateDossierDocx(profil, reponses, questionnaire)
+      const blob = await generateDossierDocx(profil, reponses, caracteristiques, competences)
       const filename = `dossier-projet-${(profil.nomProjet || 'macertif').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.docx`
       downloadDocxBlob(blob, filename)
     } finally {
@@ -105,12 +146,12 @@ export function DossierComplilePage() {
 
         <section className="compiled-chapter">
           <h2>{outline.remerciements.title}</h2>
-          <ItemList items={outline.remerciements.items} reponses={reponses} numberPrefix="" />
+          <ItemList items={outline.remerciements.items} reponses={reponses} competences={competences} numberPrefix="" />
         </section>
 
         <section className="compiled-chapter">
           <h2>{outline.introduction.title}</h2>
-          <ItemList items={outline.introduction.items} reponses={reponses} numberPrefix="" />
+          <ItemList items={outline.introduction.items} reponses={reponses} competences={competences} numberPrefix="" />
         </section>
 
         {outline.numbered.map((section) => (
@@ -126,11 +167,11 @@ export function DossierComplilePage() {
                       <h3>
                         {subNumber} {sub.title}
                       </h3>
-                      <ItemList items={sub.items} reponses={reponses} numberPrefix={subNumber} />
+                      <ItemList items={sub.items} reponses={reponses} competences={competences} numberPrefix={subNumber} />
                     </div>
                   )
                 })
-              : <ItemList items={section.items} reponses={reponses} numberPrefix={String(section.number)} />}
+              : <ItemList items={section.items} reponses={reponses} competences={competences} numberPrefix={String(section.number)} />}
           </section>
         ))}
 

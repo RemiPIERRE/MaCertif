@@ -1,8 +1,8 @@
-import { remerciementsSection, introductionSection, numberedSections, type ExportItem } from '../data/exportOutline'
+import { remerciementsSection, introductionSection, numberedSections, type ExportItem, type ExportSection, type ExportSubsection } from '../data/exportOutline'
 import { getTaskById } from './taskLookup'
 import { isTaskActive } from './activeTasks'
 import type { DossierTask } from '../types/dossier'
-import type { Questionnaire } from '../types/storage'
+import type { Caracteristiques } from '../types/storage'
 
 export interface ResolvedTaskItem {
   kind: 'task'
@@ -17,7 +17,11 @@ export interface ResolvedNoteItem {
   note: string
 }
 
-export type ResolvedItem = ResolvedTaskItem | ResolvedNoteItem
+export interface ResolvedCompetencesItem {
+  kind: 'competences'
+}
+
+export type ResolvedItem = ResolvedTaskItem | ResolvedNoteItem | ResolvedCompetencesItem
 
 export interface ResolvedSubsection {
   title: string
@@ -25,6 +29,7 @@ export interface ResolvedSubsection {
 }
 
 export interface ResolvedSection {
+  /** null for the unnumbered Remerciements/Introduction; assigned sequentially (no gaps) for numbered chapters. */
   number: number | null
   title: string
   items: ResolvedItem[]
@@ -38,8 +43,14 @@ export interface ResolvedOutline {
   annexes: { number: number; task: DossierTask }[]
 }
 
-/** Walks the export outline once, skipping disabled tasks and numbering annexes in reading order. */
-export function resolveOutline(questionnaire: Questionnaire): ResolvedOutline {
+/**
+ * Walks the export outline once, skipping disabled tasks and numbering annexes in
+ * reading order. Numbered chapters that end up with no visible content for this
+ * candidate (e.g. WordPress for a from-scratch project) are dropped entirely, and
+ * the survivors are renumbered sequentially — the table of contents must reflect
+ * only this candidate's real chapters, never a gap or an empty heading.
+ */
+export function resolveOutline(caracteristiques: Caracteristiques): ResolvedOutline {
   const annexes: { number: number; task: DossierTask }[] = []
 
   function resolveItems(items: ExportItem[]): ResolvedItem[] {
@@ -49,8 +60,12 @@ export function resolveOutline(questionnaire: Questionnaire): ResolvedOutline {
         result.push({ kind: 'note', title: item.title, note: item.note })
         continue
       }
+      if (item.kind === 'competences') {
+        result.push({ kind: 'competences' })
+        continue
+      }
       const task = getTaskById(item.taskId)
-      if (!task || !isTaskActive(task, questionnaire)) continue
+      if (!task || !isTaskActive(task, caracteristiques)) continue
       let annexNumber: number | null = null
       if (item.annex) {
         annexNumber = annexes.length + 1
@@ -61,20 +76,29 @@ export function resolveOutline(questionnaire: Questionnaire): ResolvedOutline {
     return result
   }
 
-  function resolveSection(section: typeof remerciementsSection) {
+  function resolveUnnumbered(section: ExportSubsection): ResolvedSection {
+    return { number: null, title: section.title, items: resolveItems(section.items), subsections: [] }
+  }
+
+  function resolveNumbered(section: ExportSection): Omit<ResolvedSection, 'number'> {
     if (section.subsections) {
       const subsections = section.subsections
         .map((sub) => ({ title: sub.title, items: resolveItems(sub.items) }))
         .filter((sub) => sub.items.length > 0)
-      return { number: section.number, title: section.title, items: [], subsections }
+      return { title: section.title, items: [], subsections }
     }
-    return { number: section.number, title: section.title, items: resolveItems(section.items ?? []), subsections: [] }
+    return { title: section.title, items: resolveItems(section.items ?? []), subsections: [] }
   }
 
+  const numbered = numberedSections
+    .map(resolveNumbered)
+    .filter((section) => section.items.length > 0 || section.subsections.length > 0)
+    .map((section, i) => ({ number: i + 1, ...section }))
+
   return {
-    remerciements: resolveSection(remerciementsSection),
-    introduction: resolveSection(introductionSection),
-    numbered: numberedSections.map(resolveSection),
+    remerciements: resolveUnnumbered(remerciementsSection),
+    introduction: resolveUnnumbered(introductionSection),
+    numbered,
     annexes,
   }
 }
