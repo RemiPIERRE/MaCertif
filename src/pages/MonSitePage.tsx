@@ -44,7 +44,7 @@ export function MonSitePage() {
     <div>
       <header className="page-header">
         <div className="page-eyebrow">Ma certification</div>
-        <h1>Mon site</h1>
+        <h1>Mes visuels</h1>
         <p className="page-lede">
           La checklist de toutes les images à préparer pour votre dossier : captures d'écran, code, schémas,
           arborescences. Rédigez leur description dans « Mon dossier », puis cochez-les ici au fur et à mesure que

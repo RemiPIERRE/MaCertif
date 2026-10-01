@@ -76,7 +76,7 @@ export type Competences = Record<string, Competence>
 
 /**
  * A pense-bête created from a text or image task: "I'll need an annex/inline image
- * here", named but not written yet. Shows up in Mon site as "à préparer".
+ * here", named but not written yet. Shows up in Mes visuels as "à préparer".
  */
 export interface CustomSiteRef {
   id: string

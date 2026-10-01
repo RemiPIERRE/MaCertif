@@ -12,12 +12,16 @@ const ALL_KEYS = Object.values(STORAGE_KEYS)
  * to support resetting the presentation back to its default order. V4 replaces the
  * old fixed questionnaire (`profil:questionnaire`) with the tag-based
  * `dossier:caracteristiques` that now drives which "Mon dossier" tasks are shown,
- * and adds the self-declarative `dossier:competences` (C1-C8).
+ * and adds the self-declarative `dossier:competences` (C1-C8). V5 splits the single
+ * `deploiement_effectue` characteristic into three finer-grained ones
+ * (`deploiement_moi_meme`/`deploiement_participation`/`deploiement_documentation`),
+ * distinguishing having deployed the app oneself from having only taken part in it
+ * or documented it.
  *
  * Migrations must never be removed, even once old exports become rare: an export a
  * user made years ago must still import cleanly.
  */
-export const CURRENT_SCHEMA_VERSION = 4
+export const CURRENT_SCHEMA_VERSION = 5
 
 /**
  * Ids and original position/activee of the default presentation template's sections,
@@ -132,6 +136,25 @@ const MIGRATIONS: Record<number, Migration> = {
     next[STORAGE_KEYS.caracteristiques] = inferCaracteristiquesFromReponses(next[STORAGE_KEYS.dossier])
     return next
   },
+  // v4 -> v5: deploiement_effectue is split into three finer-grained characteristics.
+  // A candidate who had deploiement_effectue: true already wrote content on tasks
+  // now tagged with the new characteristics (hebergeur/https) — deploiement_moi_meme
+  // is the closest reading of the old label ("avez-vous déployé votre projet"), so
+  // it's the one backfilled to true, keeping that content visible. The other two
+  // default to false: nothing is lost (the tasks they gate are brand new), the
+  // candidate just ticks them if relevant.
+  4: (data) => {
+    const next = { ...data }
+    const raw = next[STORAGE_KEYS.caracteristiques]
+    const caracteristiques: Record<string, unknown> = isPlainObject(raw) ? { ...raw } : {}
+    if (caracteristiques.deploiement_effectue === true) {
+      if (!('deploiement_moi_meme' in caracteristiques)) caracteristiques.deploiement_moi_meme = true
+      if (!('deploiement_participation' in caracteristiques)) caracteristiques.deploiement_participation = false
+      if (!('deploiement_documentation' in caracteristiques)) caracteristiques.deploiement_documentation = false
+    }
+    next[STORAGE_KEYS.caracteristiques] = caracteristiques
+    return next
+  },
 }
 
 /** Applies every migration step from `fromVersion` up to CURRENT_SCHEMA_VERSION, in order. */
@@ -214,9 +237,9 @@ const VALIDATORS: Record<string, (value: unknown) => string | null> = {
     return null
   },
   [STORAGE_KEYS.site]: (v) => {
-    if (!isPlainObject(v)) return '« Mon site » doit être un objet.'
+    if (!isPlainObject(v)) return '« Mes visuels » doit être un objet.'
     for (const [id, val] of Object.entries(v)) {
-      if (!isBoolean(val)) return `Valeur invalide pour "${id}" dans Mon site.`
+      if (!isBoolean(val)) return `Valeur invalide pour "${id}" dans Mes visuels.`
     }
     return null
   },

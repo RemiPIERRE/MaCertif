@@ -43,7 +43,7 @@ export function AnnexRefPanel({ taskId }: { taskId: string }) {
       <h3>Références Annexe / Image</h3>
       <p className="annex-ref-hint">
         Besoin d'une image ou d'une annexe à cet endroit précis, mais pas encore prête ? Ajoutez un pense-bête : il
-        apparaîtra dans Mon site avec le statut « à préparer ».
+        apparaîtra dans Mes visuels avec le statut « à préparer ».
       </p>
 
       {taskRefs.length > 0 && (

@@ -18,7 +18,7 @@ import './Sidebar.css'
 const links = [
   { to: '/', label: 'Accueil', Icon: IconHome, end: true },
   { to: '/dossier', label: 'Mon dossier', Icon: IconDossier },
-  { to: '/site', label: 'Mon site', Icon: IconSite },
+  { to: '/site', label: 'Mes visuels', Icon: IconSite },
   { to: '/oral', label: 'Mon oral', Icon: IconOral },
   { to: '/notes', label: 'Mes notes', Icon: IconNotes },
   { to: '/calendrier', label: 'Calendrier', Icon: IconCalendar },

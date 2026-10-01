@@ -62,6 +62,9 @@ const ANY_FRONTEND = ['front_framework', 'front_vanilla']
 const ANY_BACKEND = ['back_framework', 'back_natif']
 const ANY_BDD = ['bdd_relationnelle', 'bdd_non_relationnelle']
 const ANY_ROLE_BEYOND_ADMIN = ['roles_multiples', 'authentification']
+// Knowing one's hosting provider or HTTPS setup doesn't require having personally
+// clicked "deploy" — it just requires at least one of the three forms of involvement.
+const ANY_DEPLOIEMENT = ['deploiement_moi_meme', 'deploiement_participation', 'deploiement_documentation']
 
 export const dossierChapters: DossierChapter[] = [
   {
@@ -156,7 +159,7 @@ export const dossierChapters: DossierChapter[] = [
         code: '5.5',
         title: 'Fonctionnalités et objectifs',
         tasks: [
-          textTask('cdc-fonctionnalite', 'Présentez une fonctionnalité clé de votre site internet.', { sectionTitle: 'Fonctionnalités principales' }),
+          textTask('cdc-fonctionnalite', 'Présentez une fonctionnalité clé de votre site internet.', { sectionTitle: 'Fonctionnalité principale' }),
           textTask('cdc-objectif-1', 'Présentez le premier objectif de votre site.', { sectionTitle: 'Objectifs du projet' }),
           textTask('cdc-objectif-2', 'Présentez le second objectif de votre site.', { sectionTitle: 'Objectifs du projet (suite)' }),
         ],
@@ -166,9 +169,21 @@ export const dossierChapters: DossierChapter[] = [
         code: '5.6',
         title: 'Rôles et espace utilisateur',
         tasks: [
-          textTask('cdc-role-admin', "Expliquez le rôle et les permissions de l'administrateur sur votre site.", { sectionTitle: 'Rôle administrateur', tags: ['authentification'] }),
-          textTask('cdc-role-user', "Expliquez le ou les rôles utilisateurs et ce qu'ils peuvent faire sur votre site.", { sectionTitle: 'Rôle utilisateur', tags: ANY_ROLE_BEYOND_ADMIN }),
-          textTask('cdc-espace-utilisateur', "Décrivez l'espace utilisateur de votre site.", { sectionTitle: 'Espace utilisateur', tags: ANY_ROLE_BEYOND_ADMIN }),
+          textTask(
+            'cdc-role-admin',
+            "Décrivez, du point de vue de l'utilisateur final, ce que peut faire un administrateur sur votre site : les écrans auxquels il a accès et les actions qu'il peut réaliser (angle fonctionnel — le détail technique de l'implémentation est traité au chapitre 9).",
+            { sectionTitle: 'Rôle administrateur', tags: ['authentification'] },
+          ),
+          textTask(
+            'cdc-role-user',
+            "Décrivez, du point de vue de l'utilisateur final, ce que peuvent faire le ou les rôles utilisateurs sur votre site : écrans accessibles et actions possibles (angle fonctionnel — le détail technique est traité au chapitre 9).",
+            { sectionTitle: 'Rôle utilisateur', tags: ANY_ROLE_BEYOND_ADMIN },
+          ),
+          textTask(
+            'cdc-espace-utilisateur',
+            "Décrivez l'espace utilisateur de votre site du point de vue de l'utilisateur final : ce qu'il y trouve et ce qu'il peut y faire.",
+            { sectionTitle: 'Espace utilisateur', tags: ANY_ROLE_BEYOND_ADMIN },
+          ),
         ],
       },
       {
@@ -304,13 +319,47 @@ export const dossierChapters: DossierChapter[] = [
         ],
       },
       {
-        id: 'framework-roles',
+        id: 'framework-methodologie',
         code: '9.3',
+        title: 'Méthodologie et gestion de projet',
+        tasks: [
+          textTask(
+            'methodologie-travail',
+            "Présentez la méthode de travail utilisée sur le projet (agile, sprints, Scrum, Kanban, autre) — ou expliquez pourquoi aucune méthode formalisée n'a été mise en place, si c'est le cas.",
+            { sectionTitle: 'Méthode de travail' },
+          ),
+          textTask(
+            'methodologie-organisation',
+            "Expliquez l'organisation du travail : avez-vous travaillé seul ou en équipe ? Quel outil de suivi de tâches avez-vous utilisé le cas échéant (Trello, Notion, Jira...) ?",
+            { sectionTitle: 'Organisation du travail' },
+          ),
+          textTask(
+            'methodologie-git',
+            'Présentez votre stratégie de versionnement Git : organisation des branches, fréquence et granularité de vos commits.',
+            { sectionTitle: 'Stratégie de versionnement Git' },
+          ),
+        ],
+      },
+      {
+        id: 'framework-roles',
+        code: '9.4',
         title: 'Gestion des rôles utilisateurs',
         tasks: [
-          textTask('roles-admin', "Décrivez le rôle Administrateur : ses accès et permissions spécifiques.", { sectionTitle: 'Rôle Administrateur', tags: ['roles_multiples'] }),
-          textTask('roles-user', "Décrivez le rôle Utilisateur : ses accès et permissions spécifiques.", { sectionTitle: 'Rôle Utilisateur', tags: ['roles_multiples'] }),
-          textTask('roles-autres', 'Présentez les autres rôles éventuels de votre projet et leurs permissions.', { sectionTitle: 'Autres rôles', tags: ['roles_multiples'] }),
+          textTask(
+            'roles-admin',
+            "Décrivez comment le rôle Administrateur est contrôlé techniquement dans le code : middleware de vérification des droits, structure en base de données, gestion de session (angle technique — l'angle fonctionnel, ce que l'administrateur peut faire à l'écran, est déjà couvert au chapitre 5.6).",
+            { sectionTitle: 'Rôle Administrateur', tags: ['roles_multiples'] },
+          ),
+          textTask(
+            'roles-user',
+            "Décrivez comment le rôle Utilisateur est contrôlé techniquement dans le code : middleware de vérification des droits, structure en base de données, gestion de session (angle technique — l'angle fonctionnel est déjà couvert au chapitre 5.6).",
+            { sectionTitle: 'Rôle Utilisateur', tags: ['roles_multiples'] },
+          ),
+          textTask(
+            'roles-autres',
+            "Présentez l'implémentation technique des autres rôles éventuels de votre projet : comment leurs permissions sont contrôlées dans le code (angle technique — l'angle fonctionnel est déjà couvert au chapitre 5.6).",
+            { sectionTitle: 'Autres rôles', tags: ['roles_multiples'] },
+          ),
         ],
       },
     ],
@@ -375,7 +424,7 @@ export const dossierChapters: DossierChapter[] = [
         tasks: [
           textTask('securite-validation-donnees', 'Expliquez les contrôles de validation des données mis en place côté client et côté serveur, et pourquoi les deux sont nécessaires.', { sectionTitle: 'Validation des données' }),
           textTask('securite-antispam', 'Expliquez comment vous protégez vos formulaires publics contre le spam (captcha, honeypot, limitation de fréquence...).', { sectionTitle: 'Protection anti-spam', tags: ['formulaires_publics'] }),
-          textTask('https', "Expliquez ce qu'est le protocole HTTPS et comment vous l'avez mis en place.", { sectionTitle: 'Sécurisation HTTPS', tags: ['deploiement_effectue'] }),
+          textTask('https', "Expliquez ce qu'est le protocole HTTPS et comment vous l'avez mis en place.", { sectionTitle: 'Sécurisation HTTPS', tags: ANY_DEPLOIEMENT }),
           textTask('securite-api-externe', "Expliquez comment vous protégez l'accès aux services externes que vous utilisez (clés API non exposées côté client).", { sectionTitle: 'Protection des accès externes', tags: ['api_tierce'] }),
         ],
       },
@@ -388,7 +437,22 @@ export const dossierChapters: DossierChapter[] = [
     tasks: [
       textTask('seo-definition', "Expliquez ce qu'est le SEO et ses bénéfices pour votre projet.", { sectionTitle: 'Le SEO et ses bénéfices', tags: ['seo'] }),
       textTask('seo-mise-en-place', 'Expliquez comment vous avez mis en place le SEO sur votre projet.', { sectionTitle: 'Mise en place du SEO', tags: ['seo'] }),
-      textTask('hebergeur', 'Présentez l\'hébergeur utilisé et son historique en quelques mots.', { sectionTitle: 'Hébergement', tags: ['deploiement_effectue'] }),
+      textTask('hebergeur', 'Présentez l\'hébergeur utilisé et son historique en quelques mots.', { sectionTitle: 'Hébergement', tags: ANY_DEPLOIEMENT }),
+      textTask(
+        'deploiement-moi-meme',
+        "Expliquez comment vous avez déployé l'application : étapes suivies, hébergeur choisi, configuration réalisée.",
+        { sectionTitle: "Déploiement réalisé par mes soins", tags: ['deploiement_moi_meme'] },
+      ),
+      textTask(
+        'deploiement-participation',
+        "Expliquez comment votre application est déployée (fonctionnement du déploiement, même si vous n'étiez pas seul·e aux manettes).",
+        { sectionTitle: 'Fonctionnement du déploiement', tags: ['deploiement_participation'] },
+      ),
+      textTask(
+        'deploiement-documentation',
+        'Présentez la documentation que vous avez créée sur le déploiement : son existence, sa structure, à qui elle s\'adresse.',
+        { sectionTitle: 'Documentation du déploiement', tags: ['deploiement_documentation'] },
+      ),
     ],
   },
   {

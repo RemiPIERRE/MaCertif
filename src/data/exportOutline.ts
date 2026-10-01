@@ -115,12 +115,23 @@ export const numberedSections: ExportSection[] = [
         items: [task('framework-architecture-generale'), task('framework-nom'), task('framework-organisation-dossiers')],
       },
       {
+        title: 'Méthodologie et gestion de projet',
+        items: [task('methodologie-travail'), task('methodologie-organisation'), task('methodologie-git')],
+      },
+      {
         title: 'Gestion des rôles utilisateurs',
         items: [task('roles-admin'), task('roles-user'), task('roles-autres')],
       },
       {
         title: 'SEO et hébergement',
-        items: [task('seo-definition'), task('seo-mise-en-place'), task('hebergeur')],
+        items: [
+          task('seo-definition'),
+          task('seo-mise-en-place'),
+          task('hebergeur'),
+          task('deploiement-moi-meme'),
+          task('deploiement-participation'),
+          task('deploiement-documentation'),
+        ],
       },
       {
         title: 'Développement dynamique et gestion de contenu',

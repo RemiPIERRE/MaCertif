@@ -85,11 +85,11 @@ export function AccueilPage() {
             <div className="field-grid">
               <div className="field">
                 <label>Prénom</label>
-                <input value={profil.prenom} onChange={(e) => update({ prenom: e.target.value })} placeholder="Sylvain" />
+                <input value={profil.prenom} onChange={(e) => update({ prenom: e.target.value })} placeholder="Camille" />
               </div>
               <div className="field">
                 <label>Nom</label>
-                <input value={profil.nom} onChange={(e) => update({ nom: e.target.value })} placeholder="DURIF" />
+                <input value={profil.nom} onChange={(e) => update({ nom: e.target.value })} placeholder="PIERRE" />
               </div>
             </div>
 
@@ -98,7 +98,7 @@ export function AccueilPage() {
               <input
                 value={profil.nomProjet}
                 onChange={(e) => update({ nomProjet: e.target.value })}
-                placeholder="Conception d'un site vitrine avec back-office"
+                placeholder="Le P'tit Grain de Folie"
               />
             </div>
             <div className="field">
@@ -106,7 +106,7 @@ export function AccueilPage() {
               <input
                 value={profil.sousTitreProjet}
                 onChange={(e) => update({ sousTitreProjet: e.target.value })}
-                placeholder="Le P'tit Grain de Folie"
+                placeholder="Site vitrine de restaurant"
               />
             </div>
             <div className="field">

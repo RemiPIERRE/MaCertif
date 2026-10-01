@@ -49,6 +49,9 @@ export const caracteristiques: Caracteristique[] = [
 
   // Déploiement & qualité
   { id: 'deploiement_effectue', categorie: 'Déploiement & qualité', label: 'Avez-vous déployé votre projet en ligne (manuellement ou via une plateforme automatisée) ?' },
+  { id: 'deploiement_moi_meme', categorie: 'Déploiement & qualité', label: "Avez-vous déployé vous-même l'application ?" },
+  { id: 'deploiement_participation', categorie: 'Déploiement & qualité', label: "Avez-vous participé au déploiement de l'application (même sans l'avoir fait seul) ?" },
+  { id: 'deploiement_documentation', categorie: 'Déploiement & qualité', label: 'Avez-vous créé une documentation sur le déploiement de l\'application ?' },
   { id: 'deploiement_manuel', categorie: 'Déploiement & qualité', label: 'Avez-vous géré vous-même le déploiement/hébergement (hors plateforme automatisée type Vercel/Netlify) ?' },
   { id: 'seo', categorie: 'Déploiement & qualité', label: 'Avez-vous mis en place ou allez-vous mettre en place des actions de référencement (SEO) sur votre site ?' },
   { id: 'tests_auto', categorie: 'Déploiement & qualité', label: 'Avez-vous réalisé ou allez-vous réaliser des tests automatisés sur votre projet ?' },
