@@ -16,6 +16,10 @@ export interface Caracteristique {
  * tasks with its id — nothing else needs to change.
  */
 export const caracteristiques: Caracteristique[] = [
+  // Environnement de travail
+  { id: 'conteneurisation_utilisee', categorie: 'Environnement de travail', label: 'Avez-vous utilisé des conteneurs (Docker ou équivalent) pour votre environnement de développement ?' },
+  { id: 'qualite_code_outil', categorie: 'Environnement de travail', label: 'Avez-vous utilisé un outil de contrôle de qualité de code (linter, SonarLint, ESLint...) ?' },
+
   // Frontend
   { id: 'front_framework', categorie: 'Frontend', label: 'Avez-vous utilisé un framework/librairie front-end (React, Angular, Vue...) ?' },
   { id: 'front_vanilla', categorie: 'Frontend', label: 'Avez-vous développé une partie du front en JavaScript natif, sans framework ?' },
@@ -63,6 +67,7 @@ export const caracteristiques: Caracteristique[] = [
 
 /** Category display order for the "Personnaliser mon dossier" card. */
 export const caracteristiqueCategories = [
+  'Environnement de travail',
   'Frontend',
   'Backend',
   'CMS',

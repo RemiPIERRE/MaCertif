@@ -92,7 +92,10 @@ export const numberedSections: ExportSection[] = [
         title: 'Outils front-end',
         items: [task('outil-ide'), task('outil-html'), task('outil-css'), task('outil-js'), task('outil-frameworks')],
       },
-      { title: 'Maquettage et interface', items: [task('maquettage-pages'), task('maquettage-responsive')] },
+      {
+        title: 'Maquettage et interface',
+        items: [task('maquettage-pages'), task('maquettage-responsive'), task('maquettage-accessibilite'), task('maquettage-eco-conception')],
+      },
       {
         title: 'Identité visuelle',
         items: [task('identite-couleurs'), task('identite-typo'), task('identite-logo')],
@@ -104,7 +107,15 @@ export const numberedSections: ExportSection[] = [
       { title: 'Langages et technologies', items: [task('backend-frontend-langages'), task('backend-langages')] },
       {
         title: 'Base de données relationnelle',
-        items: [task('bdd-technologie'), task('bdd-outil-admin'), task('bdd-methodologie'), task('bdd-entites'), task('bdd-schema')],
+        items: [
+          task('bdd-technologie'),
+          task('bdd-outil-admin'),
+          task('bdd-methodologie'),
+          task('bdd-entites'),
+          task('bdd-schema'),
+          task('bdd-sauvegarde'),
+          task('bdd-droits-acces'),
+        ],
       },
       {
         title: 'Base de données non relationnelle',
@@ -115,8 +126,15 @@ export const numberedSections: ExportSection[] = [
         items: [task('framework-architecture-generale'), task('framework-nom'), task('framework-organisation-dossiers')],
       },
       {
-        title: 'Méthodologie et gestion de projet',
-        items: [task('methodologie-travail'), task('methodologie-organisation'), task('methodologie-git')],
+        title: 'Environnement de travail et méthodologie',
+        items: [
+          task('methodologie-travail'),
+          task('methodologie-organisation'),
+          task('methodologie-git'),
+          task('methodologie-conteneurisation'),
+          task('methodologie-qualite-code'),
+          task('methodologie-transfert-fichiers'),
+        ],
       },
       {
         title: 'Gestion des rôles utilisateurs',
@@ -176,6 +194,7 @@ export const numberedSections: ExportSection[] = [
           task('securite-antispam'),
           task('https'),
           task('securite-api-externe'),
+          task('securite-rgpd'),
         ],
       },
     ],

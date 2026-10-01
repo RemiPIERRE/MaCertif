@@ -7,6 +7,7 @@ interface TaskOptions {
   sectionTitle?: string
   minChars?: number
   tags?: string[]
+  example?: string
 }
 
 /** Standard "texte" task: an indicative minimum, no upper bound (never blocks saving). */
@@ -19,7 +20,7 @@ function textTask(id: string, title: string, opts: TaskOptions = {}): DossierTas
     type: 'text',
     minChars: opts.minChars ?? 600,
     maxChars: null,
-    example: null,
+    example: opts.example ?? null,
     tags: opts.tags,
   }
 }
@@ -34,7 +35,7 @@ function freeTextTask(id: string, title: string, opts: TaskOptions = {}): Dossie
     type: 'text',
     minChars: null,
     maxChars: null,
-    example: null,
+    example: opts.example ?? null,
     tags: opts.tags,
   }
 }
@@ -65,6 +66,10 @@ const ANY_ROLE_BEYOND_ADMIN = ['roles_multiples', 'authentification']
 // Knowing one's hosting provider or HTTPS setup doesn't require having personally
 // clicked "deploy" — it just requires at least one of the three forms of involvement.
 const ANY_DEPLOIEMENT = ['deploiement_moi_meme', 'deploiement_participation', 'deploiement_documentation']
+// For tasks about the mechanics of getting files onto the server — relevant to
+// anyone who deployed or took part in deploying, but not to someone who only wrote
+// documentation about a deployment they had no hand in.
+const ANY_DEPLOIEMENT_ACTEUR = ['deploiement_moi_meme', 'deploiement_participation']
 
 export const dossierChapters: DossierChapter[] = [
   {
@@ -222,6 +227,16 @@ export const dossierChapters: DossierChapter[] = [
         tasks: [
           textTask('maquettage-pages', 'Expliquez comment vous avez maquetté vos pages.', { sectionTitle: 'Maquettage', tags: ANY_FRONTEND }),
           textTask('maquettage-responsive', 'Expliquez comment vous avez géré le responsive (ordinateur, tablette, mobile).', { sectionTitle: 'Responsive design', tags: ANY_FRONTEND }),
+          textTask(
+            'maquettage-accessibilite',
+            "Avez-vous pris en compte l'accessibilité (RGAA) dans la conception de vos interfaces ? Si oui, comment (contrastes, alternatives textuelles, navigation clavier...) ? Si non, pourquoi pas et serait-ce un axe d'amélioration ?",
+            { sectionTitle: 'Accessibilité (RGAA)' },
+          ),
+          textTask(
+            'maquettage-eco-conception',
+            "Avez-vous pris en compte des pratiques d'éco-conception (optimisation des images, réduction des requêtes, sobriété visuelle...) ? Si oui, lesquelles ?",
+            { sectionTitle: 'Éco-conception' },
+          ),
         ],
       },
       {
@@ -277,6 +292,16 @@ export const dossierChapters: DossierChapter[] = [
           textTask('bdd-methodologie', 'Présentez votre méthodologie de conception de la base de données.', { sectionTitle: 'Méthodologie de conception', tags: ['bdd_relationnelle'] }),
           textTask('bdd-entites', 'Listez et expliquez les entités et tables de votre base de données.', { sectionTitle: 'Entités et tables', tags: ['bdd_relationnelle'] }),
           imageTask('bdd-schema', 'Illustrez le schéma MCD ou MPD de votre base de données.', { sectionTitle: 'Schéma de base de données', tags: ['bdd_relationnelle'] }),
+          textTask(
+            'bdd-sauvegarde',
+            'Avez-vous mis en place une stratégie de sauvegarde et de restauration de votre base de données ? Décrivez comment.',
+            { sectionTitle: 'Sauvegarde et restauration', tags: ['bdd_relationnelle'] },
+          ),
+          textTask(
+            'bdd-droits-acces',
+            "Avez-vous créé des utilisateurs dédiés avec des droits d'accès spécifiques au niveau de la base de données (hors rôles applicatifs) ?",
+            { sectionTitle: "Utilisateurs et droits d'accès (SGBD)", tags: ['bdd_relationnelle'] },
+          ),
         ],
       },
       {
@@ -321,7 +346,7 @@ export const dossierChapters: DossierChapter[] = [
       {
         id: 'framework-methodologie',
         code: '9.3',
-        title: 'Méthodologie et gestion de projet',
+        title: 'Environnement de travail et méthodologie',
         tasks: [
           textTask(
             'methodologie-travail',
@@ -337,6 +362,21 @@ export const dossierChapters: DossierChapter[] = [
             'methodologie-git',
             'Présentez votre stratégie de versionnement Git : organisation des branches, fréquence et granularité de vos commits.',
             { sectionTitle: 'Stratégie de versionnement Git' },
+          ),
+          textTask(
+            'methodologie-conteneurisation',
+            "Décrivez l'outil de conteneurisation utilisé (Docker ou équivalent) et son rôle dans votre projet (ex : reconstituer un environnement proche de la production).",
+            { sectionTitle: 'Conteneurisation', tags: ['conteneurisation_utilisee'] },
+          ),
+          textTask(
+            'methodologie-qualite-code',
+            "Décrivez l'outil de contrôle de qualité de code que vous avez utilisé (linter, SonarLint, ESLint...) et ce qu'il contrôle (style, bonnes pratiques, bugs potentiels).",
+            { sectionTitle: 'Contrôle de qualité de code', tags: ['qualite_code_outil'] },
+          ),
+          textTask(
+            'methodologie-transfert-fichiers',
+            "Décrivez le mode de transfert de fichiers utilisé vers votre hébergeur (SFTP, SCP, FTP, déploiement automatisé...).",
+            { sectionTitle: 'Transfert de fichiers vers l\'hébergeur', tags: ANY_DEPLOIEMENT_ACTEUR },
           ),
         ],
       },
@@ -426,6 +466,11 @@ export const dossierChapters: DossierChapter[] = [
           textTask('securite-antispam', 'Expliquez comment vous protégez vos formulaires publics contre le spam (captcha, honeypot, limitation de fréquence...).', { sectionTitle: 'Protection anti-spam', tags: ['formulaires_publics'] }),
           textTask('https', "Expliquez ce qu'est le protocole HTTPS et comment vous l'avez mis en place.", { sectionTitle: 'Sécurisation HTTPS', tags: ANY_DEPLOIEMENT }),
           textTask('securite-api-externe', "Expliquez comment vous protégez l'accès aux services externes que vous utilisez (clés API non exposées côté client).", { sectionTitle: 'Protection des accès externes', tags: ['api_tierce'] }),
+          textTask(
+            'securite-rgpd',
+            "Votre projet met-il en place des mentions légales / une politique de confidentialité liées au RGPD ? Si oui, lesquelles ? Si non, le projet traite-t-il réellement des données personnelles, et pourquoi ce point n'a pas été traité ?",
+            { sectionTitle: 'Mentions légales et RGPD' },
+          ),
         ],
       },
     ],
@@ -484,7 +529,15 @@ export const dossierChapters: DossierChapter[] = [
     number: 16,
     title: 'Veille technologique',
     tasks: [
-      textTask('veille-sites', 'Présentez des sites intéressants issus de votre veille en sécurité informatique.', { sectionTitle: 'Veille de sécurité informatique' }),
+      textTask(
+        'veille-sites',
+        "Présentez vos sources de veille en sécurité informatique, puis précisez si des vulnérabilités ou failles ont été identifiées pendant le projet et comment elles ont été corrigées — ou, à défaut, mentionnez explicitement qu'aucune vulnérabilité notable n'a été rencontrée.",
+        {
+          sectionTitle: 'Veille de sécurité informatique',
+          example:
+            "Exemple : « Je suis régulièrement le blog de l'OWASP et le flux CVE de mon framework. Pendant le projet, l'audit avec [outil] a révélé une faille d'injection SQL sur le formulaire de recherche, corrigée en passant aux requêtes préparées. Aucune autre vulnérabilité notable n'a été identifiée. »",
+        },
+      ),
     ],
   },
   {
