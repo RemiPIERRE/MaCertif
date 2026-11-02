@@ -388,17 +388,17 @@ export const dossierChapters: DossierChapter[] = [
           textTask(
             'roles-admin',
             "Décrivez comment le rôle Administrateur est contrôlé techniquement dans le code : middleware de vérification des droits, structure en base de données, gestion de session (angle technique — l'angle fonctionnel, ce que l'administrateur peut faire à l'écran, est déjà couvert au chapitre 5.6).",
-            { sectionTitle: 'Rôle Administrateur', tags: ['roles_multiples'], minChars: 300 },
+            { sectionTitle: 'Rôle Administrateur', tags: ['roles_multiples'], minChars: 450 },
           ),
           textTask(
             'roles-user',
             "Décrivez comment le rôle Utilisateur est contrôlé techniquement dans le code : middleware de vérification des droits, structure en base de données, gestion de session (angle technique — l'angle fonctionnel est déjà couvert au chapitre 5.6).",
-            { sectionTitle: 'Rôle Utilisateur', tags: ['roles_multiples'], minChars: 300 },
+            { sectionTitle: 'Rôle Utilisateur', tags: ['roles_multiples'], minChars: 450 },
           ),
           textTask(
             'roles-autres',
             "Présentez l'implémentation technique des autres rôles éventuels de votre projet : comment leurs permissions sont contrôlées dans le code (angle technique — l'angle fonctionnel est déjà couvert au chapitre 5.6).",
-            { sectionTitle: 'Autres rôles', tags: ['roles_multiples'], minChars: 300 },
+            { sectionTitle: 'Autres rôles', tags: ['roles_multiples'], minChars: 350 },
           ),
         ],
       },

@@ -100,4 +100,11 @@ export const STORAGE_KEYS = {
   oralPresentation: 'oral:presentation',
   oralAnnexes: 'oral:annexes',
   oralTheme: 'oral:theme',
+  /**
+   * "Mes extraits de code" (code-image module). `codeActif` (the currently open
+   * extrait, UI state only) is deliberately NOT listed here — it never leaves this
+   * browser tab and has nothing to do with the candidate's actual data.
+   */
+  codeExtraits: 'code:extraits',
+  codeReglages: 'code:reglages',
 } as const

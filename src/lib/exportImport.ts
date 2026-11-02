@@ -337,6 +337,13 @@ const VALIDATORS: Record<string, (value: unknown) => string | null> = {
     return null
   },
   [STORAGE_KEYS.oralTheme]: (v) => (isString(v) ? null : 'Le thème choisi pour Mon oral doit être une chaîne de caractères.'),
+  // STORAGE_KEYS.codeExtraits / codeReglages ("Mes extraits de code") have no entry
+  // here on purpose: the code-image module re-normalizes both on every read (see
+  // normalizeExtraits/normalizeReglages, called from its own useExtraits hook), so a
+  // malformed value degrades to sensible defaults by itself instead of blocking the
+  // whole import. Importing that normalization logic here would also drag the
+  // module's highlight.js language grammars into the eagerly-loaded main bundle,
+  // defeating the point of lazy-loading the "Mes extraits de code" tab.
 }
 
 /** Validates every known key present in `data`. Returns the list of problems found (empty = valid). */

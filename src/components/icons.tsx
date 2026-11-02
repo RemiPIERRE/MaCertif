@@ -41,6 +41,15 @@ export function IconSite(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function IconCode(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M7.5 6 3.5 10l4 4" />
+      <path d="M12.5 6l4 4-4 4" />
+    </svg>
+  )
+}
+
 export function IconOral(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>

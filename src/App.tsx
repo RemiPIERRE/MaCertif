@@ -5,6 +5,7 @@ import { DossierListPage } from './pages/DossierListPage'
 import { DossierTaskPage } from './pages/DossierTaskPage'
 import { DossierComplilePage } from './pages/DossierCompilePage'
 import { MonSitePage } from './pages/MonSitePage'
+import { CodeImagePage } from './pages/CodeImagePage'
 import { OralHomePage } from './pages/oral/OralHomePage'
 import { SlideEditorPage } from './pages/oral/SlideEditorPage'
 import { OralApercuPage } from './pages/oral/OralApercuPage'
@@ -23,6 +24,7 @@ export function App() {
         <Route path="/dossier/compile" element={<DossierComplilePage />} />
         <Route path="/dossier/:taskId" element={<DossierTaskPage />} />
         <Route path="/site" element={<MonSitePage />} />
+        <Route path="/extraits-code" element={<CodeImagePage />} />
         <Route path="/oral" element={<OralHomePage />} />
         <Route path="/oral/presentation/:slideId" element={<SlideEditorPage kind="presentation" />} />
         <Route path="/oral/annexes/:slideId" element={<SlideEditorPage kind="annexe" />} />
