@@ -68,6 +68,37 @@ export function grouperLignes(lignes: string[], premiereLigne: number, masquees:
 }
 
 /**
+ * Retire l'indentation de début de ligne (espaces/tabulations avant le premier
+ * caractère visible) d'un HTML coloré, en traversant les balises <span>/</span>
+ * sans y toucher. Utilisé pour la ligne qui suit un « … » en mode compact :
+ * son indentation d'origine (pensée pour sa propre ligne, à son propre niveau
+ * d'imbrication) n'a plus de sens une fois recollée juste après un « … » sur
+ * la même rangée — sans ce nettoyage, un grand vide apparaît avant la balise
+ * fermante.
+ */
+function retirerIndentationDebut(html: string): string {
+  let sortie = ''
+  let enIndentation = true
+  for (let i = 0; i < html.length; i++) {
+    const c = html[i]
+    if (c === '<') {
+      const fin = html.indexOf('>', i)
+      if (fin === -1) {
+        sortie += html.slice(i)
+        break
+      }
+      sortie += html.slice(i, fin + 1)
+      i = fin
+      continue
+    }
+    if (enIndentation && (c === ' ' || c === '\t')) continue
+    enIndentation = false
+    sortie += c
+  }
+  return sortie
+}
+
+/**
  * Mode compact (façon éditeur de code) : remplace chaque repère « N lignes
  * masquées » par la fusion de la ligne visible juste avant et juste après sur
  * une seule rangée, séparées par un « … » — identique au pli d'un bloc dans
@@ -87,7 +118,13 @@ export function compacterMasquage(groupes: LigneAffichage[]): LigneAffichage[] {
     const apres = groupes[i + 1]
     if (avant?.type === 'ligne' && apres?.type === 'ligne') {
       out.pop()
-      out.push({ type: 'ligne-jointe', numero: avant.numero, html: avant.html, numeroFin: apres.numero, htmlFin: apres.html })
+      out.push({
+        type: 'ligne-jointe',
+        numero: avant.numero,
+        html: avant.html,
+        numeroFin: apres.numero,
+        htmlFin: retirerIndentationDebut(apres.html),
+      })
       i++ // la ligne « après » est consommée dans la fusion
     }
   }
