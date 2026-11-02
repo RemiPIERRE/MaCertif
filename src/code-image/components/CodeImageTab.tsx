@@ -10,7 +10,7 @@ import { useExtraits } from '../lib/store'
 import { getFond } from '../lib/backgrounds'
 import { CodeCanvas } from './CodeCanvas'
 import { ExtraitsSidebar } from './ExtraitsSidebar'
-import { ReglagesPanel } from './ReglagesPanel'
+import { ReglagesContenuPanel, ReglagesStylePanel } from './ReglagesPanel'
 
 export interface CodeImageTabProps {
   /** Adaptateur de persistance (défaut : localStorage). */
@@ -152,142 +152,142 @@ export function CodeImageTab({
       </header>
 
       <div className="ci-grid">
-        <ExtraitsSidebar
-          extraits={extraits}
-          actifId={actifId}
-          taches={tachesLiees}
-          onSelect={setActifId}
-          onCreate={creer}
-          onDuplicate={dupliquer}
-          onDelete={supprimer}
-        />
+        <div className="ci-left">
+          <ExtraitsSidebar
+            extraits={extraits}
+            actifId={actifId}
+            taches={tachesLiees}
+            onSelect={setActifId}
+            onCreate={creer}
+            onDuplicate={dupliquer}
+            onDelete={supprimer}
+          />
+
+          <ReglagesContenuPanel reglages={r} langageDetecte={colore.langageDetecte} extensionSuggeree={extensionSuggeree} onChange={onReglage} />
+        </div>
 
         <div className="ci-main">
-          <div className="ci-edit">
-            <div className="ci-fields ci-fields--meta">
-              <label className="ci-field">
-                <span>Nom de l'extrait</span>
-                <input type="text" value={actif.nom} maxLength={80} onChange={(e) => onMeta({ nom: e.target.value })} />
-              </label>
-              <label className="ci-field">
-                <span>Rattaché à la tâche</span>
-                <select value={actif.tacheId ?? ''} onChange={(e) => onMeta({ tacheId: e.target.value || null })}>
-                  <option value="">Aucune (autre extrait / annexe)</option>
-                  {tachesLiees.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-                <small>Le fichier téléchargé portera le nom de la tâche.</small>
-              </label>
-            </div>
-
-            <label className="ci-field ci-field--code">
-              <span>
-                Code <em>{code.length.toLocaleString('fr-FR')} / {CODE_MAX_CARACTERES.toLocaleString('fr-FR')}</em>
-              </span>
-              <textarea
-                value={code}
-                rows={12}
-                spellCheck={false}
-                maxLength={CODE_MAX_CARACTERES}
-                placeholder="Collez ici l'extrait de code à transformer en image…"
-                onChange={(e) => onMeta({ code: e.target.value })}
-              />
+          <div className="ci-fields ci-fields--meta">
+            <label className="ci-field">
+              <span>Nom de l'extrait</span>
+              <input type="text" value={actif.nom} maxLength={80} onChange={(e) => onMeta({ nom: e.target.value })} />
             </label>
-            <div className="ci-code-actions">
-              <button type="button" className="ci-btn ci-btn--ghost" disabled={!code} onClick={() => onMeta({ code: '' })}>
-                Effacer le code
-              </button>
-            </div>
-
-            <ReglagesPanel reglages={r} langageDetecte={colore.langageDetecte} extensionSuggeree={extensionSuggeree} onChange={onReglage} onPreset={onPreset} />
+            <label className="ci-field">
+              <span>Rattaché à la tâche</span>
+              <select value={actif.tacheId ?? ''} onChange={(e) => onMeta({ tacheId: e.target.value || null })}>
+                <option value="">Aucune (autre extrait / annexe)</option>
+                {tachesLiees.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+              <small>Le fichier téléchargé portera le nom de la tâche.</small>
+            </label>
           </div>
 
-          <div className="ci-view">
-            <div className="ci-alerts" aria-live="polite">
-              {secrets.length > 0 && (
-                <div className="ci-alert ci-alert--secret" role="alert">
-                  <strong>⚠ Secret possible dans cet extrait</strong>
-                  <ul>
-                    {secrets.slice(0, 4).map((s) => (
-                      <li key={`${s.ligne}-${s.type}`}>
-                        Ligne {s.ligne} : {s.type}
-                        {s.apercu ? ` (${s.apercu})` : ''}
-                      </li>
-                    ))}
-                    {secrets.length > 4 && <li>… et {secrets.length - 4} autre(s)</li>}
-                  </ul>
-                  <p>
-                    Le dossier est imprimé et remis au jury. Remplacez la valeur par un exemple (ex. <code>process.env.API_KEY</code>) avant d'exporter.
-                  </p>
-                </div>
-              )}
-              {nbLignes > SEUIL_LIGNES_LONGUES && (
-                <div className="ci-alert ci-alert--info">
-                  Extrait long ({nbLignes} lignes) : au-delà d'environ {SEUIL_LIGNES_LONGUES} lignes, le texte devient petit à l'impression. Montrez l'essentiel et mettez le reste en annexe.
-                </div>
-              )}
-            </div>
+          <label className="ci-field ci-field--code">
+            <span>
+              Code <em>{code.length.toLocaleString('fr-FR')} / {CODE_MAX_CARACTERES.toLocaleString('fr-FR')}</em>
+            </span>
+            <textarea
+              value={code}
+              rows={12}
+              spellCheck={false}
+              maxLength={CODE_MAX_CARACTERES}
+              placeholder="Collez ici l'extrait de code à transformer en image…"
+              onChange={(e) => onMeta({ code: e.target.value })}
+            />
+          </label>
+          <div className="ci-code-actions">
+            <button type="button" className="ci-btn ci-btn--ghost" disabled={!code} onClick={() => onMeta({ code: '' })}>
+              Effacer le code
+            </button>
+          </div>
 
-            <div className="ci-preview-head">
-              <h3>Aperçu</h3>
-              {!vide && (
-                <span className="ci-dim">
-                  {Math.round(fit.largeur * r.echelle)} × {Math.round(fit.hauteur * r.echelle)} px ({r.echelle}x)
-                </span>
-              )}
-            </div>
-
-            <div className={`ci-frame${fond.css === null ? ' is-checker' : ''}`} ref={cadreRef}>
-              {vide ? (
-                <p className="ci-empty">L'aperçu apparaît dès que vous collez du code.</p>
-              ) : (
-                <div className="ci-stage" style={{ width: fit.largeur * fit.echelle, height: fit.hauteur * fit.echelle }}>
-                  <div style={{ transform: `scale(${fit.echelle})`, transformOrigin: 'top left', width: fit.largeur }}>
-                    <CodeCanvas ref={canvasRef} lignes={colore.lignes} reglages={r} />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="ci-export">
-              <button type="button" className="ci-btn ci-btn--primary" disabled={vide || occupe !== null} onClick={telechargerPng}>
-                {occupe === 'telecharger' ? 'Génération…' : 'Télécharger PNG'}
-              </button>
-              <button
-                type="button"
-                className="ci-btn"
-                disabled={vide || occupe !== null || !copieOk}
-                onClick={copier}
-                title={copieOk ? 'Copier l’image dans le presse-papiers' : 'Copie indisponible : nécessite HTTPS et un navigateur récent (utilisez Télécharger PNG)'}
-              >
-                {occupe === 'copier' ? 'Copie…' : 'Copier l’image'}
-              </button>
-              <span className="ci-fname">{nomPng}</span>
-            </div>
-            {!copieOk && <p className="ci-hint">La copie dans le presse-papiers n'est pas disponible dans ce navigateur : utilisez « Télécharger PNG ».</p>}
-
-            <div aria-live="polite">
-              {statut && <p className={`ci-status ci-status--${statut.type}`}>{statut.texte}</p>}
-              {peutMarquer && dernierTelechargement && (
-                <p className="ci-status ci-status--info">
-                  Cette image correspond à « {tacheLabel} ».{' '}
-                  <button
-                    type="button"
-                    className="ci-linkbtn"
-                    onClick={() => {
-                      onMarquerVisuelPret?.(dernierTelechargement.tacheId)
-                      setStatut({ type: 'ok', texte: 'Visuel marqué comme prêt dans « Mes visuels ».' })
-                      setDernierTelechargement(null)
-                    }}
-                  >
-                    Marquer ce visuel comme prêt dans « Mes visuels »
-                  </button>
+          <div className="ci-alerts" aria-live="polite">
+            {secrets.length > 0 && (
+              <div className="ci-alert ci-alert--secret" role="alert">
+                <strong>⚠ Secret possible dans cet extrait</strong>
+                <ul>
+                  {secrets.slice(0, 4).map((s) => (
+                    <li key={`${s.ligne}-${s.type}`}>
+                      Ligne {s.ligne} : {s.type}
+                      {s.apercu ? ` (${s.apercu})` : ''}
+                    </li>
+                  ))}
+                  {secrets.length > 4 && <li>… et {secrets.length - 4} autre(s)</li>}
+                </ul>
+                <p>
+                  Le dossier est imprimé et remis au jury. Remplacez la valeur par un exemple (ex. <code>process.env.API_KEY</code>) avant d'exporter.
                 </p>
-              )}
-            </div>
+              </div>
+            )}
+            {nbLignes > SEUIL_LIGNES_LONGUES && (
+              <div className="ci-alert ci-alert--info">
+                Extrait long ({nbLignes} lignes) : au-delà d'environ {SEUIL_LIGNES_LONGUES} lignes, le texte devient petit à l'impression. Montrez l'essentiel et mettez le reste en annexe.
+              </div>
+            )}
+          </div>
+
+          <div className="ci-preview-head">
+            <h3>Aperçu</h3>
+            {!vide && (
+              <span className="ci-dim">
+                {Math.round(fit.largeur * r.echelle)} × {Math.round(fit.hauteur * r.echelle)} px ({r.echelle}x)
+              </span>
+            )}
+          </div>
+
+          <div className={`ci-frame${fond.css === null ? ' is-checker' : ''}`} ref={cadreRef}>
+            {vide ? (
+              <p className="ci-empty">L'aperçu apparaît dès que vous collez du code.</p>
+            ) : (
+              <div className="ci-stage" style={{ width: fit.largeur * fit.echelle, height: fit.hauteur * fit.echelle }}>
+                <div style={{ transform: `scale(${fit.echelle})`, transformOrigin: 'top left', width: fit.largeur }}>
+                  <CodeCanvas ref={canvasRef} lignes={colore.lignes} reglages={r} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <ReglagesStylePanel reglages={r} onChange={onReglage} onPreset={onPreset} />
+
+          <div className="ci-export">
+            <button type="button" className="ci-btn ci-btn--primary" disabled={vide || occupe !== null} onClick={telechargerPng}>
+              {occupe === 'telecharger' ? 'Génération…' : 'Télécharger PNG'}
+            </button>
+            <button
+              type="button"
+              className="ci-btn"
+              disabled={vide || occupe !== null || !copieOk}
+              onClick={copier}
+              title={copieOk ? 'Copier l’image dans le presse-papiers' : 'Copie indisponible : nécessite HTTPS et un navigateur récent (utilisez Télécharger PNG)'}
+            >
+              {occupe === 'copier' ? 'Copie…' : 'Copier l’image'}
+            </button>
+            <span className="ci-fname">{nomPng}</span>
+          </div>
+          {!copieOk && <p className="ci-hint">La copie dans le presse-papiers n'est pas disponible dans ce navigateur : utilisez « Télécharger PNG ».</p>}
+
+          <div aria-live="polite">
+            {statut && <p className={`ci-status ci-status--${statut.type}`}>{statut.texte}</p>}
+            {peutMarquer && dernierTelechargement && (
+              <p className="ci-status ci-status--info">
+                Cette image correspond à « {tacheLabel} ».{' '}
+                <button
+                  type="button"
+                  className="ci-linkbtn"
+                  onClick={() => {
+                    onMarquerVisuelPret?.(dernierTelechargement.tacheId)
+                    setStatut({ type: 'ok', texte: 'Visuel marqué comme prêt dans « Mes visuels ».' })
+                    setDernierTelechargement(null)
+                  }}
+                >
+                  Marquer ce visuel comme prêt dans « Mes visuels »
+                </button>
+              </p>
+            )}
           </div>
         </div>
       </div>
