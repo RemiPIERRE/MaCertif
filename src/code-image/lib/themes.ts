@@ -30,6 +30,8 @@ export const THEMES: ThemeDef[] = [
   // — Clairs (pensés pour l'impression papier : contrastes marqués, peu d'encre) —
   { id: 'github-light', label: 'GitHub Light', sombre: false, bg: '#ffffff', fg: '#1f2328', barre: '#f3f4f6', commentaire: '#59636e', motCle: '#cf222e', chaine: '#0a3069', nombre: '#0550ae', fonction: '#8250df', type: '#953800', variable: '#953800', balise: '#116329', attribut: '#0550ae' },
   { id: 'one-light', label: 'One Light', sombre: false, bg: '#fafafa', fg: '#383a42', barre: '#eceded', commentaire: '#696c77', motCle: '#a626a4', chaine: '#3f7f3c', nombre: '#8a5a00', fonction: '#2f61d4', type: '#9a6700', variable: '#c8372b', balise: '#c8372b', attribut: '#8a5a00' },
+  // Fidèle au schéma "Light" (Island Light) de WebStorm, couleurs reprises de l'export .icls fourni par l'utilisateur.
+  { id: 'webstorm-light', label: 'WebStorm Island Light', sombre: false, bg: '#ffffff', fg: '#080808', barre: '#f3f4f6', commentaire: '#8c8c8c', motCle: '#0033b3', chaine: '#067d17', nombre: '#1750eb', fonction: '#00627a', type: '#174be6', variable: '#2a8c7c', balise: '#0033b3', attribut: '#174ad4' },
 ]
 
 export const THEME_PAR_DEFAUT = 'github-light'
