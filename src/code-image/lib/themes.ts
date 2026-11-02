@@ -30,9 +30,17 @@ export interface ThemeDef {
   appelFonction?: string
   /**
    * Couleur d'un ACCÈS À UNE PROPRIÉTÉ (`obj.prop`), distincte d'une variable
-   * ordinaire. Par défaut (absent) : même couleur que `variable`.
+   * ordinaire. Par défaut (absent) : même couleur que `variable`. Réutilisée
+   * aussi pour les clés d'objet littéral (`{ method: ... }`).
    */
   propriete?: string
+  /**
+   * Couleur d'un appel de MÉTHODE (`res.json()`), distincte d'un appel de
+   * fonction « nue » (`fetch()`) — ce sont le même scope TextMate, distingués
+   * ici en repérant un « . » juste avant (voir shikiHighlight.ts). Par défaut
+   * (absent) : même couleur que `appelFonction`.
+   */
+  methode?: string
 }
 
 export const THEMES: ThemeDef[] = [
@@ -65,6 +73,9 @@ export const THEMES: ThemeDef[] = [
     attribut: '#174ad4',
     appelFonction: '#080808',
     propriete: '#871094',
+    // Non trouvé dans l'export .icls (hérite du thème parent, non exporté) : estimé par
+    // échantillonnage sur la capture fournie — à ajuster si besoin.
+    methode: '#ad6339',
   },
 ]
 
@@ -89,6 +100,7 @@ export function themeVars(t: ThemeDef): CSSProperties {
     '--ci-type': t.type,
     '--ci-var': t.variable,
     '--ci-prop': t.propriete ?? t.variable,
+    '--ci-fn-call-method': t.methode ?? t.appelFonction ?? t.fonction,
     '--ci-tag': t.balise,
     '--ci-attr': t.attribut,
     '--ci-hl': t.sombre ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.07)',

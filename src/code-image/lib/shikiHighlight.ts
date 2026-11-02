@@ -33,6 +33,8 @@ const THEME_VARIABLES: ThemeRegistration = {
     // Accès à une propriété (`obj.prop`) : scope plus spécifique (variable.other.property),
     // prioritaire sur la règle « variable » générale ci-dessus pour ce cas précis.
     { scope: ['variable.other.property'], settings: { foreground: 'var(--ci-prop)' } },
+    // Clé d'un objet littéral (`{ method: ... }`) : même couleur que l'accès à une propriété.
+    { scope: ['meta.object-literal.key'], settings: { foreground: 'var(--ci-prop)' } },
     { scope: ['entity.name.tag'], settings: { foreground: 'var(--ci-tag)' } },
     { scope: ['entity.other.attribute-name'], settings: { foreground: 'var(--ci-attr)' } },
   ],
@@ -205,8 +207,14 @@ export async function colorerShiki(code: string, langageId: string): Promise<str
   const lignesTokens = highlighter.codeToTokensBase(propre, { lang: bundle, theme: THEME_VARIABLES.name })
   return lignesTokens.map((ligne) =>
     ligne
-      .map((t) => {
-        const style = styleToken(t.color, t.fontStyle)
+      .map((t, i) => {
+        // Shiki/TextMate donne le même scope à un appel de fonction « nu » (fetch(...)) et à
+        // un appel de méthode (res.json()) : rien ne les distingue dans l'ascendance du token
+        // lui-même. On les différencie ici en repérant un « . » juste avant sur la même ligne
+        // (fiable : l'accesseur est toujours son propre token, de contenu exactement ".").
+        const estAppelMethode = t.color === 'var(--ci-fn-call)' && ligne[i - 1]?.content === '.'
+        const couleur = estAppelMethode ? 'var(--ci-fn-call-method)' : t.color
+        const style = styleToken(couleur, t.fontStyle)
         return style ? `<span style="${style}">${echapper(t.content)}</span>` : echapper(t.content)
       })
       .join(''),
