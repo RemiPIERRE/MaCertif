@@ -29,7 +29,13 @@ const THEME_VARIABLES: ThemeRegistration = {
     // une déclaration (`function fetch() {}`) n'a pas cet ancêtre et reste sur --ci-fn.
     { scope: ['meta.function-call entity.name.function'], settings: { foreground: 'var(--ci-fn-call)' } },
     { scope: ['entity.name.type', 'support.type', 'entity.other.inherited-class'], settings: { foreground: 'var(--ci-type)' } },
-    { scope: ['variable', 'variable.parameter', 'variable.other'], settings: { foreground: 'var(--ci-var)' } },
+    // Nom d'une classe/interface à sa DÉCLARATION (`class Foo`, `interface Bar`) : scope plus
+    // spécifique (entity.name.type.class / .interface), prioritaire sur la règle « type » ci-dessus
+    // pour ce cas précis — une RÉFÉRENCE à ce type ailleurs (`: Foo`, `extends Foo`) reste sur --ci-type.
+    { scope: ['entity.name.type.class', 'entity.name.type.interface'], settings: { foreground: 'var(--ci-type-name)' } },
+    { scope: ['variable', 'variable.other'], settings: { foreground: 'var(--ci-var)' } },
+    // Paramètre de fonction/méthode : couleur distincte d'une variable ordinaire.
+    { scope: ['variable.parameter'], settings: { foreground: 'var(--ci-param)' } },
     // Accès à une propriété (`obj.prop`) : scope plus spécifique (variable.other.property),
     // prioritaire sur la règle « variable » générale ci-dessus pour ce cas précis.
     { scope: ['variable.other.property'], settings: { foreground: 'var(--ci-prop)' } },

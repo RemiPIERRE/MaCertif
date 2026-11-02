@@ -41,6 +41,18 @@ export interface ThemeDef {
    * (absent) : même couleur que `appelFonction`.
    */
   methode?: string
+  /**
+   * Couleur d'un PARAMÈTRE de fonction/méthode, distincte d'une variable
+   * ordinaire. Par défaut (absent) : même couleur que `variable`.
+   */
+  parametre?: string
+  /**
+   * Couleur du NOM d'une classe/interface à sa DÉCLARATION (`class Foo`,
+   * `interface Bar`), distincte d'une RÉFÉRENCE à un type (`: Foo`, `extends
+   * Foo`) qui garde la couleur `type`. Par défaut (absent) : même couleur que
+   * `type`.
+   */
+  nomType?: string
 }
 
 export const THEMES: ThemeDef[] = [
@@ -76,6 +88,10 @@ export const THEMES: ThemeDef[] = [
     // Non trouvé dans l'export .icls (hérite du thème parent, non exporté) : estimé par
     // échantillonnage sur la capture fournie — à ajuster si besoin.
     methode: '#ad6339',
+    // Confirmé sur la page Settings → Editor → Color Scheme → Language Defaults :
+    // "paramètre" et "nom de classe/interface" ne sont PAS colorés (texte normal).
+    parametre: '#080808',
+    nomType: '#080808',
   },
 ]
 
@@ -101,6 +117,8 @@ export function themeVars(t: ThemeDef): CSSProperties {
     '--ci-var': t.variable,
     '--ci-prop': t.propriete ?? t.variable,
     '--ci-fn-call-method': t.methode ?? t.appelFonction ?? t.fonction,
+    '--ci-param': t.parametre ?? t.variable,
+    '--ci-type-name': t.nomType ?? t.type,
     '--ci-tag': t.balise,
     '--ci-attr': t.attribut,
     '--ci-hl': t.sombre ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.07)',
