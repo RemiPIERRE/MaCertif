@@ -18,8 +18,11 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
   const theme = getTheme(r.theme)
   const fond = getFond(r.fond)
   const fixe = r.largeur !== 'auto'
+  // Volontairement indépendants de numerosLignes : masquer/mettre en évidence des
+  // lignes reste actif même quand la numérotation elle-même n'est pas affichée —
+  // numerosLignes ne contrôle QUE la colonne de numéros, pas quelles lignes existent.
   const misesEnAvant = analyserLignes(r.lignesMisesEnAvant)
-  const masquees = r.numerosLignes ? analyserLignes(r.lignesMasquees) : new Set<number>()
+  const masquees = analyserLignes(r.lignesMasquees)
   const groupes = grouperLignes(lignes, r.premiereLigne, masquees)
   const dernier = r.premiereLigne + Math.max(lignes.length - 1, 0)
   const chiffres = String(dernier).length
@@ -61,9 +64,11 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
             g.type === 'masque' ? (
               r.afficherRepereMasquage && (
                 <div key={i} className="ci-line ci-line--masque" style={{ minWidth: `${chiffres}ch` }}>
-                  <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }} aria-hidden="true">
-                    ⋯
-                  </span>
+                  {r.numerosLignes && (
+                    <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }} aria-hidden="true">
+                      ⋯
+                    </span>
+                  )}
                   <span className="ci-lc ci-lc--masque">
                     {g.fin > g.debut ? `${g.fin - g.debut + 1} lignes masquées (${g.debut}-${g.fin})` : `ligne ${g.debut} masquée`}
                   </span>

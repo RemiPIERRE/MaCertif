@@ -105,7 +105,6 @@ export function ReglagesContenuPanel({ reglages: r, langageDetecte, extensionSug
           type="number"
           min={1}
           max={99999}
-          disabled={!r.numerosLignes}
           value={r.premiereLigne}
           onChange={(e) => onChange({ premiereLigne: Math.max(1, Math.min(99999, Math.round(Number(e.target.value) || 1))) })}
         />
@@ -119,7 +118,6 @@ export function ReglagesContenuPanel({ reglages: r, langageDetecte, extensionSug
           value={r.lignesMisesEnAvant}
           maxLength={120}
           placeholder="ex. 3-5, 9"
-          disabled={!r.numerosLignes}
           onChange={(e) => onChange({ lignesMisesEnAvant: e.target.value })}
         />
         <small>Numéros tels qu'affichés : vous pourrez écrire « lignes 3 à 5 » dans votre explication.</small>
@@ -133,7 +131,6 @@ export function ReglagesContenuPanel({ reglages: r, langageDetecte, extensionSug
             value={r.lignesMasquees}
             maxLength={300}
             placeholder="ex. 10-45, 80-120"
-            disabled={!r.numerosLignes}
             onChange={(e) => onChange({ lignesMasquees: e.target.value })}
           />
           <small>
@@ -146,7 +143,7 @@ export function ReglagesContenuPanel({ reglages: r, langageDetecte, extensionSug
           <input
             type="checkbox"
             checked={r.afficherRepereMasquage}
-            disabled={!r.numerosLignes || !r.lignesMasquees}
+            disabled={!r.lignesMasquees}
             onChange={(e) => onChange({ afficherRepereMasquage: e.target.checked })}
           />
           Afficher un repère « N lignes masquées » dans l'aperçu
