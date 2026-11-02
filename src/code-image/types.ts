@@ -42,6 +42,8 @@ export interface Reglages {
    * d'un éditeur classique, qui est purement visuel).
    */
   lignesMasquees: string
+  /** Si faux, les lignes masquées disparaissent sans aucun repère visuel (numérotation qui saute directement). */
+  afficherRepereMasquage: boolean
   fenetre: boolean
   ombre: boolean
   /** Largeur totale de l'image en px (300–1200) ou 'auto' */

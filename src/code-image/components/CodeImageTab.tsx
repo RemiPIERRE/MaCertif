@@ -9,7 +9,7 @@ import { localStorageAdapter, type StorageAdapter } from '../lib/storage'
 import { useExtraits } from '../lib/store'
 import { getFond } from '../lib/backgrounds'
 import { CodeCanvas } from './CodeCanvas'
-import { CodeEditor } from './CodeEditor'
+import { CodeEditor, type PlageLignes } from './CodeEditor'
 import { ExtraitsSidebar } from './ExtraitsSidebar'
 import { ReglagesContenuPanel, ReglagesStylePanel } from './ReglagesPanel'
 
@@ -108,6 +108,20 @@ export function CodeImageTab({
   const onReglage = (patch: Partial<Reglages>) => modifierReglages(actif.id, patch)
   const onPreset = (p: PresetId) => modifierReglages(actif.id, appliquerPreset(r, p))
   const onMeta = (patch: Partial<Pick<Extrait, 'nom' | 'tacheId' | 'code'>>) => modifier(actif.id, patch)
+
+  // L'aperçu doit plier ce que l'utilisateur plie dans l'éditeur : les plages
+  // repliées (relatives au document de l'éditeur) sont converties vers la
+  // numérotation affichée (premiereLigne) et remplacent "Lignes à masquer".
+  const onPliChange = (plages: PlageLignes[]) => {
+    const spec = plages
+      .map((p) => {
+        const debut = r.premiereLigne + p.debut - 1
+        const fin = r.premiereLigne + p.fin - 1
+        return debut === fin ? `${debut}` : `${debut}-${fin}`
+      })
+      .join(', ')
+    onReglage({ lignesMasquees: spec })
+  }
 
   async function telechargerPng() {
     if (!canvasRef.current) return
@@ -228,6 +242,7 @@ export function CodeImageTab({
               langageId={langageEditeur}
               maxLength={CODE_MAX_CARACTERES}
               placeholder="Collez ici l'extrait de code à transformer en image…"
+              onFoldedLinesChange={onPliChange}
             />
           </div>
           {pleinEcran && <div className="ci-code-pleinecran-backdrop" onClick={() => setPleinEcran(false)} />}

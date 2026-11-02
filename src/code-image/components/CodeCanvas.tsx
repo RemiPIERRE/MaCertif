@@ -59,14 +59,16 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
         <div className={`ci-code${fixe ? ' ci-wrap' : ''}`} style={styleCode}>
           {groupes.map((g, i) =>
             g.type === 'masque' ? (
-              <div key={i} className="ci-line ci-line--masque" style={{ minWidth: `${chiffres}ch` }}>
-                <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }} aria-hidden="true">
-                  ⋯
-                </span>
-                <span className="ci-lc ci-lc--masque">
-                  {g.fin > g.debut ? `${g.fin - g.debut + 1} lignes masquées (${g.debut}-${g.fin})` : `ligne ${g.debut} masquée`}
-                </span>
-              </div>
+              r.afficherRepereMasquage && (
+                <div key={i} className="ci-line ci-line--masque" style={{ minWidth: `${chiffres}ch` }}>
+                  <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }} aria-hidden="true">
+                    ⋯
+                  </span>
+                  <span className="ci-lc ci-lc--masque">
+                    {g.fin > g.debut ? `${g.fin - g.debut + 1} lignes masquées (${g.debut}-${g.fin})` : `ligne ${g.debut} masquée`}
+                  </span>
+                </div>
+              )
             ) : (
               <div key={i} className={`ci-line${misesEnAvant.has(g.numero) ? ' ci-line--hl' : ''}`}>
                 {r.numerosLignes && (

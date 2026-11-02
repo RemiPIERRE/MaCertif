@@ -72,8 +72,11 @@ export function useExtraits(adapter: StorageAdapter = localStorageAdapter) {
     setExtraits((prev) =>
       prev.map((e) => (e.id === id ? { ...e, reglages: { ...e.reglages, ...patch }, modifieLe: new Date().toISOString() } : e)),
     )
-    // Les derniers réglages de style servent de base aux prochains extraits.
-    setReglagesNeufs((r) => ({ ...r, ...patch, nomFichier: r.nomFichier, lignesMisesEnAvant: '', premiereLigne: 1, langage: r.langage }))
+    // Les derniers réglages de style servent de base aux prochains extraits — mais
+    // jamais le contenu propre à CET extrait (lignes en évidence, masquées, langage,
+    // première ligne, nom de fichier) : un nouvel extrait doit toujours en repartir
+    // vierge, même si ce patch vient d'un repliement dans l'éditeur.
+    setReglagesNeufs((r) => ({ ...r, ...patch, nomFichier: r.nomFichier, lignesMisesEnAvant: '', lignesMasquees: '', premiereLigne: 1, langage: r.langage }))
   }, [])
 
   const creer = useCallback(() => {

@@ -13,6 +13,7 @@ export const REGLAGES_IMPRESSION: Reglages = {
   premiereLigne: 1,
   lignesMisesEnAvant: '',
   lignesMasquees: '',
+  afficherRepereMasquage: true,
   fenetre: true,
   ombre: false,
   largeur: 'auto',
