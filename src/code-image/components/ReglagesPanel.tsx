@@ -148,6 +148,10 @@ export function ReglagesContenuPanel({ reglages: r, langageDetecte, extensionSug
           />
           Afficher un repère « N lignes masquées » dans l'aperçu
         </label>
+        <small>
+          Décoché : la ligne juste avant et juste après le masquage sont resserrées sur une même rangée avec « … »,
+          comme un bloc replié dans un éditeur de code.
+        </small>
       </div>
     </section>
   )

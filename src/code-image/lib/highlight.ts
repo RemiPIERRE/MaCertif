@@ -36,7 +36,10 @@ export function analyserLignes(spec: string): Set<number> {
   return out
 }
 
-export type LigneAffichage = { type: 'ligne'; numero: number; html: string } | { type: 'masque'; debut: number; fin: number }
+export type LigneAffichage =
+  | { type: 'ligne'; numero: number; html: string }
+  | { type: 'masque'; debut: number; fin: number }
+  | { type: 'ligne-jointe'; numero: number; html: string; numeroFin: number; htmlFin: string }
 
 /**
  * Regroupe les lignes colorées pour l'affichage : les lignes masquées consécutives
@@ -61,5 +64,32 @@ export function grouperLignes(lignes: string[], premiereLigne: number, masquees:
     out.push({ type: 'ligne', numero, html: lignes[i] })
   }
   if (debutMasque !== null) out.push({ type: 'masque', debut: debutMasque, fin: premiereLigne + lignes.length - 1 })
+  return out
+}
+
+/**
+ * Mode compact (façon éditeur de code) : remplace chaque repère « N lignes
+ * masquées » par la fusion de la ligne visible juste avant et juste après sur
+ * une seule rangée, séparées par un « … » — identique au pli d'un bloc dans
+ * CodeMirror (`<select defaultValue="user">…</select>`). Un masquage en tout
+ * début ou toute fin d'extrait (sans ligne de part et d'autre) n'a rien à
+ * fusionner : il disparaît silencieusement, comme avant l'ajout de ce mode.
+ */
+export function compacterMasquage(groupes: LigneAffichage[]): LigneAffichage[] {
+  const out: LigneAffichage[] = []
+  for (let i = 0; i < groupes.length; i++) {
+    const g = groupes[i]
+    if (g.type !== 'masque') {
+      out.push(g)
+      continue
+    }
+    const avant = out[out.length - 1]
+    const apres = groupes[i + 1]
+    if (avant?.type === 'ligne' && apres?.type === 'ligne') {
+      out.pop()
+      out.push({ type: 'ligne-jointe', numero: avant.numero, html: avant.html, numeroFin: apres.numero, htmlFin: apres.html })
+      i++ // la ligne « après » est consommée dans la fusion
+    }
+  }
   return out
 }

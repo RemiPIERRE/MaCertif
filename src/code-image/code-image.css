@@ -183,6 +183,7 @@
 .ci-line--masque { opacity: 0.6; }
 .ci-line--masque .ci-ln { font-style: normal; }
 .ci-lc--masque { font-style: italic; color: var(--ci-com); white-space: normal; }
+.ci-pli { display: inline-block; margin: 0 2px; padding: 0 4px; border-radius: 3px; background: var(--ci-hl); color: var(--ci-com); font-style: normal; }
 .ci-ln { flex: none; text-align: right; margin-right: 1.4em; color: var(--ci-com); user-select: none; }
 .ci-lc { flex: 1; min-width: 0; white-space: pre; }
 .ci-wrap .ci-lc { white-space: pre-wrap; overflow-wrap: anywhere; }

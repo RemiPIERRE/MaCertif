@@ -1,7 +1,7 @@
 import { forwardRef, type CSSProperties } from 'react'
 import type { Reglages } from '../types'
 import { getFond } from '../lib/backgrounds'
-import { analyserLignes, grouperLignes } from '../lib/highlight'
+import { analyserLignes, compacterMasquage, grouperLignes } from '../lib/highlight'
 import { POLICES_CSS } from '../lib/exportImage'
 import { getTheme, themeVars } from '../lib/themes'
 
@@ -23,7 +23,11 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
   // numerosLignes ne contrôle QUE la colonne de numéros, pas quelles lignes existent.
   const misesEnAvant = analyserLignes(r.lignesMisesEnAvant)
   const masquees = analyserLignes(r.lignesMasquees)
-  const groupes = grouperLignes(lignes, r.premiereLigne, masquees)
+  const groupesBruts = grouperLignes(lignes, r.premiereLigne, masquees)
+  // Repère explicite « N lignes masquées » (avec compte), ou mode compact façon
+  // éditeur (ligne d'avant + « … » + ligne d'après sur une même rangée) — voir
+  // le bouton juste sous le champ « Lignes à masquer ».
+  const groupes = r.afficherRepereMasquage ? groupesBruts : compacterMasquage(groupesBruts)
   const dernier = r.premiereLigne + Math.max(lignes.length - 1, 0)
   const chiffres = String(dernier).length
 
@@ -60,9 +64,9 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
           </div>
         )}
         <div className={`ci-code${fixe ? ' ci-wrap' : ''}`} style={styleCode}>
-          {groupes.map((g, i) =>
-            g.type === 'masque' ? (
-              r.afficherRepereMasquage && (
+          {groupes.map((g, i) => {
+            if (g.type === 'masque') {
+              return (
                 <div key={i} className="ci-line ci-line--masque" style={{ minWidth: `${chiffres}ch` }}>
                   {r.numerosLignes && (
                     <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }} aria-hidden="true">
@@ -74,7 +78,26 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
                   </span>
                 </div>
               )
-            ) : (
+            }
+            if (g.type === 'ligne-jointe') {
+              return (
+                <div key={i} className={`ci-line${misesEnAvant.has(g.numero) || misesEnAvant.has(g.numeroFin) ? ' ci-line--hl' : ''}`}>
+                  {r.numerosLignes && (
+                    <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }}>
+                      {g.numero}
+                    </span>
+                  )}
+                  <span className="ci-lc">
+                    <span dangerouslySetInnerHTML={{ __html: g.html }} />
+                    <span className="ci-pli" aria-hidden="true" title={`lignes masquées entre ${g.numero} et ${g.numeroFin}`}>
+                      …
+                    </span>
+                    <span dangerouslySetInnerHTML={{ __html: g.htmlFin }} />
+                  </span>
+                </div>
+              )
+            }
+            return (
               <div key={i} className={`ci-line${misesEnAvant.has(g.numero) ? ' ci-line--hl' : ''}`}>
                 {r.numerosLignes && (
                   <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }}>
@@ -83,8 +106,8 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
                 )}
                 <span className="ci-lc" dangerouslySetInnerHTML={{ __html: g.html }} />
               </div>
-            ),
-          )}
+            )
+          })}
         </div>
       </div>
     </div>
