@@ -65,8 +65,9 @@ export const THEMES: ThemeDef[] = [
   { id: 'github-light', label: 'GitHub Light', sombre: false, bg: '#ffffff', fg: '#1f2328', barre: '#f3f4f6', commentaire: '#59636e', motCle: '#cf222e', chaine: '#0a3069', nombre: '#0550ae', fonction: '#8250df', type: '#953800', variable: '#953800', balise: '#116329', attribut: '#0550ae' },
   { id: 'one-light', label: 'One Light', sombre: false, bg: '#fafafa', fg: '#383a42', barre: '#eceded', commentaire: '#696c77', motCle: '#a626a4', chaine: '#3f7f3c', nombre: '#8a5a00', fonction: '#2f61d4', type: '#9a6700', variable: '#c8372b', balise: '#c8372b', attribut: '#8a5a00' },
   // Fidèle au schéma "Light" (Island Light) de WebStorm, couleurs reprises de l'export .icls fourni par l'utilisateur.
-  // Particularité JetBrains : seules les DÉCLARATIONS de fonction sont colorées (appelFonction = fg, pas de couleur
-  // spéciale pour fetch(...)/setErrors(...)), et l'accès à une propriété (obj.prop) a sa propre couleur (violet).
+  // Vérifié au pixel sur une vraie capture : un appel de fonction « nue » (setErrors(...), navigate(...))
+  // prend la MÊME couleur que la déclaration — pas de distinction appel/déclaration pour ce thème
+  // (appelFonction n'est donc pas surchargé, il reprend "fonction" par défaut).
   {
     id: 'webstorm-light',
     label: 'WebStorm Island Light',
@@ -83,7 +84,6 @@ export const THEMES: ThemeDef[] = [
     variable: '#2a8c7c',
     balise: '#0033b3',
     attribut: '#174ad4',
-    appelFonction: '#080808',
     propriete: '#871094',
     // Non trouvé dans l'export .icls (hérite du thème parent, non exporté) : estimé par
     // échantillonnage sur la capture fournie — à ajuster si besoin.
