@@ -20,8 +20,10 @@ import { StreamLanguage } from '@codemirror/language'
 export async function extensionPourLangage(id: string): Promise<Extension | null> {
   switch (id) {
     case 'javascript':
+    case 'jsx':
       return (await import('@codemirror/lang-javascript')).javascript({ jsx: true })
     case 'typescript':
+    case 'tsx':
       return (await import('@codemirror/lang-javascript')).javascript({ jsx: true, typescript: true })
     case 'python':
       return (await import('@codemirror/lang-python')).python()

@@ -187,22 +187,3 @@
 .ci-lc { flex: 1; min-width: 0; white-space: pre; }
 .ci-wrap .ci-lc { white-space: pre-wrap; overflow-wrap: anywhere; }
 
-/* Coloration : correspondance des classes highlight.js → variables du thème */
-.ci-code .hljs-comment, .ci-code .hljs-quote { color: var(--ci-com); font-style: italic; }
-.ci-code .hljs-keyword, .ci-code .hljs-doctag, .ci-code .hljs-meta, .ci-code .hljs-meta .hljs-keyword, .ci-code .hljs-selector-tag { color: var(--ci-kw); }
-.ci-code .hljs-number, .ci-code .hljs-literal { color: var(--ci-num); }
-.ci-code .hljs-string, .ci-code .hljs-regexp, .ci-code .hljs-link, .ci-code .hljs-symbol, .ci-code .hljs-bullet, .ci-code .hljs-meta .hljs-string { color: var(--ci-str); }
-.ci-code .hljs-title, .ci-code .hljs-title.function_, .ci-code .hljs-section { color: var(--ci-fn); }
-.ci-code .hljs-title.class_, .ci-code .hljs-title.class_.inherited__, .ci-code .hljs-type, .ci-code .hljs-built_in, .ci-code .hljs-class { color: var(--ci-type); }
-.ci-code .hljs-variable, .ci-code .hljs-template-variable, .ci-code .hljs-params, .ci-code .hljs-property { color: var(--ci-var); }
-.ci-code .hljs-tag { color: var(--ci-fg); }
-.ci-code .hljs-name { color: var(--ci-tag); }
-.ci-code .hljs-attr, .ci-code .hljs-attribute, .ci-code .hljs-selector-class, .ci-code .hljs-selector-id, .ci-code .hljs-selector-attr, .ci-code .hljs-selector-pseudo { color: var(--ci-attr); }
-.ci-code .hljs-operator, .ci-code .hljs-punctuation, .ci-code .hljs-subst { color: var(--ci-fg); }
-.ci-code .hljs-template-tag { color: var(--ci-kw); }
-.ci-code .hljs-code { color: var(--ci-str); font-style: italic; }
-.ci-code .hljs-formula { color: var(--ci-num); font-style: italic; }
-.ci-code .hljs-addition { color: #22863a; }
-.ci-code .hljs-deletion { color: #cb2431; }
-.ci-code .hljs-emphasis { font-style: italic; }
-.ci-code .hljs-strong { font-weight: 700; }

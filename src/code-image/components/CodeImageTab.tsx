@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { Extrait, Reglages, TacheLiee } from '../types'
 import { appliquerPreset, CODE_MAX_CARACTERES, SEUIL_LIGNES_LONGUES, TACHES_CODE_PAR_DEFAUT, type PresetId } from '../lib/defaults'
 import { copieImageDisponible, copierImage, genererPng, POLICES_CSS, slug, telecharger } from '../lib/exportImage'
-import { colorer } from '../lib/highlight'
+import { detecterLangageAuto } from '../lib/highlight'
+import { colorerShiki } from '../lib/shikiHighlight'
 import { LANGAGES, getLangage } from '../lib/languages'
 import { detecterSecrets } from '../lib/secrets'
 import { localStorageAdapter, type StorageAdapter } from '../lib/storage'
@@ -44,7 +45,24 @@ export function CodeImageTab({
 
   const code = actif?.code ?? ''
   const langage = actif?.reglages.langage ?? 'auto'
-  const colore = useMemo(() => colorer(code, langage), [code, langage])
+  const [colore, setColore] = useState<{ lignes: string[]; langageDetecte: string | null }>({ lignes: [], langageDetecte: null })
+
+  // Coloration asynchrone (moteur Shiki, voir lib/shikiHighlight.ts). On garde
+  // l'aperçu précédent affiché pendant le chargement plutôt que de le vider,
+  // et on ignore les résultats d'un appel devenu obsolète (code/langage déjà
+  // changés entre-temps).
+  useEffect(() => {
+    let annule = false
+    const detecte = langage === 'auto' ? detecterLangageAuto(code) : null
+    const langageResolu = langage !== 'auto' ? langage : (detecte?.id ?? 'plaintext')
+    colorerShiki(code, langageResolu).then((lignes) => {
+      if (!annule) setColore({ lignes, langageDetecte: detecte?.label ?? null })
+    })
+    return () => {
+      annule = true
+    }
+  }, [code, langage])
+
   const secrets = useMemo(() => detecterSecrets(code), [code])
   const nbLignes = colore.lignes.length
   const vide = nbLignes === 0

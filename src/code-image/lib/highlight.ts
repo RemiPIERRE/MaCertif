@@ -1,67 +1,24 @@
 import { hljs, getLangage, SOUS_ENSEMBLE_AUTO } from './languages'
 
-export interface Colore {
-  /** une entrée HTML (balises <span class="hljs-…">) par ligne */
-  lignes: string[]
-  /** libellé du langage trouvé par l'auto-détection, sinon null */
-  langageDetecte: string | null
-}
-
-function echapper(s: string): string {
+export function echapper(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;')
 }
 
 /**
- * Découpe un HTML coloré en lignes en gardant les <span> équilibrés : un commentaire
- * ou une chaîne sur plusieurs lignes est refermé en fin de ligne puis rouvert à la suivante.
+ * Détection automatique du langage (option « auto ») : on garde highlight.js
+ * pour cette seule tâche (sa détection heuristique reste utile) mais on jette
+ * sa coloration HTML — la coloration de l'export/aperçu passe par Shiki, voir
+ * shikiHighlight.ts, pour une bien meilleure fidélité (notamment en JSX/TSX).
  */
-export function decouperEnLignes(html: string): string[] {
-  const lignes: string[] = []
-  const pile: string[] = []
-  let courante = ''
-  const re = /<span[^>]*>|<\/span>|\n|[^<\n]+/g
-  let m: RegExpExecArray | null
-  while ((m = re.exec(html)) !== null) {
-    const tok = m[0]
-    if (tok === '\n') {
-      lignes.push(courante + '</span>'.repeat(pile.length))
-      courante = pile.join('')
-    } else if (tok === '</span>') {
-      pile.pop()
-      courante += tok
-    } else if (tok.startsWith('<span')) {
-      pile.push(tok)
-      courante += tok
-    } else {
-      courante += tok
-    }
-  }
-  lignes.push(courante + '</span>'.repeat(pile.length))
-  return lignes
-}
-
-export function colorer(code: string, langage: string): Colore {
+export function detecterLangageAuto(code: string): { id: string; label: string } | null {
   const propre = code.replace(/\r\n?/g, '\n').replace(/\n+$/, '')
-  if (propre.trim() === '') return { lignes: [], langageDetecte: null }
-
-  let html: string
-  let detecte: string | null = null
-  if (langage === 'plaintext') {
-    html = echapper(propre)
-  } else if (langage === 'auto') {
-    const r = hljs.highlightAuto(propre, SOUS_ENSEMBLE_AUTO)
-    html = r.value
-    const nom = r.language
-    if (nom) {
-      detecte = nom === 'xml' ? 'HTML' : (getLangage(nom)?.label ?? nom)
-    }
-  } else {
-    const def = getLangage(langage)
-    html = def
-      ? hljs.highlight(propre, { language: def.hljs, ignoreIllegals: true }).value
-      : echapper(propre)
-  }
-  return { lignes: decouperEnLignes(html), langageDetecte: detecte }
+  if (propre.trim() === '') return null
+  const r = hljs.highlightAuto(propre, SOUS_ENSEMBLE_AUTO)
+  const nom = r.language
+  if (!nom) return null
+  if (nom === 'xml') return { id: 'html', label: 'HTML' }
+  const def = getLangage(nom)
+  return def ? { id: def.id, label: def.label } : { id: nom, label: nom }
 }
 
 /** « 3-5, 9 » → {3,4,5,9}. Les morceaux invalides sont ignorés. Plafonné pour éviter les abus. */

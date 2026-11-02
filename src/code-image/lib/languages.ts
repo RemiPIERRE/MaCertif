@@ -35,7 +35,9 @@ export interface LangageDef {
 /** 21 langages de la page d'origine + Dockerfile, SCSS et Twig (utiles en contexte DWWM). */
 export const LANGAGES: LangageDef[] = [
   { id: 'javascript', label: 'JavaScript', hljs: 'javascript', ext: 'js' },
+  { id: 'jsx', label: 'JSX (React)', hljs: 'javascript', ext: 'jsx' },
   { id: 'typescript', label: 'TypeScript', hljs: 'typescript', ext: 'ts' },
+  { id: 'tsx', label: 'TSX (React)', hljs: 'typescript', ext: 'tsx' },
   { id: 'python', label: 'Python', hljs: 'python', ext: 'py' },
   { id: 'html', label: 'HTML', hljs: 'xml', ext: 'html' },
   { id: 'css', label: 'CSS', hljs: 'css', ext: 'css' },
