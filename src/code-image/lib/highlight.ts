@@ -78,3 +78,31 @@ export function analyserLignes(spec: string): Set<number> {
   }
   return out
 }
+
+export type LigneAffichage = { type: 'ligne'; numero: number; html: string } | { type: 'masque'; debut: number; fin: number }
+
+/**
+ * Regroupe les lignes colorées pour l'affichage : les lignes masquées consécutives
+ * deviennent un seul repère « N lignes masquées » plutôt que de disparaître
+ * silencieusement. La numérotation des lignes visibles reste celle d'origine
+ * (premiereLigne + position dans le texte complet) : masquer n'est jamais
+ * renuméroter, contrairement à une suppression pure et simple du texte.
+ */
+export function grouperLignes(lignes: string[], premiereLigne: number, masquees: Set<number>): LigneAffichage[] {
+  const out: LigneAffichage[] = []
+  let debutMasque: number | null = null
+  for (let i = 0; i < lignes.length; i++) {
+    const numero = premiereLigne + i
+    if (masquees.has(numero)) {
+      if (debutMasque === null) debutMasque = numero
+      continue
+    }
+    if (debutMasque !== null) {
+      out.push({ type: 'masque', debut: debutMasque, fin: numero - 1 })
+      debutMasque = null
+    }
+    out.push({ type: 'ligne', numero, html: lignes[i] })
+  }
+  if (debutMasque !== null) out.push({ type: 'masque', debut: debutMasque, fin: premiereLigne + lignes.length - 1 })
+  return out
+}

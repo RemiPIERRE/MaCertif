@@ -9,6 +9,7 @@ import { localStorageAdapter, type StorageAdapter } from '../lib/storage'
 import { useExtraits } from '../lib/store'
 import { getFond } from '../lib/backgrounds'
 import { CodeCanvas } from './CodeCanvas'
+import { CodeEditor } from './CodeEditor'
 import { ExtraitsSidebar } from './ExtraitsSidebar'
 import { ReglagesContenuPanel, ReglagesStylePanel } from './ReglagesPanel'
 
@@ -39,6 +40,7 @@ export function CodeImageTab({
   const [occupe, setOccupe] = useState<'telecharger' | 'copier' | null>(null)
   const [statut, setStatut] = useState<Statut>(null)
   const [dernierTelechargement, setDernierTelechargement] = useState<{ extraitId: string; tacheId: string } | null>(null)
+  const [pleinEcran, setPleinEcran] = useState(false)
 
   const code = actif?.code ?? ''
   const langage = actif?.reglages.langage ?? 'auto'
@@ -52,6 +54,21 @@ export function CodeImageTab({
     setStatut(null)
     setDernierTelechargement(null)
   }, [actifId])
+
+  // Plein écran de l'éditeur : fermeture au clavier, défilement de la page bloqué pendant.
+  useEffect(() => {
+    if (!pleinEcran) return
+    const surEchap = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPleinEcran(false)
+    }
+    document.addEventListener('keydown', surEchap)
+    const precedent = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', surEchap)
+      document.body.style.overflow = precedent
+    }
+  }, [pleinEcran])
 
   // L'aperçu s'adapte à la largeur disponible sans toucher à la taille réelle de l'image exportée.
   useLayoutEffect(() => {
@@ -79,6 +96,11 @@ export function CodeImageTab({
   const nomPng = actif.tacheId ? `${actif.tacheId}.png` : `${slug(actif.nom)}.png`
   const extensionSuggeree =
     (r.langage !== 'auto' ? getLangage(r.langage)?.ext : LANGAGES.find((l) => l.label === colore.langageDetecte)?.ext) ?? 'txt'
+  // Coloration en direct dans l'éditeur : même langage que l'export si choisi
+  // manuellement ; sinon celui détecté automatiquement par highlight.js (une fois
+  // du code présent), sinon aucune coloration tant que rien n'est détectable.
+  const langageEditeur =
+    r.langage !== 'auto' ? r.langage : (LANGAGES.find((l) => l.label === colore.langageDetecte)?.id ?? null)
   const copieOk = copieImageDisponible()
   const police = { famille: POLICES_CSS[r.police], taille: r.taillePolice }
   const tacheLabel = actif.tacheId ? (tachesLiees.find((t) => t.id === actif.tacheId)?.label ?? actif.tacheId) : null
@@ -186,19 +208,29 @@ export function CodeImageTab({
             </label>
           </div>
 
-          <label className="ci-field ci-field--code">
-            <span>
-              Code <em>{code.length.toLocaleString('fr-FR')} / {CODE_MAX_CARACTERES.toLocaleString('fr-FR')}</em>
+          <div className={`ci-field ci-field--code${pleinEcran ? ' ci-code-pleinecran' : ''}`}>
+            <span className="ci-code-head">
+              <span>
+                Code <em>{code.length.toLocaleString('fr-FR')} / {CODE_MAX_CARACTERES.toLocaleString('fr-FR')}</em>
+              </span>
+              <button
+                type="button"
+                className="ci-mini ci-fullscreen-btn"
+                onClick={() => setPleinEcran((v) => !v)}
+                title={pleinEcran ? 'Quitter le plein écran (Échap)' : 'Afficher le code en plein écran'}
+              >
+                {pleinEcran ? '⤡ Quitter le plein écran' : '⛶ Plein écran'}
+              </button>
             </span>
-            <textarea
+            <CodeEditor
               value={code}
-              rows={12}
-              spellCheck={false}
+              onChange={(v) => onMeta({ code: v })}
+              langageId={langageEditeur}
               maxLength={CODE_MAX_CARACTERES}
               placeholder="Collez ici l'extrait de code à transformer en image…"
-              onChange={(e) => onMeta({ code: e.target.value })}
             />
-          </label>
+          </div>
+          {pleinEcran && <div className="ci-code-pleinecran-backdrop" onClick={() => setPleinEcran(false)} />}
           <div className="ci-code-actions">
             <button type="button" className="ci-btn ci-btn--ghost" disabled={!code} onClick={() => onMeta({ code: '' })}>
               Effacer le code

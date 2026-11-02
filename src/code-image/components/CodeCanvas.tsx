@@ -1,7 +1,7 @@
 import { forwardRef, type CSSProperties } from 'react'
 import type { Reglages } from '../types'
 import { getFond } from '../lib/backgrounds'
-import { analyserLignes } from '../lib/highlight'
+import { analyserLignes, grouperLignes } from '../lib/highlight'
 import { POLICES_CSS } from '../lib/exportImage'
 import { getTheme, themeVars } from '../lib/themes'
 
@@ -19,6 +19,8 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
   const fond = getFond(r.fond)
   const fixe = r.largeur !== 'auto'
   const misesEnAvant = analyserLignes(r.lignesMisesEnAvant)
+  const masquees = r.numerosLignes ? analyserLignes(r.lignesMasquees) : new Set<number>()
+  const groupes = grouperLignes(lignes, r.premiereLigne, masquees)
   const dernier = r.premiereLigne + Math.max(lignes.length - 1, 0)
   const chiffres = String(dernier).length
 
@@ -55,19 +57,27 @@ export const CodeCanvas = forwardRef<HTMLDivElement, Props>(function CodeCanvas(
           </div>
         )}
         <div className={`ci-code${fixe ? ' ci-wrap' : ''}`} style={styleCode}>
-          {lignes.map((html, i) => {
-            const numero = r.premiereLigne + i
-            return (
-              <div key={i} className={`ci-line${misesEnAvant.has(numero) ? ' ci-line--hl' : ''}`}>
+          {groupes.map((g, i) =>
+            g.type === 'masque' ? (
+              <div key={i} className="ci-line ci-line--masque" style={{ minWidth: `${chiffres}ch` }}>
+                <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }} aria-hidden="true">
+                  ⋯
+                </span>
+                <span className="ci-lc ci-lc--masque">
+                  {g.fin > g.debut ? `${g.fin - g.debut + 1} lignes masquées (${g.debut}-${g.fin})` : `ligne ${g.debut} masquée`}
+                </span>
+              </div>
+            ) : (
+              <div key={i} className={`ci-line${misesEnAvant.has(g.numero) ? ' ci-line--hl' : ''}`}>
                 {r.numerosLignes && (
                   <span className="ci-ln" style={{ minWidth: `${chiffres}ch` }}>
-                    {numero}
+                    {g.numero}
                   </span>
                 )}
-                <span className="ci-lc" dangerouslySetInnerHTML={{ __html: html }} />
+                <span className="ci-lc" dangerouslySetInnerHTML={{ __html: g.html }} />
               </div>
-            )
-          })}
+            ),
+          )}
         </div>
       </div>
     </div>

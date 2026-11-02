@@ -65,6 +65,7 @@ export function normalizeReglages(raw: unknown): Reglages {
     numerosLignes: typeof r.numerosLignes === 'boolean' ? r.numerosLignes : d.numerosLignes,
     premiereLigne: borne(r.premiereLigne, 1, 99999, d.premiereLigne),
     lignesMisesEnAvant: typeof r.lignesMisesEnAvant === 'string' ? r.lignesMisesEnAvant.slice(0, 120) : d.lignesMisesEnAvant,
+    lignesMasquees: typeof r.lignesMasquees === 'string' ? r.lignesMasquees.slice(0, 300) : d.lignesMasquees,
     fenetre: typeof r.fenetre === 'boolean' ? r.fenetre : d.fenetre,
     ombre: typeof r.ombre === 'boolean' ? r.ombre : d.ombre,
     largeur: r.largeur === 'auto' || r.largeur === undefined ? 'auto' : borne(r.largeur, 300, 1200, 800),

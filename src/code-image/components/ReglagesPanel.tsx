@@ -124,6 +124,22 @@ export function ReglagesContenuPanel({ reglages: r, langageDetecte, extensionSug
         />
         <small>Numéros tels qu'affichés : vous pourrez écrire « lignes 3 à 5 » dans votre explication.</small>
       </label>
+
+      <label className="ci-field">
+        <span>Lignes à masquer</span>
+        <input
+          type="text"
+          value={r.lignesMasquees}
+          maxLength={300}
+          placeholder="ex. 10-45, 80-120"
+          disabled={!r.numerosLignes}
+          onChange={(e) => onChange({ lignesMasquees: e.target.value })}
+        />
+        <small>
+          Collez un fichier entier et n'en montrez qu'un extrait : les lignes masquées disparaissent de l'image
+          (remplacées par un repère « N lignes masquées »), mais les lignes visibles gardent leur numéro d'origine.
+        </small>
+      </label>
     </section>
   )
 }

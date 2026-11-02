@@ -12,6 +12,7 @@ export const REGLAGES_IMPRESSION: Reglages = {
   numerosLignes: true,
   premiereLigne: 1,
   lignesMisesEnAvant: '',
+  lignesMasquees: '',
   fenetre: true,
   ombre: false,
   largeur: 'auto',

@@ -33,6 +33,15 @@ export interface Reglages {
   premiereLigne: number
   /** Numéros affichés à mettre en évidence, ex. « 3-5, 9 » */
   lignesMisesEnAvant: string
+  /**
+   * Numéros à MASQUER à l'export, ex. « 10-45, 80-120 » (même format que
+   * lignesMisesEnAvant). Les lignes visibles restantes gardent leur numéro
+   * d'origine (pas de renumérotation) — utile pour coller un fichier entier et
+   * n'en montrer qu'un extrait pertinent, sans que le code masqué soit jamais
+   * récupérable par un copier-coller de l'image (contrairement au repliement
+   * d'un éditeur classique, qui est purement visuel).
+   */
+  lignesMasquees: string
   fenetre: boolean
   ombre: boolean
   /** Largeur totale de l'image en px (300–1200) ou 'auto' */

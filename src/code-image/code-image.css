@@ -70,18 +70,37 @@
 .ci-root input:disabled { opacity: 0.5; }
 .ci-root input[type='range'] { width: 100%; accent-color: var(--ci-accent); }
 .ci-root input[type='checkbox'] { accent-color: var(--ci-accent); }
-/* Volontairement toujours sombre (indépendant du thème clair/sombre de l'hôte) : se
-   distingue visuellement des autres cadres et évoque un vrai éditeur de code. */
-.ci-field--code textarea {
-  font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0;
-  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; font-size: 0.85rem;
-  line-height: 1.5; resize: vertical; min-height: 160px; tab-size: 4; white-space: pre;
-  background: var(--sidebar-bg, #171b38);
-  color: #e3e5f7;
-  border-color: color-mix(in srgb, var(--sidebar-bg, #171b38) 70%, white 15%);
+/* — Éditeur de code (CodeMirror) — toujours sombre (thème "One Dark" propre à
+   l'éditeur, indépendant du thème clair/sombre de l'hôte et du thème choisi pour
+   l'image exportée) : se distingue visuellement des autres cadres et évoque un
+   vrai éditeur de code. */
+.ci-code-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ci-fullscreen-btn { flex: none; }
+.ci-codemirror {
+  border: 1px solid var(--ci-line);
+  border-radius: 8px;
+  overflow: hidden;
 }
-.ci-field--code textarea::placeholder { color: color-mix(in srgb, #e3e5f7 55%, transparent); }
-.ci-field--code textarea:focus-visible { outline-offset: 0; }
+.ci-codemirror .cm-editor { height: 260px; font-size: 0.85rem; }
+.ci-codemirror .cm-editor.cm-focused { outline: 2px solid var(--ci-accent); outline-offset: 1px; }
+.ci-codemirror .cm-scroller {
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  font-variant-ligatures: none; line-height: 1.5;
+}
+.ci-codemirror .cm-content { padding: 4px 0; }
+
+/* Plein écran : le cadre de code seul passe en recouvrement, le reste de la page
+   derrière reste intact (pas de démontage de l'éditeur, juste repositionné). */
+.ci-code-pleinecran-backdrop { position: fixed; inset: 0; background: rgba(8, 9, 20, 0.6); z-index: 90; }
+.ci-code-pleinecran {
+  position: fixed; inset: 4vh 4vw; z-index: 91;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+  padding: 16px; display: flex; flex-direction: column;
+}
+.ci-code-pleinecran .ci-codemirror { flex: 1; min-height: 0; }
+.ci-code-pleinecran .ci-codemirror .cm-editor { height: 100%; font-size: 0.95rem; }
+
 .ci-code-actions { display: flex; justify-content: flex-end; margin-top: -6px; }
 .ci-inline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ci-inline select { flex: 1 1 180px; width: auto; }
@@ -159,6 +178,9 @@
 .ci-code { padding: 16px 20px; line-height: 1.6; tab-size: 4; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; color: var(--ci-fg); }
 .ci-line { display: flex; min-height: 1.6em; margin: 0; }
 .ci-line--hl { background: var(--ci-hl); box-shadow: inset 3px 0 0 var(--ci-kw); margin: 0 -20px; padding: 0 20px; }
+.ci-line--masque { opacity: 0.6; }
+.ci-line--masque .ci-ln { font-style: normal; }
+.ci-lc--masque { font-style: italic; color: var(--ci-com); white-space: normal; }
 .ci-ln { flex: none; text-align: right; margin-right: 1.4em; color: var(--ci-com); user-select: none; }
 .ci-lc { flex: 1; min-width: 0; white-space: pre; }
 .ci-wrap .ci-lc { white-space: pre-wrap; overflow-wrap: anywhere; }
