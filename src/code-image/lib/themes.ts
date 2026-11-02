@@ -19,6 +19,20 @@ export interface ThemeDef {
   variable: string
   balise: string
   attribut: string
+  /**
+   * Couleur d'un APPEL de fonction (`fetch(...)`), distincte d'une déclaration
+   * (`function fetch() {}`) — Shiki/TextMate les distingue via l'ascendance du
+   * token (`meta.function-call`), contrairement à highlight.js qui les
+   * confondait. Par défaut (absent) : même couleur que `fonction`, comme le
+   * font la plupart des thèmes VS Code. Certains thèmes (WebStorm) ne colorent
+   * que la déclaration et laissent les appels en couleur de texte normale.
+   */
+  appelFonction?: string
+  /**
+   * Couleur d'un ACCÈS À UNE PROPRIÉTÉ (`obj.prop`), distincte d'une variable
+   * ordinaire. Par défaut (absent) : même couleur que `variable`.
+   */
+  propriete?: string
 }
 
 export const THEMES: ThemeDef[] = [
@@ -31,7 +45,27 @@ export const THEMES: ThemeDef[] = [
   { id: 'github-light', label: 'GitHub Light', sombre: false, bg: '#ffffff', fg: '#1f2328', barre: '#f3f4f6', commentaire: '#59636e', motCle: '#cf222e', chaine: '#0a3069', nombre: '#0550ae', fonction: '#8250df', type: '#953800', variable: '#953800', balise: '#116329', attribut: '#0550ae' },
   { id: 'one-light', label: 'One Light', sombre: false, bg: '#fafafa', fg: '#383a42', barre: '#eceded', commentaire: '#696c77', motCle: '#a626a4', chaine: '#3f7f3c', nombre: '#8a5a00', fonction: '#2f61d4', type: '#9a6700', variable: '#c8372b', balise: '#c8372b', attribut: '#8a5a00' },
   // Fidèle au schéma "Light" (Island Light) de WebStorm, couleurs reprises de l'export .icls fourni par l'utilisateur.
-  { id: 'webstorm-light', label: 'WebStorm Island Light', sombre: false, bg: '#ffffff', fg: '#080808', barre: '#f3f4f6', commentaire: '#8c8c8c', motCle: '#0033b3', chaine: '#067d17', nombre: '#1750eb', fonction: '#00627a', type: '#174be6', variable: '#2a8c7c', balise: '#0033b3', attribut: '#174ad4' },
+  // Particularité JetBrains : seules les DÉCLARATIONS de fonction sont colorées (appelFonction = fg, pas de couleur
+  // spéciale pour fetch(...)/setErrors(...)), et l'accès à une propriété (obj.prop) a sa propre couleur (violet).
+  {
+    id: 'webstorm-light',
+    label: 'WebStorm Island Light',
+    sombre: false,
+    bg: '#ffffff',
+    fg: '#080808',
+    barre: '#f3f4f6',
+    commentaire: '#8c8c8c',
+    motCle: '#0033b3',
+    chaine: '#067d17',
+    nombre: '#1750eb',
+    fonction: '#00627a',
+    type: '#174be6',
+    variable: '#2a8c7c',
+    balise: '#0033b3',
+    attribut: '#174ad4',
+    appelFonction: '#080808',
+    propriete: '#871094',
+  },
 ]
 
 export const THEME_PAR_DEFAUT = 'github-light'
@@ -51,8 +85,10 @@ export function themeVars(t: ThemeDef): CSSProperties {
     '--ci-str': t.chaine,
     '--ci-num': t.nombre,
     '--ci-fn': t.fonction,
+    '--ci-fn-call': t.appelFonction ?? t.fonction,
     '--ci-type': t.type,
     '--ci-var': t.variable,
+    '--ci-prop': t.propriete ?? t.variable,
     '--ci-tag': t.balise,
     '--ci-attr': t.attribut,
     '--ci-hl': t.sombre ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.07)',

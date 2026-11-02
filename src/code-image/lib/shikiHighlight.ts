@@ -24,8 +24,15 @@ const THEME_VARIABLES: ThemeRegistration = {
     { scope: ['string', 'string.quoted'], settings: { foreground: 'var(--ci-str)' } },
     { scope: ['constant.numeric', 'constant.language'], settings: { foreground: 'var(--ci-num)' } },
     { scope: ['entity.name.function', 'support.function'], settings: { foreground: 'var(--ci-fn)' } },
+    // Appel de fonction (`fetch(...)`) : scope plus spécifique que la règle générale ci-dessus
+    // (ancêtre meta.function-call), donc prioritaire sur elle pour ce cas précis uniquement —
+    // une déclaration (`function fetch() {}`) n'a pas cet ancêtre et reste sur --ci-fn.
+    { scope: ['meta.function-call entity.name.function'], settings: { foreground: 'var(--ci-fn-call)' } },
     { scope: ['entity.name.type', 'support.type', 'entity.other.inherited-class'], settings: { foreground: 'var(--ci-type)' } },
     { scope: ['variable', 'variable.parameter', 'variable.other'], settings: { foreground: 'var(--ci-var)' } },
+    // Accès à une propriété (`obj.prop`) : scope plus spécifique (variable.other.property),
+    // prioritaire sur la règle « variable » générale ci-dessus pour ce cas précis.
+    { scope: ['variable.other.property'], settings: { foreground: 'var(--ci-prop)' } },
     { scope: ['entity.name.tag'], settings: { foreground: 'var(--ci-tag)' } },
     { scope: ['entity.other.attribute-name'], settings: { foreground: 'var(--ci-attr)' } },
   ],
