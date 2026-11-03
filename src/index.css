@@ -21,6 +21,12 @@
   --red: #b8342c;
   --red-tint: #f8e3e1;
 
+  --blue: #2159c7;
+  --blue-tint: #e2e9fa;
+
+  --green: #1a8a56;
+  --green-tint: #e0f3e8;
+
   --sidebar-bg: #171b38;
   --sidebar-text: #c7cae6;
   --sidebar-text-dim: #7f84ac;
@@ -53,6 +59,12 @@
 
   --red: #e2695f;
   --red-tint: #3a2020;
+
+  --blue: #6c93f0;
+  --blue-tint: #1c2744;
+
+  --green: #4ac790;
+  --green-tint: #16342a;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
 }

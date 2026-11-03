@@ -75,7 +75,7 @@ export const THEMES: ThemeDef[] = [
   // (appelFonction n'est donc pas surchargé, il reprend "fonction" par défaut).
   {
     id: 'webstorm-light',
-    label: 'Island Light',
+    label: 'WebStorm Island Light',
     sombre: false,
     bg: '#ffffff',
     fg: '#080808',

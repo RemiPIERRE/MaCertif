@@ -107,4 +107,6 @@ export const STORAGE_KEYS = {
    */
   codeExtraits: 'code:extraits',
   codeReglages: 'code:reglages',
+  /** "Quizz révision" : seul le meilleur score cumulé est conservé (comme dans la version d'origine). */
+  quiz: 'quiz:meilleur-score',
 } as const

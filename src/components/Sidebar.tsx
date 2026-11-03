@@ -8,6 +8,7 @@ import {
   IconSite,
   IconCode,
   IconOral,
+  IconQuiz,
   IconNotes,
   IconCalendar,
   IconSun,
@@ -22,6 +23,7 @@ const links = [
   { to: '/site', label: 'Mes visuels', Icon: IconSite },
   { to: '/extraits-code', label: 'Mes extraits de code', Icon: IconCode },
   { to: '/oral', label: 'Mon oral', Icon: IconOral },
+  { to: '/quiz', label: 'Quizz révision', Icon: IconQuiz },
   { to: '/notes', label: 'Mes notes', Icon: IconNotes },
   { to: '/calendrier', label: 'Calendrier', Icon: IconCalendar },
 ]

@@ -71,6 +71,16 @@ export function IconNotes(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function IconQuiz(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="10" cy="10" r="7.2" />
+      <path d="M7.6 7.8a2.4 2.4 0 1 1 3.4 2.2c-.7.35-1 .75-1 1.4v.3" />
+      <path d="M10 14.2h.01" />
+    </svg>
+  )
+}
+
 export function IconCalendar(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>

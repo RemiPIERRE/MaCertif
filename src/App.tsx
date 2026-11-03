@@ -13,6 +13,7 @@ import { OralDiscoursPage } from './pages/oral/OralDiscoursPage'
 import { OralEntrainementHomePage } from './pages/oral/OralEntrainementHomePage'
 import { OralTrainingPage } from './pages/oral/OralTrainingPage'
 import { MesNotesPage } from './pages/MesNotesPage'
+import { QuizPage } from './pages/QuizPage'
 import { CalendrierPage } from './pages/CalendrierPage'
 
 export function App() {
@@ -33,6 +34,7 @@ export function App() {
         <Route path="/oral/entrainement" element={<OralEntrainementHomePage />} />
         <Route path="/oral/entrainement/prompteur/:slideId" element={<OralTrainingPage mode="prompteur" />} />
         <Route path="/oral/entrainement/slides/:slideId" element={<OralTrainingPage mode="slides" />} />
+        <Route path="/quiz" element={<QuizPage />} />
         <Route path="/notes" element={<MesNotesPage />} />
         <Route path="/calendrier" element={<CalendrierPage />} />
       </Route>
