@@ -793,6 +793,7 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
             onNodeDoubleClick={surDoubleClicNoeud}
             onEdgeDoubleClick={surDoubleClicArete}
             onReconnect={onReconnectFk}
+            onPaneClick={() => setEdgeEditionId(null)}
             onNodeDragStart={surDebutGlissement}
             onNodeDrag={surGlissement}
             onNodeDragStop={surFinGlissement}
