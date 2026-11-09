@@ -130,6 +130,9 @@ export interface FkReference {
   colonneId: string;
 }
 
+/** Côté d'une table d'où part / où arrive un lien FK. */
+export type CoteLienFk = "gauche" | "droite";
+
 export interface TableColonne {
   /** Identifiant stable — key React ET base des ids de handles ("<id>-gauche" / "<id>-droite"). */
   id: string;
@@ -147,6 +150,10 @@ export interface TableColonne {
   reference: FkReference | null;
   surSuppression: FkAction;
   surMiseAJour: FkAction;
+  /** Apparence du lien FK : cardinalité (flèche/patte d'oie, défaut) ou simple trait. */
+  styleLien?: "cardinalite" | "simple";
+  /** Côtés gauche/droite choisis à la main (glisser-déposer ou éditeur) ; absent = calculé automatiquement (chemin le plus court). */
+  cotes?: { enfant: CoteLienFk; parent: CoteLienFk } | null;
 }
 
 export interface TableNodeData extends Record<string, unknown> {
@@ -162,6 +169,8 @@ export type CardinaliteFk = "un" | "zero-un" | "zero-n" | "un-n";
 export interface LienFkData extends Record<string, unknown> {
   /** MLD : simple flèche enfant → parent ; MPD : pattes d'oie. */
   notation: "fleche" | "patte";
+  /** Trait simple (sans marqueur) si 'simple' ; cardinalité (selon `notation`) sinon/absent. */
+  styleLien?: "cardinalite" | "simple";
   parent: CardinaliteFk;
   enfant: CardinaliteFk;
 }

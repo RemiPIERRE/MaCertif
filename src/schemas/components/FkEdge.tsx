@@ -16,17 +16,18 @@ type Props = EdgeProps<LienFkEdgeType>
  * (parent : « un » ou « zéro ou un » selon NOT NULL ; enfant : « zéro ou plusieurs », ou
  * « zéro ou un » si la colonne est UNIQUE).
  */
-export function FkEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: Props) {
+export function FkEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, selected }: Props) {
   const [chemin] = getSmoothStepPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition, borderRadius: 8 })
-  const patte = 'patte' === data?.notation
+  const simple = 'simple' === data?.styleLien
+  const patte = !simple && 'patte' === data?.notation
 
   return (
     <BaseEdge
       id={id}
       path={chemin}
       markerStart={patte && data ? MARQUEURS[data.enfant] : undefined}
-      markerEnd={patte && data ? MARQUEURS[data.parent] : 'url(#schema-marker-fleche)'}
-      style={{ strokeWidth: 1.5 }}
+      markerEnd={simple ? undefined : patte && data ? MARQUEURS[data.parent] : 'url(#schema-marker-fleche)'}
+      style={{ strokeWidth: selected ? 2.5 : 1.5 }}
     />
   )
 }

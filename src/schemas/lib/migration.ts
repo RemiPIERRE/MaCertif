@@ -121,6 +121,12 @@ function normaliserColonne(brut: unknown): TableColonne | null {
       : null;
   const action = (v: unknown): FkAction =>
     FK_ACTIONS.includes(v as FkAction) ? (v as FkAction) : "NO ACTION";
+  const cote = (v: unknown): "gauche" | "droite" | null => ("gauche" === v || "droite" === v ? v : null);
+  const styleLien = "simple" === brut.styleLien ? "simple" : "cardinalite" === brut.styleLien ? "cardinalite" : undefined;
+  const cotesBrut = estObjet(brut.cotes) ? brut.cotes : null;
+  const coteEnfant = cotesBrut ? cote(cotesBrut.enfant) : null;
+  const coteParent = cotesBrut ? cote(cotesBrut.parent) : null;
+  const cotes = coteEnfant && coteParent ? { enfant: coteEnfant, parent: coteParent } : undefined;
 
   return {
     id: texte(brut.id) || generateId(),
@@ -135,6 +141,8 @@ function normaliserColonne(brut: unknown): TableColonne | null {
     reference,
     surSuppression: action(brut.surSuppression),
     surMiseAJour: action(brut.surMiseAJour),
+    ...(styleLien ? { styleLien } : {}),
+    ...(cotes ? { cotes } : {}),
   };
 }
 

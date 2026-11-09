@@ -873,3 +873,32 @@ div.schema-canvas-wrap.is-plein-ecran {
 .react-flow__viewport.schema-export-clair .schema-marker-composition {
   fill: #475569;
 }
+
+/* ───── Éditeur du bas d'un lien FK (LienFkEditor) : plus petit que .merise-editor standard,
+   pas de pied « + Ajouter » ni de section Apparence. ───── */
+.merise-editor--lien .me-corps {
+  padding: 0 12px 12px;
+}
+
+.me-corps--lien {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.me-champ-lien {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 9rem;
+}
+
+.me-lien-titre {
+  display: block;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 20rem;
+}

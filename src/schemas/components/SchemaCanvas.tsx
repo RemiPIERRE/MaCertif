@@ -14,6 +14,7 @@ import {
   useNodesState,
   useReactFlow,
   type Connection,
+  type EdgeMouseHandler,
   type Node,
   type NodeChange,
   type NodeMouseHandler,
@@ -38,10 +39,11 @@ import type {
   RelationType,
   SchemaEdge,
   SchemaNode,
+  TableColonne,
   TableNodeData,
 } from '../types'
 import { ACTIVITE_ZONES, CU_ZONES, RELATION_LABELS } from '../types'
-import { aretesFk, idLigneDuHandle, nouvelleColonne, nouvellePropriete } from '../lib/modele'
+import { aretesFk, coteDuHandle, idLigneDuHandle, nouvelleColonne, nouvellePropriete } from '../lib/modele'
 import { dupliquerNoeud, TYPES_DUPLIQUABLES } from '../lib/dupliquerEntite'
 import { genererPng, OPTIONS_EXPORT_DEFAUT, type OptionsExport } from '../lib/exportPng'
 import { ApercuExport, signatureSchema, useZoneApercu } from './ApercuExport'
@@ -58,6 +60,7 @@ import { LienMcdEdge } from './LienMcdEdge'
 import { RelationEdge, SchemaMarkers } from './RelationEdge'
 import { McdEditor } from './McdEditor'
 import { TableEditor, type TableResume } from './TableEditor'
+import { LienFkEditor } from './LienFkEditor'
 import { NiveauContext } from './NiveauContext'
 import { EditionContext } from './EditionContext'
 import './schemas.css'
@@ -280,6 +283,10 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
   const [editionId, setEditionId] = useState<string | null>(null)
   const editionRef = useRef<string | null>(null)
   editionRef.current = editionId
+  // Lien FK en édition (ouvert par un double-clic sur le trait) : style + côtés gauche/droite.
+  const [edgeEditionId, setEdgeEditionId] = useState<string | null>(null)
+  const edgeEditionRef = useRef<string | null>(null)
+  edgeEditionRef.current = edgeEditionId
   const menuAjoutRef = useRef<HTMLDivElement>(null)
   const canevasRef = useRef<HTMLDivElement>(null)
   const instance = useReactFlow()
@@ -334,6 +341,7 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
     const quitter = (e: KeyboardEvent) => {
       if ('Escape' !== e.key) return
       if (null !== editionRef.current) setEditionId(null) // Échap ferme d'abord l'édition
+      else if (null !== edgeEditionRef.current) setEdgeEditionId(null)
       else setPleinEcran(false)
     }
     const overflowInitial = document.body.style.overflow
@@ -361,6 +369,16 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
     window.addEventListener('keydown', fermerEdition)
     return () => window.removeEventListener('keydown', fermerEdition)
   }, [editionId, pleinEcran])
+
+  // Échap ferme l'éditeur de lien FK (même logique que l'édition de nœud ci-dessus).
+  useEffect(() => {
+    if (null === edgeEditionId || pleinEcran) return
+    const fermer = (e: KeyboardEvent) => {
+      if ('Escape' === e.key) setEdgeEditionId(null)
+    }
+    window.addEventListener('keydown', fermer)
+    return () => window.removeEventListener('keydown', fermer)
+  }, [edgeEditionId, pleinEcran])
 
   // Le conteneur change de taille : on recadre pour garder le schéma visible.
   useEffect(() => {
@@ -561,7 +579,10 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
   /* ───── Liens affichés ───── */
 
   const aretesAffichees = useMemo<SchemaEdge[]>(() => {
-    if (sql) return aretesFk(nodes, 'mpd' === kind ? 'patte' : 'fleche')
+    if (sql) {
+      const brutes = aretesFk(nodes, 'mpd' === kind ? 'patte' : 'fleche')
+      return edgeEditionId ? brutes.map((e) => (e.id === edgeEditionId ? ({ ...e, selected: true } as SchemaEdge) : e)) : brutes
+    }
     if (!mcd) return edges
     // Liens parallèles (même paire association/entité) : écartés les uns des autres.
     const groupes = new Map<string, number[]>()
@@ -575,7 +596,7 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
       const decalage = (indices.indexOf(i) - (indices.length - 1) / 2) * 22
       return { ...e, data: { ...e.data, decalage } } as SchemaEdge
     })
-  }, [sql, mcd, kind, nodes, edges])
+  }, [sql, mcd, kind, nodes, edges, edgeEditionId])
 
   /* ───── Éditeur du bas : élément sélectionné ───── */
 
@@ -610,6 +631,35 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
       if (retirees.size > 0) retirerReferences((_t, colonneId) => retirees.has(colonneId))
     }
     reinitialiserHauteur(idNoeud)
+  }
+
+  /**
+   * Glisser-déposer un point de connexion d'un lien FK sur l'autre côté (gauche/droite) de la
+   * même ligne : ne change que le côté choisi, jamais la colonne/table référencée (ce geste
+   * n'est pas un moyen de rebrancher la FK ailleurs — ça reste le rôle du sélecteur dans
+   * TableEditor). Le résultat est mémorisé sur la colonne (col.cotes), pris en compte par
+   * aretesFk au prochain rendu.
+   */
+  const onReconnectFk = (ancienne: SchemaEdge, nouvelle: Connection) => {
+    if ('fk' !== ancienne.type) return
+    if (nouvelle.source !== ancienne.source || nouvelle.target !== ancienne.target) return
+    const idColEnfant = idLigneDuHandle(ancienne.sourceHandle)
+    const idColParent = idLigneDuHandle(ancienne.targetHandle)
+    if (!idColEnfant || !idColParent) return
+    if (idLigneDuHandle(nouvelle.sourceHandle) !== idColEnfant || idLigneDuHandle(nouvelle.targetHandle) !== idColParent) return
+    const coteEnfant = coteDuHandle(nouvelle.sourceHandle)
+    const coteParent = coteDuHandle(nouvelle.targetHandle)
+    if (!coteEnfant || !coteParent) return
+    const enfant = nodes.find((n) => n.id === ancienne.source)
+    if (!enfant || 'table' !== enfant.type) return
+    majTable(enfant.id, { colonnes: enfant.data.colonnes.map((c) => (c.id === idColEnfant ? { ...c, cotes: { enfant: coteEnfant, parent: coteParent } } : c)) })
+  }
+
+  /** Modifie le style/les côtés du lien FK actuellement ouvert dans LienFkEditor. */
+  const majLienFk = (idTableEnfant: string, idCol: string, patch: Partial<Pick<TableColonne, 'styleLien' | 'cotes'>>) => {
+    const enfant = nodes.find((n) => n.id === idTableEnfant)
+    if (!enfant || 'table' !== enfant.type) return
+    majTable(idTableEnfant, { colonnes: enfant.data.colonnes.map((c) => (c.id === idCol ? { ...c, ...patch } : c)) })
   }
 
   const majMcd = (idNoeud: string, patch: Partial<McdEntiteNodeData & McdAssociationNodeData>) => {
@@ -662,9 +712,30 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
   /** Double-clic sur une forme : ouvre son édition (éditeur du bas pour les tables et le MCD ; texte et palette pour l'activité). */
   const surDoubleClicNoeud: NodeMouseHandler = (_e, noeud) => {
     if (!['table', 'mcdEntite', 'mcdAssociation', 'activite', 'acteur', 'casUtilisation', 'cuStructure'].includes(String(noeud.type))) return
+    setEdgeEditionId(null)
     setNodes((nds) => nds.map((n) => (n.id === noeud.id ? { ...n, selected: true } : n.selected ? { ...n, selected: false } : n)))
     setEditionId(noeud.id)
   }
+
+  /** Double-clic sur un lien FK : ouvre son petit éditeur du bas (style, côtés). */
+  const surDoubleClicArete: EdgeMouseHandler<SchemaEdge> = (_e, edge) => {
+    if ('fk' !== edge.type) return
+    setEditionId(null)
+    setNodes((nds) => nds.map((n) => (n.selected ? { ...n, selected: false } : n)))
+    setEdgeEditionId(edge.id)
+  }
+
+  /* ───── Éditeur du bas : lien FK en édition ───── */
+
+  const areteFkEditee = sql && edgeEditionId ? aretesAffichees.find((e) => e.id === edgeEditionId && 'fk' === e.type) : undefined
+  const idColFkEditee = areteFkEditee ? idLigneDuHandle(areteFkEditee.sourceHandle) : null
+  const tableEnfantFk = idColFkEditee ? nodes.find((n): n is Extract<SchemaNode, { type: 'table' }> => 'table' === n.type && n.data.colonnes.some((c) => c.id === idColFkEditee)) : undefined
+  const colFk = tableEnfantFk?.data.colonnes.find((c) => c.id === idColFkEditee)
+  const tableParentFk = colFk?.reference
+    ? nodes.find((n): n is Extract<SchemaNode, { type: 'table' }> => 'table' === n.type && n.id === colFk.reference?.tableId)
+    : undefined
+  const coteEnfantEffectif = areteFkEditee ? (coteDuHandle(areteFkEditee.sourceHandle) ?? 'droite') : 'droite'
+  const coteParentEffectif = areteFkEditee ? (coteDuHandle(areteFkEditee.targetHandle) ?? 'gauche') : 'gauche'
 
   /* Une zone (cadre, couloir, région) emporte avec elle les formes qu'elle contient : elles sont
      relevées au début du glissement (centre dans la zone) puis suivent le même déplacement. */
@@ -720,6 +791,8 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
             onViewportChange={setViewport}
             deleteKeyCode={['Backspace', 'Delete']}
             onNodeDoubleClick={surDoubleClicNoeud}
+            onEdgeDoubleClick={surDoubleClicArete}
+            onReconnect={onReconnectFk}
             onNodeDragStart={surDebutGlissement}
             onNodeDrag={surGlissement}
             onNodeDragStop={surFinGlissement}
@@ -968,6 +1041,18 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
           data={selectionUnique.data}
           onChange={(patch) => majMcd(selectionUnique.id, patch)}
           onClose={fermerEditeur}
+        />
+      )}
+      {areteFkEditee && tableEnfantFk && colFk && (
+        <LienFkEditor
+          key={areteFkEditee.id}
+          col={colFk}
+          nomEnfant={tableEnfantFk.data.nom}
+          nomParent={tableParentFk?.data.nom ?? ''}
+          coteEnfantEffectif={coteEnfantEffectif}
+          coteParentEffectif={coteParentEffectif}
+          onChange={(patch) => majLienFk(tableEnfantFk.id, colFk.id, patch)}
+          onClose={() => setEdgeEditionId(null)}
         />
       )}
 
