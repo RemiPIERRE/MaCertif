@@ -7,6 +7,7 @@ import { useLocalStorage } from '../lib/useLocalStorage'
 import { useDisclaimer } from '../lib/useDisclaimer'
 import { filterActiveTasks } from '../lib/activeTasks'
 import { computeProgress, getTaskStatus } from '../lib/progress'
+import { getTaskById } from '../lib/taskLookup'
 import { STORAGE_KEYS, type Caracteristiques, type Competences, type DossierReponses } from '../types/storage'
 import { ProgressBar } from '../components/ProgressBar'
 import { IconChevronDown } from '../components/icons'
@@ -14,26 +15,73 @@ import { DisclaimerModal } from '../components/DisclaimerModal'
 import type { DossierTask } from '../types/dossier'
 import './DossierListPage.css'
 
-function TaskRow({ task, reponses }: { task: DossierTask; reponses: DossierReponses }) {
+function TaskRow({
+  task,
+  reponses,
+  onHide,
+}: {
+  task: DossierTask
+  reponses: DossierReponses
+  onHide: (taskId: string) => void
+}) {
   const status = getTaskStatus(task, reponses)
   const length = reponses[task.id]?.text.length ?? 0
   return (
-    <Link to={`/dossier/${task.id}`} className={`task-row status-${status}`}>
-      <span className={`task-row-status status-${status}`} aria-hidden>
-        {status === 'complete' ? '✓' : status === 'incomplete' ? '!' : ''}
-      </span>
-      <span className="task-row-title">
-        {task.type === 'image' && <span className="tag tag-amber task-row-tag">Image</span>}
-        {task.title}
-      </span>
-      <span className="task-row-count">
-        {task.type === 'image'
-          ? `${length} car.`
-          : task.minChars !== null
-            ? `${length} / ${task.minChars}+ car.`
-            : `${length} car.`}
-      </span>
-    </Link>
+    <div className={`task-row status-${status}`}>
+      <Link to={`/dossier/${task.id}`} className="task-row-link">
+        <span className={`task-row-status status-${status}`} aria-hidden>
+          {status === 'complete' ? '✓' : ''}
+        </span>
+        <span className="task-row-title">
+          {task.type === 'image' && <span className="tag tag-amber task-row-tag">Image</span>}
+          {task.title}
+        </span>
+        <span className="task-row-count">{length} car.</span>
+      </Link>
+      <button
+        type="button"
+        className="task-row-hide"
+        title="Masquer cette tâche (non pertinente pour mon projet)"
+        onClick={(e) => {
+          e.preventDefault()
+          onHide(task.id)
+        }}
+      >
+        Masquer
+      </button>
+    </div>
+  )
+}
+
+function TachesMasqueesCard({
+  tachesMasquees,
+  onUnhide,
+}: {
+  tachesMasquees: string[]
+  onUnhide: (taskId: string) => void
+}) {
+  if (tachesMasquees.length === 0) return null
+  return (
+    <details className="card questionnaire-card">
+      <summary className="questionnaire-summary">
+        <IconChevronDown className="questionnaire-chevron" />
+        <span>Tâches masquées ({tachesMasquees.length})</span>
+        <span className="questionnaire-summary-hint">Non pertinentes pour votre projet — réponses conservées</span>
+      </summary>
+      <div className="taches-masquees-list">
+        {tachesMasquees.map((taskId) => {
+          const task = getTaskById(taskId)
+          return (
+            <div key={taskId} className="taches-masquees-item">
+              <span>{task?.title ?? taskId}</span>
+              <button type="button" className="btn btn-secondary" onClick={() => onUnhide(taskId)}>
+                Démasquer
+              </button>
+            </div>
+          )
+        })}
+      </div>
+    </details>
   )
 }
 
@@ -151,8 +199,12 @@ export function DossierListPage() {
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
   const [caracteristiques, setCaracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
   const [competences, setCompetences] = useLocalStorage<Competences>(STORAGE_KEYS.competences, {})
-  const progress = computeProgress(reponses, caracteristiques)
+  const [tachesMasquees, setTachesMasquees] = useLocalStorage<string[]>(STORAGE_KEYS.tachesMasquees, [])
+  const progress = computeProgress(reponses, caracteristiques, tachesMasquees)
   const disclaimer = useDisclaimer('disclaimer:dossier')
+
+  const hideTask = (taskId: string) => setTachesMasquees((prev) => (prev.includes(taskId) ? prev : [...prev, taskId]))
+  const unhideTask = (taskId: string) => setTachesMasquees((prev) => prev.filter((id) => id !== taskId))
 
   return (
     <div>
@@ -173,20 +225,16 @@ export function DossierListPage() {
 
       <CaracteristiquesCard caracteristiques={caracteristiques} setCaracteristiques={setCaracteristiques} />
       <CompetencesCard competences={competences} setCompetences={setCompetences} />
+      <TachesMasqueesCard tachesMasquees={tachesMasquees} onUnhide={unhideTask} />
 
       <div className="card dossier-progress-card">
-        <ProgressBar
-          percent={progress.percent}
-          label={`${progress.completedCount} / ${progress.totalCount} tâches${
-            progress.incompleteCount > 0 ? ` · ${progress.incompleteCount} sous la cible indicative` : ''
-          }`}
-        />
+        <ProgressBar percent={progress.percent} label={`${progress.completedCount} / ${progress.totalCount} tâches`} />
       </div>
 
       <div className="dossier-chapters">
         {dossierChapters.map((chapter) => {
           const rawTasks = chapter.subchapters ? chapter.subchapters.flatMap((s) => s.tasks) : (chapter.tasks ?? [])
-          const chapterTasks = filterActiveTasks(rawTasks, caracteristiques)
+          const chapterTasks = filterActiveTasks(rawTasks, caracteristiques, tachesMasquees)
           if (chapterTasks.length === 0) return null
           const doneCount = chapterTasks.filter((t) => getTaskStatus(t, reponses) === 'complete').length
           return (
@@ -201,7 +249,7 @@ export function DossierListPage() {
 
               {chapter.subchapters ? (
                 chapter.subchapters.map((sub) => {
-                  const subTasks = filterActiveTasks(sub.tasks, caracteristiques)
+                  const subTasks = filterActiveTasks(sub.tasks, caracteristiques, tachesMasquees)
                   if (subTasks.length === 0) return null
                   return (
                     <div key={sub.id} className="subchapter">
@@ -210,7 +258,7 @@ export function DossierListPage() {
                       </div>
                       <div className="task-rows">
                         {subTasks.map((task) => (
-                          <TaskRow key={task.id} task={task} reponses={reponses} />
+                          <TaskRow key={task.id} task={task} reponses={reponses} onHide={hideTask} />
                         ))}
                       </div>
                     </div>
@@ -219,7 +267,7 @@ export function DossierListPage() {
               ) : (
                 <div className="task-rows">
                   {chapterTasks.map((task) => (
-                    <TaskRow key={task.id} task={task} reponses={reponses} />
+                    <TaskRow key={task.id} task={task} reponses={reponses} onHide={hideTask} />
                   ))}
                 </div>
               )}

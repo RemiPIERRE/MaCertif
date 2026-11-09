@@ -123,3 +123,14 @@ export function IconMoon(props: SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export function IconSchema(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="2.5" y="3" width="6" height="4.5" rx="1" />
+      <rect x="11.5" y="3" width="6" height="4.5" rx="1" />
+      <rect x="7" y="12.5" width="6" height="4.5" rx="1" />
+      <path d="M5.5 7.5v2.5a1 1 0 0 0 1 1h3M14.5 7.5v2.5a1 1 0 0 1-1 1h-3" />
+    </svg>
+  )
+}

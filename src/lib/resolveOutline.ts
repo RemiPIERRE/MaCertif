@@ -1,6 +1,6 @@
 import { remerciementsSection, introductionSection, numberedSections, type ExportItem, type ExportSection, type ExportSubsection } from '../data/exportOutline'
 import { getTaskById } from './taskLookup'
-import { isTaskActive } from './activeTasks'
+import { isTaskVisible } from './activeTasks'
 import type { DossierTask } from '../types/dossier'
 import type { Caracteristiques } from '../types/storage'
 
@@ -50,7 +50,7 @@ export interface ResolvedOutline {
  * the survivors are renumbered sequentially — the table of contents must reflect
  * only this candidate's real chapters, never a gap or an empty heading.
  */
-export function resolveOutline(caracteristiques: Caracteristiques): ResolvedOutline {
+export function resolveOutline(caracteristiques: Caracteristiques, tachesMasquees: string[] = []): ResolvedOutline {
   const annexes: { number: number; task: DossierTask }[] = []
 
   function resolveItems(items: ExportItem[]): ResolvedItem[] {
@@ -65,7 +65,7 @@ export function resolveOutline(caracteristiques: Caracteristiques): ResolvedOutl
         continue
       }
       const task = getTaskById(item.taskId)
-      if (!task || !isTaskActive(task, caracteristiques)) continue
+      if (!task || !isTaskVisible(task, caracteristiques, tachesMasquees)) continue
       let annexNumber: number | null = null
       if (item.annex) {
         annexNumber = annexes.length + 1

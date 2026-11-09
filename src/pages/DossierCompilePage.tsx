@@ -97,15 +97,16 @@ export function DossierComplilePage() {
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
   const [caracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
   const [competences] = useLocalStorage<Competences>(STORAGE_KEYS.competences, {})
+  const [tachesMasquees] = useLocalStorage<string[]>(STORAGE_KEYS.tachesMasquees, [])
   const [exporting, setExporting] = useState(false)
 
-  const outline = resolveOutline(caracteristiques)
+  const outline = resolveOutline(caracteristiques, tachesMasquees)
 
   const handleExport = async () => {
     setExporting(true)
     try {
       const { generateDossierDocx, downloadDocxBlob } = await import('../lib/docxExport')
-      const blob = await generateDossierDocx(profil, reponses, caracteristiques, competences)
+      const blob = await generateDossierDocx(profil, reponses, caracteristiques, competences, tachesMasquees)
       const filename = `dossier-projet-${(profil.nomProjet || 'macertif').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.docx`
       downloadDocxBlob(blob, filename)
     } finally {

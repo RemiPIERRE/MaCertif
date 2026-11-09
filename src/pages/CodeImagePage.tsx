@@ -1,8 +1,9 @@
 import { lazy, Suspense, useMemo } from 'react'
 import { findTaskContext } from '../lib/taskLookup'
 import { useLocalStorage } from '../lib/useLocalStorage'
-import { STORAGE_KEYS, type SiteCoches } from '../types/storage'
-import type { StorageAdapter, TacheLiee } from '../code-image'
+import { generateId } from '../lib/id'
+import { STORAGE_KEYS, type CustomSiteRef } from '../types/storage'
+import type { TacheLiee } from '../code-image'
 
 // Dynamic import: highlight.js' language grammars, html-to-image and the embedded
 // fonts only ever load once this tab is actually opened, never as part of the main
@@ -22,42 +23,38 @@ function tachesLieesParDefaut(): TacheLiee[] {
   })
 }
 
-/** Same localStorage + cross-tab-sync pattern as `useLocalStorage`, exposed as the
- * module's own StorageAdapter shape so "Mes extraits de code" stays in sync with
- * the rest of MaCertif without the module needing to know about our hook. */
-const macertifStorageAdapter: StorageAdapter = {
-  get(key) {
-    try {
-      const raw = window.localStorage.getItem(key)
-      return raw === null ? null : JSON.parse(raw)
-    } catch {
-      return null
-    }
-  },
-  set(key, value) {
-    try {
-      window.localStorage.setItem(key, JSON.stringify(value))
-      window.dispatchEvent(new CustomEvent('macertif:storage', { detail: { key } }))
-    } catch {
-      // quota exceeded or storage unavailable: don't break the tab over it
-    }
-  },
-}
-
 export function CodeImagePage() {
-  const [coches, setCoches] = useLocalStorage<SiteCoches>(STORAGE_KEYS.site, {})
+  // « Mes visuels » n'affiche plus que les CustomSiteRef ajoutés par l'utilisateur (plus
+  // de checklist par défaut, cf. Phase 3) : « marquer ce visuel comme prêt » crée/complète
+  // désormais une référence là-bas plutôt que de cocher une entrée qui n'y apparaît plus.
+  const [customRefs, setCustomRefs] = useLocalStorage<CustomSiteRef[]>(STORAGE_KEYS.siteCustomRefs, [])
   const tachesLiees = useMemo(() => tachesLieesParDefaut(), [])
 
-  const onMarquerVisuelPret = (tacheId: string) => setCoches((prev) => ({ ...prev, [tacheId]: true }))
+  const visuelsPrets = useMemo(
+    () => Object.fromEntries(customRefs.filter((r) => r.ready).map((r) => [r.taskId, true])),
+    [customRefs],
+  )
+
+  const onMarquerVisuelPret = (tacheId: string) => {
+    setCustomRefs((prev) => {
+      const existing = prev.find((r) => r.taskId === tacheId)
+      if (existing) return prev.map((r) => (r === existing ? { ...r, ready: true } : r))
+      const context = findTaskContext(tacheId)
+      const ref: CustomSiteRef = {
+        id: generateId(),
+        taskId: tacheId,
+        label: context?.task.sectionTitle ?? context?.task.title ?? tacheId,
+        kind: 'inline',
+        ready: true,
+        createdAt: new Date().toISOString(),
+      }
+      return [...prev, ref]
+    })
+  }
 
   return (
     <Suspense fallback={<p className="page-lede">Chargement de l'éditeur d'extraits de code…</p>}>
-      <CodeImageTab
-        storage={macertifStorageAdapter}
-        tachesLiees={tachesLiees}
-        visuelsPrets={coches}
-        onMarquerVisuelPret={onMarquerVisuelPret}
-      />
+      <CodeImageTab tachesLiees={tachesLiees} visuelsPrets={visuelsPrets} onMarquerVisuelPret={onMarquerVisuelPret} />
     </Suspense>
   )
 }

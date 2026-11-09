@@ -1,8 +1,9 @@
 import type { OralSection, Slide } from '../types/oral'
 
-/** Speaking pace range used for every duration estimate and the teleprompter. */
-export const WPM_MIN = 150
-export const WPM_MAX = 160
+/** Default speaking pace (words/minute) used until the user sets their own in Mon oral. */
+export const DEFAULT_WPM = 155
+/** Half-width of the internal pace range derived from the user's single WPM value (e.g. 155 → 150-160). */
+const WPM_MARGIN = 5
 
 export const TARGET_MIN_MINUTES = 35
 export const TARGET_MAX_MINUTES = 40
@@ -23,12 +24,12 @@ export interface DurationRange {
 }
 
 /** A slide's duration as a range: fewer minutes at the fast end of the pace, more at the slow end. */
-export function slideDuration(discours: string): DurationRange {
+export function slideDuration(discours: string, wpm: number = DEFAULT_WPM): DurationRange {
   const words = countWords(discours)
   return {
     words,
-    minMinutes: words / WPM_MAX,
-    maxMinutes: words / WPM_MIN,
+    minMinutes: words / (wpm + WPM_MARGIN),
+    maxMinutes: words / (wpm - WPM_MARGIN),
   }
 }
 
@@ -41,8 +42,8 @@ export function activeSlides(sections: OralSection[]): Slide[] {
   return sections.filter((s) => !s.optionnelle || s.activee).flatMap((s) => s.slides)
 }
 
-export function presentationDuration(sections: OralSection[]): DurationRange {
-  return activeSlides(sections).reduce((acc, slide) => addRange(acc, slideDuration(slide.discours)), {
+export function presentationDuration(sections: OralSection[], wpm: number = DEFAULT_WPM): DurationRange {
+  return activeSlides(sections).reduce((acc, slide) => addRange(acc, slideDuration(slide.discours, wpm)), {
     words: 0,
     minMinutes: 0,
     maxMinutes: 0,

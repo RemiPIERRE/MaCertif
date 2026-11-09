@@ -143,6 +143,21 @@
   margin: 0 0 0.5rem;
 }
 
+.sidebar-account {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-account-email {
+  font-size: 0.72rem;
+  color: var(--sidebar-text-dim);
+  margin: 0 0 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .mobile-menu-button {
   display: none;
   position: fixed;

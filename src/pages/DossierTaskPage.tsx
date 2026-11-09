@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { findTaskContext, getAdjacentTasks } from '../lib/taskLookup'
@@ -11,15 +11,26 @@ export function DossierTaskPage() {
   const navigate = useNavigate()
   const [reponses, setReponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
   const [caracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
+  const [tachesMasquees] = useLocalStorage<string[]>(STORAGE_KEYS.tachesMasquees, [])
   const context = findTaskContext(taskId)
   const [text, setText] = useState(() => reponses[taskId]?.text ?? '')
   const [savedFlash, setSavedFlash] = useState(false)
+  // useLocalStorage's initial GET is async: opening a task before it resolves must not
+  // leave the editor stuck empty once the real answer arrives. Tracks whether the user
+  // has typed anything for the *current* task, so the sync below can safely re-run every
+  // time `reponses` updates without ever clobbering in-progress edits.
+  const userEditedRef = useRef(false)
 
   useEffect(() => {
-    setText(reponses[taskId]?.text ?? '')
+    userEditedRef.current = false
     window.scrollTo({ top: 0 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId])
+
+  useEffect(() => {
+    if (!userEditedRef.current) setText(reponses[taskId]?.text ?? '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reponses, taskId])
 
   if (!context) {
     return (
@@ -31,9 +42,8 @@ export function DossierTaskPage() {
   }
 
   const { task, chapter, subchapter } = context
-  const { prev, next } = getAdjacentTasks(taskId, caracteristiques)
+  const { prev, next } = getAdjacentTasks(taskId, caracteristiques, tachesMasquees)
   const isDirty = text !== (reponses[taskId]?.text ?? '')
-  const belowMin = task.minChars !== null && text.length < task.minChars
 
   const save = (currentText: string = text) => {
     setReponses((prevState) => ({
@@ -87,23 +97,14 @@ export function DossierTaskPage() {
 
       <div className="task-editor card">
         <div className="task-editor-toolbar">
-          <span className={`task-counter${belowMin ? ' warn' : ''}`}>
-            {task.type === 'image'
-              ? `${text.length} / ${task.maxChars} caractères`
-              : task.minChars !== null
-                ? `${text.length} caractères (cible indicative : ${task.minChars}+)`
-                : `${text.length} caractères`}
-          </span>
-          {belowMin && (
-            <span className="task-counter-hint">
-              Encore {task.minChars! - text.length} caractères pour atteindre la cible (non bloquant)
-            </span>
-          )}
+          <span className="task-counter">{text.length} caractères</span>
         </div>
         <textarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
-          maxLength={task.type === 'image' ? (task.maxChars ?? undefined) : undefined}
+          onChange={(e) => {
+            userEditedRef.current = true
+            setText(e.target.value)
+          }}
           rows={task.type === 'image' ? 4 : 12}
           placeholder={
             task.type === 'image'

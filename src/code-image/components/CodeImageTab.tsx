@@ -6,7 +6,6 @@ import { detecterLangageAuto } from '../lib/highlight'
 import { colorerShiki } from '../lib/shikiHighlight'
 import { LANGAGES, getLangage } from '../lib/languages'
 import { detecterSecrets } from '../lib/secrets'
-import { localStorageAdapter, type StorageAdapter } from '../lib/storage'
 import { useExtraits } from '../lib/store'
 import { getFond } from '../lib/backgrounds'
 import { CodeCanvas } from './CodeCanvas'
@@ -15,8 +14,6 @@ import { ExtraitsSidebar } from './ExtraitsSidebar'
 import { ReglagesContenuPanel, ReglagesStylePanel } from './ReglagesPanel'
 
 export interface CodeImageTabProps {
-  /** Adaptateur de persistance (défaut : localStorage). */
-  storage?: StorageAdapter
   /** Tâches du dossier auxquelles on peut rattacher un extrait. */
   tachesLiees?: TacheLiee[]
   /** État actuel de `site:coches` (taskId → visuel prêt), pour ne pas reproposer ce qui est déjà coché. */
@@ -27,13 +24,8 @@ export interface CodeImageTabProps {
 
 type Statut = { type: 'ok' | 'info' | 'warn'; texte: string } | null
 
-export function CodeImageTab({
-  storage = localStorageAdapter,
-  tachesLiees = TACHES_CODE_PAR_DEFAUT,
-  visuelsPrets,
-  onMarquerVisuelPret,
-}: CodeImageTabProps) {
-  const { extraits, actif, actifId, setActifId, modifier, modifierReglages, creer, dupliquer, supprimer } = useExtraits(storage)
+export function CodeImageTab({ tachesLiees = TACHES_CODE_PAR_DEFAUT, visuelsPrets, onMarquerVisuelPret }: CodeImageTabProps) {
+  const { extraits, actif, actifId, setActifId, modifier, modifierReglages, creer, dupliquer, supprimer } = useExtraits()
 
   const canvasRef = useRef<HTMLDivElement>(null)
   const cadreRef = useRef<HTMLDivElement>(null)
@@ -103,7 +95,11 @@ export function CodeImageTab({
     mesurer()
     const ro = new ResizeObserver(mesurer)
     ro.observe(cadre)
-    ro.observe(canvas)
+    // box: 'border-box' est indispensable ici : en largeur auto (width: 'max-content'),
+    // la content-box (observée par défaut) ne change pas quand seul le remplissage
+    // (padding) varie — seule la border-box grandit, donc un ResizeObserver par défaut
+    // ne se redéclencherait jamais au changement du curseur « Remplissage ».
+    ro.observe(canvas, { box: 'border-box' })
     return () => ro.disconnect()
   }, [actifId, vide])
 

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useLocalStorage } from '../../lib/useLocalStorage'
-import { STORAGE_KEYS } from '../../types/storage'
+import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos } from '../../types/storage'
 import { createDefaultPresentation, createDefaultAnnexes } from '../../data/oralDefaults'
 import type { OralAnnexCategory, OralSection, Slide } from '../../types/oral'
 import { MAX_BLOCKS_PER_SLIDE } from '../../types/oral'
@@ -18,7 +18,7 @@ import {
   updateSlideInAnnexes,
   updateSlideInSections,
 } from '../../lib/oralMutations'
-import { countWords, formatMinutes, pacingStatus, presentationDuration, slideDuration } from '../../lib/oralTime'
+import { DEFAULT_WPM, countWords, formatMinutes, pacingStatus, presentationDuration, slideDuration } from '../../lib/oralTime'
 import './SlideEditorPage.css'
 
 interface SlideEditorPageProps {
@@ -33,6 +33,8 @@ export function SlideEditorPage({ kind }: SlideEditorPageProps) {
 
   const [sections, setSections] = useLocalStorage<OralSection[]>(STORAGE_KEYS.oralPresentation, createDefaultPresentation())
   const [annexes, setAnnexes] = useLocalStorage<OralAnnexCategory[]>(STORAGE_KEYS.oralAnnexes, createDefaultAnnexes())
+  const [profil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
+  const wpm = profil.wpm || DEFAULT_WPM
 
   const basePath = kind === 'presentation' ? '/oral/presentation' : '/oral/annexes'
   const flatPresentation = flattenPresentation(sections)
@@ -100,10 +102,10 @@ export function SlideEditorPage({ kind }: SlideEditorPageProps) {
     navigate(fallback ? `${basePath}/${fallback.slide.id}` : '/oral')
   }
 
-  const duration = presentationDuration(sections)
+  const duration = presentationDuration(sections, wpm)
   const status = pacingStatus(duration)
   const slideWords = countWords(slide.discours)
-  const slideEstimate = slideDuration(slide.discours)
+  const slideEstimate = slideDuration(slide.discours, wpm)
 
   return (
     <div>

@@ -358,8 +358,9 @@ export async function generateDossierDocx(
   reponses: DossierReponses,
   caracteristiques: Caracteristiques,
   competences: Competences,
+  tachesMasquees: string[] = [],
 ): Promise<Blob> {
-  const outline = resolveOutline(caracteristiques)
+  const outline = resolveOutline(caracteristiques, tachesMasquees)
   const body: (Paragraph | Table)[] = []
 
   body.push(...buildCoverPage(profil))

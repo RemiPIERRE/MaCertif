@@ -9,6 +9,12 @@
   color: var(--accent-dark);
 }
 
+.site-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
 .site-list {
   display: flex;
   flex-direction: column;
@@ -69,7 +75,58 @@
   flex-shrink: 0;
 }
 
-.site-custom-heading {
-  font-size: 0.95rem;
-  margin: 2rem 0 0.9rem;
+.visuels-header {
+  margin-top: 2.5rem;
+}
+
+.visuels-erreur {
+  padding: 0.9rem 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--danger, #c0392b);
+}
+
+.visuels-input-fichier {
+  display: none;
+}
+
+.visuels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.visuel-item {
+  position: relative;
+  padding: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.visuel-item-image {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--line);
+}
+
+.visuel-item-nom {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.visuel-item-taille {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.visuel-item .btn-icon-delete {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
 }

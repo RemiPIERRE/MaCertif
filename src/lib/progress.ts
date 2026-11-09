@@ -3,17 +3,12 @@ import { filterActiveTasks } from './activeTasks'
 import type { DossierTask } from '../types/dossier'
 import type { Caracteristiques, DossierReponses } from '../types/storage'
 
-export type TaskStatus = 'empty' | 'incomplete' | 'complete'
+export type TaskStatus = 'empty' | 'complete'
 
-/**
- * Saving is never blocked: below the indicative minimum, a task is "incomplete"
- * (flagged, but already has content) rather than invalid.
- */
+/** A task is complete as soon as it has any content — no character target to reach. */
 export function getTaskStatus(task: DossierTask, reponses: DossierReponses): TaskStatus {
   const text = reponses[task.id]?.text ?? ''
-  if (text.trim().length === 0) return 'empty'
-  if (task.minChars !== null && text.length < task.minChars) return 'incomplete'
-  return 'complete'
+  return text.trim().length === 0 ? 'empty' : 'complete'
 }
 
 export function isTaskComplete(task: DossierTask, reponses: DossierReponses): boolean {
@@ -22,21 +17,18 @@ export function isTaskComplete(task: DossierTask, reponses: DossierReponses): bo
 
 export interface ProgressStats {
   completedCount: number
-  incompleteCount: number
   totalCount: number
   percent: number
 }
 
-export function computeProgress(reponses: DossierReponses, caracteristiques: Caracteristiques = {}): ProgressStats {
-  const activeTasks = filterActiveTasks(allTasks, caracteristiques)
-  let completedCount = 0
-  let incompleteCount = 0
-  for (const task of activeTasks) {
-    const status = getTaskStatus(task, reponses)
-    if (status === 'complete') completedCount++
-    else if (status === 'incomplete') incompleteCount++
-  }
+export function computeProgress(
+  reponses: DossierReponses,
+  caracteristiques: Caracteristiques = {},
+  tachesMasquees: string[] = [],
+): ProgressStats {
+  const activeTasks = filterActiveTasks(allTasks, caracteristiques, tachesMasquees)
+  const completedCount = activeTasks.filter((task) => getTaskStatus(task, reponses) === 'complete').length
   const totalCount = activeTasks.length
   const percent = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 1000) / 10
-  return { completedCount, incompleteCount, totalCount, percent }
+  return { completedCount, totalCount, percent }
 }

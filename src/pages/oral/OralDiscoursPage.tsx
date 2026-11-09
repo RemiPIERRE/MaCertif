@@ -1,16 +1,18 @@
 import { Link } from 'react-router-dom'
 import { useLocalStorage } from '../../lib/useLocalStorage'
-import { STORAGE_KEYS } from '../../types/storage'
+import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos } from '../../types/storage'
 import { createDefaultPresentation } from '../../data/oralDefaults'
 import type { OralSection } from '../../types/oral'
 import { flattenActivePresentation } from '../../lib/oralMutations'
-import { formatMinutes, pacingStatus, presentationDuration, slideDuration } from '../../lib/oralTime'
+import { DEFAULT_WPM, formatMinutes, pacingStatus, presentationDuration, slideDuration } from '../../lib/oralTime'
 import './OralDiscoursPage.css'
 
 export function OralDiscoursPage() {
   const [sections] = useLocalStorage<OralSection[]>(STORAGE_KEYS.oralPresentation, createDefaultPresentation())
+  const [profil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
+  const wpm = profil.wpm || DEFAULT_WPM
   const flat = flattenActivePresentation(sections)
-  const duration = presentationDuration(sections)
+  const duration = presentationDuration(sections, wpm)
   const status = pacingStatus(duration)
 
   const sectionHeadingFlags = flat.map((entry, i) => i === 0 || entry.sectionId !== flat[i - 1].sectionId)
@@ -38,7 +40,7 @@ export function OralDiscoursPage() {
         <div className="discours-body">
           {flat.map((entry, i) => {
             const showSectionHeading = sectionHeadingFlags[i]
-            const est = slideDuration(entry.slide.discours)
+            const est = slideDuration(entry.slide.discours, wpm)
             return (
               <div key={entry.slide.id}>
                 {showSectionHeading && <h2 className="discours-section-title">{entry.sectionTitre}</h2>}

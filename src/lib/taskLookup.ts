@@ -28,12 +28,13 @@ export function findTaskContext(taskId: string): TaskContext | null {
   return null
 }
 
-/** Prev/next only ever land on active (non-disabled) tasks. */
+/** Prev/next only ever land on active, non-masquée tasks. */
 export function getAdjacentTasks(
   taskId: string,
   caracteristiques: Caracteristiques = {},
+  tachesMasquees: string[] = [],
 ): { prev: DossierTask | null; next: DossierTask | null } {
-  const active = filterActiveTasks(allTasks, caracteristiques)
+  const active = filterActiveTasks(allTasks, caracteristiques, tachesMasquees)
   const index = active.findIndex((t) => t.id === taskId)
   if (index === -1) return { prev: null, next: null }
   return {

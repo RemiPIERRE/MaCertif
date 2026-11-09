@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom'
 import { useLocalStorage } from '../../lib/useLocalStorage'
-import { STORAGE_KEYS } from '../../types/storage'
+import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos } from '../../types/storage'
 import { createDefaultPresentation } from '../../data/oralDefaults'
 import type { OralSection } from '../../types/oral'
 import { flattenActivePresentation } from '../../lib/oralMutations'
+import { DEFAULT_WPM } from '../../lib/oralTime'
 import './OralEntrainementHomePage.css'
 
 export function OralEntrainementHomePage() {
   const [sections] = useLocalStorage<OralSection[]>(STORAGE_KEYS.oralPresentation, createDefaultPresentation())
+  const [profil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
+  const wpm = profil.wpm || DEFAULT_WPM
   const flat = flattenActivePresentation(sections)
   const firstSlideId = flat[0]?.slide.id
 
@@ -34,7 +37,7 @@ export function OralEntrainementHomePage() {
           <Link className="card entrainement-mode-card" to={`/oral/entrainement/prompteur/${firstSlideId}`}>
             <h3>Discours + prompteur</h3>
             <p>
-              Votre discours défile automatiquement au rythme de 150 à 160 mots par minute. Calez votre débit sur le
+              Votre discours défile automatiquement au rythme de {wpm} mots par minute. Calez votre débit sur le
               défilement, pas l'inverse.
             </p>
           </Link>

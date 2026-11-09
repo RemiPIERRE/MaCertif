@@ -67,6 +67,15 @@
   background: var(--accent-tint);
 }
 
+.month-calendar-cell.clickable {
+  cursor: pointer;
+  transition: border-color 0.12s ease;
+}
+
+.month-calendar-cell.clickable:hover {
+  border-color: var(--accent);
+}
+
 .month-calendar-daynum {
   font-size: 0.78rem;
   font-weight: 600;
@@ -98,6 +107,13 @@
 .event-custom {
   background: var(--amber-tint);
   color: var(--amber);
+}
+
+.month-calendar-event-more {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 1px 4px;
 }
 
 .month-calendar-legend {
@@ -133,6 +149,10 @@
     height: 6px;
     border-radius: 50%;
     width: 6px;
+    padding: 0;
+  }
+  .month-calendar-event-more {
+    font-size: 0.55rem;
     padding: 0;
   }
 }

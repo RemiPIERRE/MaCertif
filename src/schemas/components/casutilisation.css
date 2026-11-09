@@ -1,0 +1,184 @@
+/*
+ * Diagramme de cas d'utilisation : acteur, cas (ellipse), frontière du système, paquetage.
+ * S'appuie sur les variables de couleur de activite.css (--ac-trait, --ac-fond, --ac-plein).
+ */
+
+/* ───── Acteur ───── */
+
+.schema-cu-acteur-corps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  width: 100%;
+}
+
+.schema-cu-bonhomme {
+  width: 34px;
+  height: 52px;
+  fill: var(--ac-fond);
+  stroke: var(--ac-plein);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+.schema-cu-acteur-rect {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.3rem;
+  border: 1.6px solid var(--ac-trait);
+  background: var(--ac-fond);
+}
+
+/* ───── Cas d'utilisation ───── */
+
+.schema-cu-ellipse {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1.6px solid var(--ac-trait);
+  border-radius: 50%;
+  background: var(--ac-fond);
+}
+
+.schema-cu-cas-contenu {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  max-width: 78%;
+  max-height: 86%;
+  overflow: hidden;
+}
+
+.schema-cu-points-liste {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  margin-top: 0.1rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid var(--ac-trait);
+  font-size: 0.66rem;
+  line-height: 1.2;
+}
+
+.schema-cu-points-titre {
+  opacity: 0.65;
+  font-style: italic;
+}
+
+/* ───── Frontière du système et paquetage ───── */
+
+.schema-cu-titre {
+  top: 4px;
+  left: 20%;
+  right: 20%;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.schema-cu-onglet {
+  top: 0;
+  left: 0;
+  min-width: 80px;
+  max-width: 60%;
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  font-weight: 600;
+  border: 1.6px solid var(--ac-trait);
+  border-bottom: none;
+  background: var(--ac-fond);
+}
+
+.schema-cu-struct--paquetage .schema-zone-cadre {
+  top: 22px;
+  background: color-mix(in srgb, var(--ac-trait) 5%, transparent);
+}
+
+.schema-cu-struct--paquetage .schema-zone-bord--haut {
+  top: 18px;
+}
+
+.schema-cu-struct--systeme .schema-zone-cadre {
+  border-radius: 4px;
+}
+
+/* ───── Barre de la palette : forme et stéréotype d'un acteur ───── */
+
+.schema-cu-select,
+.schema-cu-champ {
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 0.72rem;
+  color: var(--ink, #222);
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #ddd);
+  border-radius: 6px;
+}
+
+.schema-cu-champ {
+  width: 96px;
+}
+
+/* ───── Points d'extension (éditeur sous le cas) ───── */
+
+.schema-cu-points {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--ink, #222);
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.schema-cu-points textarea {
+  width: 190px;
+  font: inherit;
+  font-size: 0.75rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--line, #ddd);
+  border-radius: 6px;
+  padding: 0.25rem 0.4rem;
+  resize: vertical;
+}
+
+/* ───── Libellé d'un lien : lignes supplémentaires (condition, point d'extension) ───── */
+
+.schema-edge-label-ligne {
+  display: block;
+  font-size: 0.66rem;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+/* ───── Panneau de relation ───── */
+
+.schema-relation-input--court {
+  width: 90px;
+}
+
+.schema-relation-aide {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}

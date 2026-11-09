@@ -1,9 +1,8 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLocalStorage } from '../lib/useLocalStorage'
-import { downloadExport, importFromFile, ImportError } from '../lib/exportImport'
 import { computeProgress } from '../lib/progress'
-import { filledSlidesStats, formatMinutes, pacingStatus, presentationDuration } from '../lib/oralTime'
+import { DEFAULT_WPM, filledSlidesStats, formatMinutes, pacingStatus, presentationDuration } from '../lib/oralTime'
 import { createDefaultPresentation } from '../data/oralDefaults'
 import { STORAGE_KEYS, EMPTY_PROFIL, type Caracteristiques, type ProfilInfos, type DossierReponses } from '../types/storage'
 import type { OralSection } from '../types/oral'
@@ -38,16 +37,15 @@ export function AccueilPage() {
   const [profil, setProfil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
   const [reponses] = useLocalStorage<DossierReponses>(STORAGE_KEYS.dossier, {})
   const [caracteristiques] = useLocalStorage<Caracteristiques>(STORAGE_KEYS.caracteristiques, {})
+  const [tachesMasquees] = useLocalStorage<string[]>(STORAGE_KEYS.tachesMasquees, [])
   const [oralSections] = useLocalStorage<OralSection[]>(STORAGE_KEYS.oralPresentation, createDefaultPresentation())
-  const [importMessage, setImportMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [editing, setEditing] = useState(() => !(profil.nom.trim() || profil.prenom.trim()))
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const update = (patch: Partial<ProfilInfos>) => setProfil((prev) => ({ ...prev, ...patch }))
-  const progress = computeProgress(reponses, caracteristiques)
+  const progress = computeProgress(reponses, caracteristiques, tachesMasquees)
 
   const oralStats = filledSlidesStats(oralSections)
-  const oralDuration = presentationDuration(oralSections)
+  const oralDuration = presentationDuration(oralSections, profil.wpm || DEFAULT_WPM)
   const oralStatus = pacingStatus(oralDuration)
   const oralPercent = oralStats.total === 0 ? 0 : Math.round((oralStats.filled / oralStats.total) * 1000) / 10
 
@@ -55,21 +53,6 @@ export function AccueilPage() {
   const combinedFilled = progress.completedCount + oralStats.filled
   const combinedTotal = progress.totalCount + oralStats.total
   const combinedPercent = combinedTotal === 0 ? 0 : Math.round((combinedFilled / combinedTotal) * 1000) / 10
-
-  const handleImportClick = () => fileInputRef.current?.click()
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-    if (!file) return
-    try {
-      await importFromFile(file)
-      setImportMessage({ ok: true, text: 'Données importées avec succès.' })
-    } catch (error) {
-      const text = error instanceof ImportError ? error.message : "Échec de l'import."
-      setImportMessage({ ok: false, text })
-    }
-  }
 
   return (
     <div>
@@ -202,7 +185,6 @@ export function AccueilPage() {
                 <ProgressBar percent={progress.percent} />
                 <p className="accueil-progress-mini-hint">
                   {progress.completedCount} / {progress.totalCount} tâches
-                  {progress.incompleteCount > 0 && ` (${progress.incompleteCount} sous la cible)`}
                 </p>
                 <Link className="btn btn-secondary accueil-cta" to="/dossier">
                   Continuer mon dossier
@@ -225,28 +207,6 @@ export function AccueilPage() {
             </div>
           </section>
 
-          <section className="card accueil-backup">
-            <h3>Travailler sur plusieurs postes</h3>
-            <p>
-              Tout est stocké dans <strong>ce navigateur uniquement</strong>, rien n'est envoyé sur un serveur. Si
-              vous avancez le soir chez vous et la journée en entreprise, pensez à{' '}
-              <strong>exporter vos données en fin de session</strong> et à déposer le fichier JSON dans un espace
-              personnel type OneDrive. Sur l'autre poste, il suffit de le réimporter pour retrouver exactement où
-              vous en étiez.
-            </p>
-            <div className="accueil-backup-actions">
-              <button className="btn btn-secondary" onClick={downloadExport}>
-                Exporter mes données (JSON)
-              </button>
-              <button className="btn btn-ghost" onClick={handleImportClick}>
-                Importer
-              </button>
-              <input ref={fileInputRef} type="file" accept="application/json" hidden onChange={handleFileChange} />
-            </div>
-            {importMessage && (
-              <p className={importMessage.ok ? 'accueil-import-ok' : 'accueil-import-error'}>{importMessage.text}</p>
-            )}
-          </section>
         </div>
       </div>
     </div>

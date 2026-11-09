@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocalStorage } from '../lib/useLocalStorage'
 import { generateId } from '../lib/id'
 import { formatCountdown, isPast } from '../lib/countdown'
@@ -19,6 +19,8 @@ export function CalendrierPage() {
   const [label, setLabel] = useState('')
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
+  const addFormRef = useRef<HTMLDivElement>(null)
+  const labelInputRef = useRef<HTMLInputElement>(null)
 
   const sorted = [...deadlines].sort((a, b) => a.date.localeCompare(b.date))
 
@@ -50,6 +52,15 @@ export function CalendrierPage() {
   const shiftMonth = (delta: number) =>
     setVisibleMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1))
 
+  // Clic sur un jour du calendrier : pré-remplit la date et amène au formulaire d'ajout
+  // plutôt que d'ouvrir une modale séparée — le formulaire existe déjà juste en dessous.
+  const handleDayClick = (clickedDate: Date) => {
+    const iso = `${clickedDate.getFullYear()}-${String(clickedDate.getMonth() + 1).padStart(2, '0')}-${String(clickedDate.getDate()).padStart(2, '0')}`
+    setDate(iso)
+    addFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    labelInputRef.current?.focus()
+  }
+
   return (
     <div>
       <header className="page-header">
@@ -67,6 +78,7 @@ export function CalendrierPage() {
         onPrev={() => shiftMonth(-1)}
         onNext={() => shiftMonth(1)}
         onToday={() => setVisibleMonth(startOfMonth(new Date()))}
+        onDayClick={handleDayClick}
       />
 
       <div className="card calendrier-form">
@@ -92,7 +104,7 @@ export function CalendrierPage() {
         {profil.dateExamenDebut && <span className="deadline-countdown">{formatCountdown(profil.dateExamenDebut)}</span>}
       </div>
 
-      <div className="card calendrier-form">
+      <div className="card calendrier-form" ref={addFormRef}>
         <h3>Ajouter une échéance personnalisée</h3>
         <div className="calendrier-suggestions">
           {SUGGESTIONS.map((s) => (
@@ -104,7 +116,12 @@ export function CalendrierPage() {
         <div className="calendrier-form-row">
           <div className="field">
             <label>Intitulé</label>
-            <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex : finir 30% du dossier" />
+            <input
+              ref={labelInputRef}
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="Ex : finir 30% du dossier"
+            />
           </div>
           <div className="field">
             <label>Date</label>

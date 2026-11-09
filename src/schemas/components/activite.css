@@ -1,0 +1,585 @@
+/*
+ * Diagramme d'activité — formes UML. Une couleur d'accent facultative (`--ac`, posée par la
+ * palette du double-clic) teinte contour et fond ; sans elle, les formes suivent le thème.
+ */
+
+.schema-activite {
+  --ac-trait: var(--line-strong, #999);
+  --ac-fond: var(--surface, #fff);
+  --ac-plein: var(--ink, #222);
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: var(--ink, #222);
+}
+
+.schema-activite[data-couleur] {
+  --ac-trait: var(--ac);
+  --ac-fond: color-mix(in srgb, var(--ac) 30%, var(--surface, #fff));
+  --ac-plein: var(--ac);
+}
+
+.schema-activite.selected {
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent, #7a1f33) 55%, transparent));
+}
+
+/* ───── Texte : affiché tel quel, ouvert en édition par double-clic ───── */
+
+.schema-activite-libelle {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  padding: 0 0.4rem;
+  text-align: center;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.schema-activite-vide {
+  opacity: 0.4;
+}
+
+.schema-activite-saisie {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 0.4rem;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  line-height: 1.25;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  box-shadow: 0 1px 0 currentColor;
+}
+
+.schema-activite-mini {
+  width: 90%;
+  font-size: 0.7rem;
+}
+
+.schema-activite-centre {
+  max-width: 88%;
+}
+
+/* ───── Contrôle ───── */
+
+.schema-activite-point {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ac-plein);
+}
+
+.schema-activite-anneau {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ac-plein);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schema-activite-anneau .schema-activite-point {
+  width: 20px;
+  height: 20px;
+}
+
+.schema-activite-croix {
+  width: 30px;
+  height: 30px;
+}
+
+.schema-activite-losange {
+  position: absolute;
+  inset: 15%;
+  background: var(--ac-fond);
+  border: 1.5px solid var(--ac-trait);
+  transform: rotate(45deg);
+}
+
+.schema-activite--decision .schema-activite-centre {
+  max-width: 62%;
+  font-size: 0.72rem;
+}
+
+.schema-activite-barre {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: var(--ac-plein);
+}
+
+.schema-activite-barre-texte {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  min-width: 100px;
+  white-space: nowrap;
+  font-size: 0.72rem;
+}
+
+.schema-activite-barre-texte.is-vertical {
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin: 0 0 0 6px;
+}
+
+.schema-activite-cercle {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid var(--ac-trait);
+  background: var(--ac-fond);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ───── Actions ───── */
+
+.schema-activite--action,
+.schema-activite--appel {
+  border: 1.5px solid var(--ac-trait);
+  border-radius: 14px;
+  background: var(--ac-fond);
+}
+
+.schema-activite-rateau {
+  position: absolute;
+  right: 8px;
+  bottom: 5px;
+  width: 14px;
+  height: 14px;
+}
+
+.schema-activite-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.schema-activite-forme {
+  fill: var(--ac-fond);
+  stroke: var(--ac-trait);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.schema-activite-trait {
+  fill: none;
+  stroke: var(--ac-plein);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.schema-activite-sablier {
+  width: 24px;
+  height: 34px;
+}
+
+.schema-activite-sous-texte {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 2px;
+  min-width: 80px;
+}
+
+/* ───── Objets ───── */
+
+.schema-activite-objet {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid var(--ac-trait);
+  background: var(--ac-fond);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 0;
+}
+
+.schema-activite-stereotype,
+.schema-activite-annexe {
+  font-size: 0.68rem;
+  opacity: 0.85;
+  text-align: center;
+  max-width: 94%;
+}
+
+.schema-activite-broche {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid var(--ac-trait);
+  background: var(--ac-fond);
+}
+
+.schema-activite-note-texte {
+  text-align: left;
+  align-self: flex-start;
+  padding: 0.35rem 0.5rem;
+}
+
+.schema-activite--note .schema-activite-saisie {
+  text-align: left;
+}
+
+/* ───── Zones : cadre d'activité, couloirs, régions ───── */
+
+.schema-zone {
+  display: block;
+  pointer-events: none;
+}
+
+.schema-zone-cadre {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1.6px solid var(--ac-trait);
+  border-radius: 2px;
+  background: transparent;
+}
+
+.schema-zone[data-couleur] .schema-zone-cadre {
+  background: color-mix(in srgb, var(--ac) 7%, transparent);
+}
+
+.schema-activite--structure .schema-zone-cadre,
+.schema-activite--expansion .schema-zone-cadre,
+.schema-activite--interruptible .schema-zone-cadre {
+  border-style: dashed;
+  border-radius: 16px;
+}
+
+.schema-activite--couloir .schema-zone-cadre {
+  border-radius: 0;
+}
+
+/* Seuls l'en-tête et le pourtour attrapent la souris : le reste laisse passer vers les formes
+   posées dedans, et vers le fond (panoramique, sélection). */
+.schema-zone-entete,
+.schema-zone-bord {
+  pointer-events: all;
+}
+
+.schema-zone-bord {
+  position: absolute;
+  display: block;
+}
+
+.schema-zone-bord--haut {
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 10px;
+}
+
+.schema-zone-bord--bas {
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 10px;
+}
+
+.schema-zone-bord--gauche {
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+}
+
+.schema-zone-bord--droite {
+  right: -4px;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+}
+
+.schema-zone-entete {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Cadre d'activité : étiquette « act Nom » en haut à gauche. */
+.schema-zone-tag {
+  top: 0;
+  left: 0;
+  min-width: 90px;
+  max-width: 80%;
+  padding: 3px 18px 3px 8px;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  background: #f5e6b8;
+  color: #3b2f10;
+  border-right: 1.6px solid var(--ac-trait);
+  border-bottom: 1.6px solid var(--ac-trait);
+  border-bottom-right-radius: 12px;
+}
+
+.schema-activite[data-couleur] .schema-zone-tag {
+  background: var(--ac-fond);
+}
+
+.schema-zone-tag .schema-activite-libelle,
+.schema-zone-tag .schema-activite-saisie {
+  text-align: left;
+  padding: 0;
+}
+
+.schema-zone-prefixe {
+  font-style: italic;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+/* Couloir : bandeau de titre en haut (ou à gauche en mode horizontal). */
+.schema-zone-couloir-titre {
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 30px;
+  justify-content: center;
+  border-bottom: 1.6px solid var(--ac-trait);
+  background: var(--ac-fond);
+  font-weight: 700;
+}
+
+.schema-zone.is-horizontal .schema-zone-couloir-titre {
+  top: 0;
+  bottom: 0;
+  right: auto;
+  width: 96px;
+  border-bottom: none;
+  border-right: 1.6px solid var(--ac-trait);
+}
+
+/* Régions : petite étiquette en haut à gauche. */
+.schema-zone-etiquette {
+  top: 6px;
+  left: 14px;
+  max-width: 80%;
+  font-size: 0.74rem;
+}
+
+.schema-zone-etiquette .schema-activite-libelle,
+.schema-zone-etiquette .schema-activite-saisie {
+  text-align: left;
+  padding: 0;
+}
+
+.schema-zone-mode {
+  font: inherit;
+  font-style: italic;
+  color: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  appearance: none;
+}
+
+.schema-zone-mode:not(:disabled) {
+  appearance: auto;
+  border-bottom: 1px dashed currentColor;
+}
+
+/* Région d'expansion : trois petites cases sur chaque bord (nœuds d'expansion). */
+.schema-zone-marques {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 32px;
+  margin-top: -16px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--ac-trait);
+  background: repeating-linear-gradient(to bottom, var(--surface, #fff) 0 9px, var(--ac-trait) 9px 10.5px);
+  pointer-events: none;
+}
+
+.schema-zone-marques--gauche {
+  left: -7px;
+}
+
+.schema-zone-marques--droite {
+  right: -7px;
+}
+
+/* Le nœud React Flow d'une zone ne capte rien lui-même : voir `.schema-zone` pour ce qui reste cliquable. */
+.react-flow__node:has(.schema-zone) {
+  pointer-events: none !important;
+}
+
+.react-flow__node:has(.schema-zone) .react-flow__resize-control {
+  pointer-events: all;
+}
+
+/* ───── Palette de couleurs (double-clic) ───── */
+
+.schema-palette {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border: 1px solid var(--line, #e2e2e2);
+  border-radius: 999px;
+  background: var(--surface, #fff);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.schema-palette-pastille {
+  position: relative;
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  background-clip: padding-box;
+}
+
+.schema-palette-pastille:hover {
+  transform: scale(1.1);
+}
+
+.schema-palette-pastille.is-active {
+  outline: 2px solid var(--ink, #222);
+  outline-offset: 2px;
+}
+
+.schema-palette-perso {
+  background: conic-gradient(#e5484d, #eec643, #3f9a5a, #3b82e0, #8b5cf6, #e5484d);
+}
+
+.schema-palette-perso input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.schema-palette-bouton {
+  box-sizing: border-box;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--ink, #222);
+  background: transparent;
+  border: 1px solid var(--line, #e2e2e2);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.schema-palette-bouton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ───── Menu « + Ajouter » à plat en plein écran ───── */
+
+.schema-add-plat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-width: min(980px, calc(100vw - 260px));
+}
+
+.schema-add-plat-categories,
+.schema-add-plat-elements {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.3rem;
+}
+
+.schema-add-plat-cat.is-ouvert {
+  border-color: var(--accent, #3b82e0);
+  font-weight: 600;
+}
+
+.schema-add-plat-groupe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.schema-add-plat-titre {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+}
+
+/* Export sur fond clair : formes, textes et traits passent en couleurs « papier » (le thème de
+   l'écran est sombre, ses textes clairs seraient invisibles sur l'image). */
+.react-flow__viewport.schema-export-clair .schema-activite {
+  --ink: #1e293b;
+  --surface: #ffffff;
+  --line-strong: #64748b;
+}
+
+/* ───── Menu « + Ajouter » du diagramme d'activité : une catégorie dépliable à la fois ───── */
+
+.schema-add-menu-dropdown {
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+}
+
+.schema-add-menu-categorie {
+  display: flex;
+  flex-direction: column;
+}
+
+.schema-add-menu-dropdown .schema-add-menu-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-weight: 600;
+}
+
+.schema-add-menu-dropdown .schema-add-menu-entete.is-ouvert {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.schema-add-menu-sous {
+  display: flex;
+  flex-direction: column;
+  margin: 0.1rem 0 0.25rem 0.6rem;
+  padding-left: 0.4rem;
+  border-left: 1.5px solid var(--line, #e2e2e2);
+}

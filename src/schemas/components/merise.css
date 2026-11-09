@@ -1,0 +1,875 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   merise.css — fichier AUTONOME, à placer dans le dossier components, à côté de SchemaCanvas.tsx.
+   Chargé par `import './merise.css'` dans les nœuds, les éditeurs et SchemaCanvas :
+   rien à coller dans schemas.css.
+
+   Parties :
+     1. nœuds : table (MLD/MPD), entité et association (MCD)
+     2. éditeurs sous le canevas (.merise-editor …)
+     3. conteneur canevas + éditeur, plein écran
+     4. bouton « Dupliquer »
+     5. marqueurs des liens FK (pattes d'oie)
+     6. cadre « Aperçu de l'export »
+     7. rendu de l'export sur fond clair
+
+   Toutes les règles de l'éditeur sont préfixées par .merise-editor : elles l'emportent
+   ainsi sur d'éventuels styles globaux (button, input[type='text'], select…).
+   Les variables --me-* sont locales : ajuste-les pour coller à ta charte.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ═════════════ 1. Nœuds : table (MLD/MPD), entité et association (MCD) ═════════════ */
+
+/* La grille des colonnes est posée en ligne par chaque nœud (gridTemplateColumns) ; chaque
+   ligne en reprend les pistes (subgrid) : les colonnes restent alignées d'une ligne à
+   l'autre et chacune a sa propre largeur. */
+.schema-node-merise .schema-node-section {
+  display: grid;
+  padding: 0;
+}
+
+.schema-node-merise .schema-ligne {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  position: relative;
+  align-items: center;
+  min-height: 28px;
+  font-size: 0.85rem;
+}
+
+.schema-node-merise .schema-ligne + .schema-ligne {
+  border-top: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.schema-node-merise .schema-cell {
+  min-width: 0;
+  padding: 5px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.schema-node-merise .schema-cell--cle {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-right: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.schema-node-merise .schema-cell--nom {
+  font-weight: 600;
+}
+
+/* Identifiant (MCD) et clé primaire (MLD) : soulignés. */
+.schema-node-merise .schema-cell--nom.is-identifiant {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.schema-node-merise .schema-cell--type,
+.schema-node-merise .schema-cell--contraintes {
+  border-left: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.schema-node-merise .schema-cell--type {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+.schema-node-merise .schema-cell--contraintes {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  opacity: 0.85;
+}
+
+/* Association du MCD : rectangle arrondi. */
+.schema-node-mcd-association {
+  border-radius: 18px;
+}
+
+.schema-node-mcd-association .schema-node-header {
+  border-radius: 16px 16px 0 0;
+}
+
+.schema-node-mcd-association:not(:has(.schema-node-section)) .schema-node-header {
+  border-radius: 16px;
+}
+
+/* Sélecteur « min , max » du panneau de branche MCD. */
+.schema-cardinalite-choix {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+}
+
+/* ═════════════ 2. Éditeur sous le canevas ═════════════ */
+
+.merise-editor {
+  /* Couleurs issues du thème de l'application (clair / sombre) ; les valeurs sombres ne servent
+     que de secours si une variable n'existe pas. */
+  --me-surface: var(--surface, #171a3a);
+  --me-fond: color-mix(in srgb, var(--ink, #e7e9ff) 5%, var(--surface, #0f1230));
+  --me-bordure: var(--line, #2d3368);
+  --me-bordure-vive: var(--accent, #8b7cf8);
+  --me-texte: var(--ink, #e7e9ff);
+  --me-discret: color-mix(in srgb, var(--ink, #e7e9ff) 60%, var(--surface, #0f1230));
+  --me-accent: var(--accent, #8b7cf8);
+  --me-danger: #e0453a;
+
+  /* Hauteur dynamique : le panneau prend la hauteur de son contenu (basis auto) et ne
+     rétrécit que si le canevas ne peut plus céder de place (il garde 240px minimum). */
+  flex: 0 1 auto;
+  min-height: 150px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--me-surface);
+  border-top: 1px solid var(--me-bordure);
+  color: var(--me-texte);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.merise-editor *,
+.merise-editor *::before,
+.merise-editor *::after {
+  box-sizing: border-box;
+}
+
+/* ───── En-tête ───── */
+
+.merise-editor .me-entete {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px 6px;
+}
+
+.merise-editor .me-champ-nom {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  max-width: 20rem;
+}
+
+.merise-editor .me-etiquette {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--me-discret);
+}
+
+.merise-editor .me-entete-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ───── Champs ───── */
+
+.merise-editor .me-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  padding: 0 8px;
+  background-color: var(--me-fond);
+  color: var(--me-texte);
+  border: 1px solid var(--me-bordure);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.8rem;
+  box-shadow: none;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.merise-editor .me-input::placeholder {
+  color: color-mix(in srgb, var(--me-discret) 65%, transparent);
+}
+
+.merise-editor .me-input:hover {
+  border-color: color-mix(in srgb, var(--me-bordure-vive) 45%, var(--me-bordure));
+}
+
+.merise-editor .me-input:focus {
+  outline: none;
+  border-color: var(--me-bordure-vive);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--me-accent) 25%, transparent);
+}
+
+.merise-editor .me-input--titre {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.merise-editor .me-input--mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.merise-editor .me-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 22px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%238f95c9' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.merise-editor .me-select option {
+  background: var(--me-fond);
+  color: var(--me-texte);
+}
+
+/* ───── Boutons ───── */
+
+.merise-editor .me-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  margin: 0;
+  padding: 0 10px;
+  background-color: var(--me-fond);
+  color: var(--me-texte);
+  border: 1px solid var(--me-bordure);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.merise-editor .me-bouton:hover:not(:disabled) {
+  border-color: var(--me-bordure-vive);
+  background-color: color-mix(in srgb, var(--me-accent) 12%, var(--me-fond));
+}
+
+.merise-editor .me-bouton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--me-accent) 30%, transparent);
+}
+
+.merise-editor .me-bouton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.merise-editor .me-bouton--icone {
+  width: 28px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.merise-editor .me-bouton--mini {
+  width: 18px;
+  height: 28px;
+  font-size: 0.85rem;
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--me-discret);
+}
+
+.merise-editor .me-bouton--petit {
+  height: 24px;
+  padding: 0 9px;
+  font-size: 0.74rem;
+}
+
+.merise-editor .me-bouton--discret {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--me-discret);
+}
+
+.merise-editor .me-bouton--danger {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--me-discret);
+}
+
+.merise-editor .me-bouton--danger:hover:not(:disabled) {
+  color: var(--me-danger);
+  border-color: color-mix(in srgb, var(--me-danger) 55%, transparent);
+  background-color: color-mix(in srgb, var(--me-danger) 12%, var(--me-fond));
+}
+
+.merise-editor .me-bouton--principal {
+  background-color: var(--me-accent);
+  border-color: var(--me-accent);
+  color: #12122b;
+  font-weight: 600;
+}
+
+.merise-editor .me-bouton--principal:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--me-accent) 85%, white);
+  border-color: color-mix(in srgb, var(--me-accent) 85%, white);
+}
+
+/* ───── Apparence (dépliable) ───── */
+
+.merise-editor .me-pastilles {
+  display: inline-flex;
+}
+
+.merise-editor .me-pastilles i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin-left: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--me-fond);
+  box-sizing: content-box;
+}
+
+.merise-editor .me-pastilles i:first-child {
+  margin-left: 0;
+}
+
+.merise-editor .me-chevron {
+  display: inline-block;
+  color: var(--me-discret);
+  transition: transform 0.15s;
+}
+
+.merise-editor .me-bouton--apparence.is-ouvert {
+  border-color: var(--me-bordure-vive);
+}
+
+.merise-editor .me-bouton--apparence.is-ouvert .me-chevron {
+  transform: rotate(180deg);
+}
+
+/* Compact : thèmes sur une ligne, puis les 4 couleurs côte à côte. */
+.merise-editor .me-apparence {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 12px 8px;
+  padding: 8px 10px;
+  background: var(--me-fond);
+  border: 1px solid var(--me-bordure);
+  border-radius: 8px;
+}
+
+.merise-editor .me-themes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.merise-editor .me-themes .me-etiquette {
+  margin-right: 2px;
+}
+
+.merise-editor .me-themes-reset {
+  margin-left: auto;
+}
+
+.merise-editor .me-couleurs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px 14px;
+}
+
+.merise-editor .me-couleur {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.merise-editor .me-couleur input[type='color'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--me-bordure);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.merise-editor .me-couleur input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.merise-editor .me-couleur input[type='color']::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+.merise-editor .me-couleur input[type='color']::-moz-color-swatch {
+  border: none;
+  border-radius: 5px;
+}
+
+.merise-editor .me-couleur-texte {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  font-size: 0.72rem;
+}
+
+.merise-editor .me-couleur-texte code {
+  font-size: 0.62rem;
+  color: var(--me-discret);
+  background: none;
+  padding: 0;
+}
+
+/* ───── Tableau des éléments (zone qui défile) ───── */
+
+/* Le corps (Apparence + éléments) est la SEULE zone qui défile : l'en-tête et le pied
+   restent toujours visibles. Il ne défile que si l'espace disponible est épuisé. */
+.merise-editor .me-corps {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--me-bordure) transparent;
+}
+
+.merise-editor .me-tableau {
+  padding: 0 12px 4px;
+}
+
+.merise-editor .me-ligne {
+  display: grid;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.merise-editor .me-bloc {
+  margin-bottom: 4px;
+}
+
+.merise-editor .me-bloc > .me-ligne {
+  margin-bottom: 0;
+}
+
+/* Une grille par outil : MPD (ordre · nom · type · PK · NN · UQ · AI · défaut · FK · ×), MLD,
+   et les deux éléments du MCD. */
+.merise-editor .me-ligne--mpd {
+  grid-template-columns: 38px minmax(90px, 1.2fr) minmax(88px, 1fr) 28px 28px 28px 28px minmax(70px, 0.7fr) minmax(130px, 1.3fr) 28px;
+}
+
+.merise-editor .me-ligne--mld {
+  grid-template-columns: 38px minmax(110px, 1.4fr) 28px minmax(150px, 1.4fr) 28px;
+}
+
+.merise-editor .me-ligne--mcd-entite {
+  grid-template-columns: 38px minmax(120px, 1.4fr) minmax(100px, 1fr) 64px 28px;
+}
+
+.merise-editor .me-ligne--mcd-association {
+  grid-template-columns: 38px minmax(120px, 1.4fr) minmax(100px, 1fr) 28px;
+}
+
+/* Cases à cocher (PK, NN, UQ, AI, identifiant). */
+.merise-editor .me-case {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  cursor: pointer;
+}
+
+.merise-editor .me-case input {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background: var(--me-fond);
+  border: 1px solid var(--me-bordure);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.merise-editor .me-case input:hover:not(:disabled) {
+  border-color: var(--me-bordure-vive);
+}
+
+.merise-editor .me-case input:checked {
+  background: var(--me-accent);
+  border-color: var(--me-accent);
+}
+
+.merise-editor .me-case input:checked::after {
+  content: '';
+  width: 8px;
+  height: 4px;
+  margin-top: -2px;
+  border-left: 2px solid #12122b;
+  border-bottom: 2px solid #12122b;
+  transform: rotate(-45deg);
+}
+
+.merise-editor .me-case input:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.merise-editor .me-case input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--me-accent) 30%, transparent);
+}
+
+/* Actions de la clé étrangère (MPD), sous la ligne de la colonne. */
+.merise-editor .me-ligne-fk {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 3px 0 2px 44px;
+  font-size: 0.68rem;
+  color: var(--me-discret);
+}
+
+.merise-editor .me-ligne-fk label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.merise-editor .me-ligne-fk .me-fk-lecture {
+  flex-basis: 100%;
+  margin: 0;
+  font-style: italic;
+  color: color-mix(in srgb, var(--me-discret) 85%, var(--me-texte));
+}
+
+.merise-editor .me-ligne-fk .me-select.me-select--court {
+  width: 64px;
+}
+
+.merise-editor .me-ligne-fk .me-select {
+  width: 140px;
+  height: 24px;
+  font-size: 0.74rem;
+}
+
+.merise-editor .me-ligne--titres {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-bottom: 3px;
+  padding: 4px 0 3px;
+  background: var(--me-surface);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--me-discret);
+}
+
+.merise-editor .me-ordre {
+  display: flex;
+}
+
+.merise-editor .me-vide {
+  margin: 4px 0 8px;
+  color: var(--me-discret);
+}
+
+/* ───── Pied fixe ───── */
+
+.merise-editor .me-pied {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--me-bordure);
+}
+
+.merise-editor .me-astuce {
+  font-size: 0.7rem;
+  color: var(--me-discret);
+}
+
+/* ═════════════ 3. Conteneur canevas + éditeur, et plein écran ═════════════ */
+
+/* Colonne : le canevas (haut) et l'éditeur (bas). Le canevas garde au moins 240px et
+   absorbe le reste ; l'éditeur prend sa hauteur naturelle. Si le parent n'impose pas de
+   hauteur, l'ensemble grandit avec le contenu. (Préfixe div. : l'emporte sur d'éventuelles
+   règles .schema-canvas-wrap / .schema-canvas de schemas.css.) */
+div.schema-canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+div.schema-canvas-wrap > .schema-canvas {
+  flex: 1 0 240px;
+  min-width: 0;
+  min-height: 240px;
+  height: auto;
+  position: relative;
+}
+
+/* React Flow remplit la boîte du canevas par positionnement (et non par pourcentage de
+   hauteur) : il a ainsi toujours une taille, quelles que soient les règles de la page. */
+div.schema-canvas-wrap > .schema-canvas > .react-flow {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+}
+
+/* Plein écran : le conteneur recouvre toute la fenêtre (Échap pour quitter). */
+div.schema-canvas-wrap.is-plein-ecran {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  min-height: 0;
+  background: var(--surface, #0f1230);
+}
+
+/* ═════════════ 4. Bouton "Dupliquer" au-dessus de la table sélectionnée ═════════════ */
+
+/* Rendu par NodeToolbar dans la couche du canevas (hors .merise-editor) : valeurs en dur. */
+.me-dupliquer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  background: var(--surface, #171a3a);
+  color: var(--ink, #e7e9ff);
+  border: 1px solid var(--line, #2d3368);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.me-dupliquer:hover {
+  background: color-mix(in srgb, var(--ink, #e7e9ff) 8%, var(--surface, #171a3a));
+  border-color: var(--accent, #8b7cf8);
+}
+
+.me-dupliquer:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 124, 248, 0.35);
+}
+
+/* ═════════════ 5. Marqueurs des liens FK (pattes d'oie du MPD) ═════════════ */
+
+.schema-marker-sql {
+  fill: none;
+  stroke: var(--xy-edge-stroke, var(--xy-edge-stroke-default, #b1b1b7));
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/* Le rond du « zéro » est plein, à la couleur du fond du canevas, pour masquer le trait derrière. */
+.schema-marker-sql.schema-marker-sql--rond {
+  fill: var(--schema-canvas-fond, var(--surface, #14173a));
+}
+
+/* ═════════════ 6. Cadre « Aperçu de l'export » (sous le canevas et l'éditeur) ═════════════ */
+
+.me-apercu {
+  --ap-surface: var(--surface, #14173a);
+  --ap-fond: color-mix(in srgb, var(--ink, #e7e9ff) 5%, var(--surface, #0f1230));
+  --ap-bordure: var(--line, #2d3368);
+  --ap-texte: var(--ink, #e7e9ff);
+  --ap-discret: color-mix(in srgb, var(--ink, #e7e9ff) 60%, var(--surface, #14173a));
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--ap-surface);
+  border: 1px solid var(--ap-bordure);
+  border-radius: 10px;
+  color: var(--ap-texte);
+  font-size: 0.78rem;
+}
+
+.me-apercu-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 6px 12px;
+}
+
+.me-apercu .me-apercu-titre {
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  color: inherit;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ap-discret);
+  cursor: pointer;
+}
+
+.me-apercu .me-apercu-titre:hover {
+  color: var(--ap-texte);
+}
+
+.me-apercu-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.me-apercu-actions label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ap-discret);
+}
+
+.me-apercu .me-apercu-actions select {
+  height: 24px;
+  padding: 0 6px;
+  background: var(--ap-fond);
+  color: var(--ap-texte);
+  border: 1px solid var(--ap-bordure);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.me-apercu-taille {
+  color: var(--ap-discret);
+  font-variant-numeric: tabular-nums;
+}
+
+.me-apercu .me-apercu-bouton {
+  height: 26px;
+  padding: 0 12px;
+  background: var(--accent, #8b7cf8);
+  color: var(--on-accent, #fff);
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.me-apercu .me-apercu-bouton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.me-apercu-corps {
+  display: flex;
+  justify-content: center;
+  max-height: 60vh;
+  min-height: 120px;
+  overflow: auto;
+  padding: 12px;
+  background: var(--ap-fond);
+  border-top: 1px solid var(--ap-bordure);
+}
+
+/* Damier : rend visible la transparence du PNG. */
+.me-apercu-corps.is-transparent {
+  background-color: #f1f3f9;
+  background-image: conic-gradient(#d9dce8 25%, transparent 25% 50%, #d9dce8 50% 75%, transparent 75%);
+  background-size: 16px 16px;
+}
+
+.me-apercu-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  align-self: flex-start;
+  transition: opacity 0.15s;
+}
+
+.me-apercu-image.is-en-cours {
+  opacity: 0.55;
+}
+
+.me-apercu-message {
+  margin: auto;
+  color: var(--ap-discret);
+}
+
+.me-apercu-message--erreur {
+  color: #e0453a;
+}
+
+/* ═════════════ 7. Export sur fond clair ═════════════ */
+
+/* Classe posée sur la zone capturée le temps de l'export (voir lib/exportPng.ts) : les liens
+   et leurs étiquettes, clairs sur le canevas sombre, deviennent sombres sur l'image. */
+.react-flow__viewport.schema-export-clair {
+  --xy-edge-stroke: #475569;
+  --xy-edge-label-color: #1e293b;
+}
+
+.react-flow__viewport.schema-export-clair .react-flow__edge-path {
+  stroke: #475569 !important;
+}
+
+.react-flow__viewport.schema-export-clair .schema-edge-cardinalite,
+.react-flow__viewport.schema-export-clair .schema-edge-label {
+  color: #1e293b !important;
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Conteneur du cadre « Aperçu », inséré juste sous la mise en page « Mes schémas » + canevas. */
+.schema-apercu-zone {
+  margin-top: 1rem;
+}
+
+/* Pointes des liens (flèche du MLD, héritage, composition…) : leurs couleurs viennent du thème
+   (--ink, --surface), clair sur le canevas sombre. Sur fond clair, elles prennent la couleur du trait. */
+.react-flow__viewport.schema-export-clair .schema-marker-fleche {
+  stroke: #475569;
+}
+
+.react-flow__viewport.schema-export-clair .schema-marker-heritage,
+.react-flow__viewport.schema-export-clair .schema-marker-agregation {
+  fill: #ffffff;
+  stroke: #475569;
+}
+
+.react-flow__viewport.schema-export-clair .schema-marker-composition {
+  fill: #475569;
+}

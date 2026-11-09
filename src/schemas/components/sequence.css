@@ -1,0 +1,332 @@
+/*
+ * Diagramme de séquence — correctifs de mise en page. Importé APRÈS schemas.css : à
+ * spécificité égale, ces règles l'emportent sur les anciennes `.sequence-*`.
+ */
+
+/* Bug « canevas trop petit » : .sequence-tab est un enfant de .schema-main (flex en ligne) ;
+ * sans flex:1 il se réduisait à la largeur de la barre d'outils, et le cadre avec. */
+.sequence-tab {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.6rem;
+  overflow: hidden;
+}
+
+/* Le cadre prend toute la hauteur libre ; la liste des messages défile en dessous. */
+.sequence-frame {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 260px;
+  height: auto;
+}
+
+/* Remplissage absolu : insensible à l'erreur React Flow #004 (parent sans hauteur). */
+.sequence-frame > .react-flow {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+}
+
+.sequence-liste {
+  flex: 0 0 auto;
+  max-height: 38%;
+}
+
+/*
+ * Bug « participants inertes » : React Flow pose `pointer-events: none` en ligne sur un
+ * nœud ni déplaçable, ni sélectionnable, ni connectable. !important est nécessaire pour
+ * passer devant le style en ligne ; le panoramique/zoom du cadre reste inchangé.
+ */
+.sequence-frame .react-flow__node {
+  pointer-events: all !important;
+}
+
+/* Géométrie explicite (voir SequenceContentNode) : marge incluse dans l'export PNG. */
+.sequence-diagram-contenu {
+  box-sizing: content-box;
+}
+
+.sequence-participants {
+  box-sizing: border-box;
+}
+
+.sequence-participant {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+/* ───── Participant cliquable (l'édition se fait dans SequenceParticipantEditor) ───── */
+
+.sequence-participant-boite {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.25;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.5rem;
+  border: 1.5px solid var(--line-strong, #999);
+  border-radius: 6px;
+  background: var(--surface, #fff);
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.sequence-participant-boite:hover {
+  border-color: var(--accent, #8b7cf8);
+}
+
+.sequence-participant-boite:focus-visible,
+.sequence-participant-boite.is-selected {
+  outline: none;
+  border-color: var(--accent, #8b7cf8);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #8b7cf8) 30%, transparent);
+}
+
+/* ───── Éditeurs (cadre .merise-editor de merise.css) : participant et fragment ───── */
+
+.sequence-tab .merise-editor {
+  max-height: 50%;
+  border: 1px solid var(--line, #2d3368);
+  border-radius: var(--radius-md, 12px);
+}
+
+.merise-editor .me-ligne--sequence {
+  grid-template-columns: 40px minmax(80px, 0.9fr) 14px minmax(80px, 0.9fr) minmax(120px, 2fr) 104px 154px 124px 18px 18px 28px;
+}
+
+.merise-editor .me-champ-nom--ligne {
+  flex: 0 1 16rem;
+}
+
+.sequence-frame {
+  min-height: 220px;
+}
+
+.sequence-toolbar-droite {
+  margin-left: auto;
+}
+
+/* Plein écran : le diagramme et son éditeur recouvrent la fenêtre (Échap pour quitter). */
+.sequence-tab.is-plein-ecran {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  height: auto;
+  min-height: 0;
+  background: var(--surface, #0f1230);
+}
+
+/* Les noms de participants ne sont pas en capitales (contrairement aux tables). */
+.sequence-tab .merise-editor .me-input--titre {
+  text-transform: none;
+}
+
+.merise-editor .me-input.me-textarea {
+  height: auto;
+  min-height: 28px;
+  padding: 5px 8px;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.3;
+  font-family: inherit;
+}
+
+.sequence-liste-texte {
+  resize: none;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+.merise-editor .me-nouveau-message {
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+.merise-editor .sequence-editor {
+  display: flex;
+  flex-direction: column;
+}
+
+.merise-editor .me-ligne--sequence {
+  align-items: start;
+}
+
+.merise-editor .me-ligne--sequence > span,
+.merise-editor .me-ligne--sequence > .me-bouton {
+  align-self: center;
+}
+
+.merise-editor .me-ligne--portee {
+  grid-template-columns: 92px minmax(160px, 1fr) 74px minmax(160px, 1fr);
+}
+
+.merise-editor .sequence-operande-garde {
+  display: flex;
+  gap: 6px;
+}
+
+.merise-editor .sequence-fragment-entete {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex: 1;
+}
+
+.merise-editor .sequence-fragment-entete .me-champ-nom {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+/* ───── Acteur (bonhomme) : pas de rectangle, le trait et le fond viennent du bonhomme ───── */
+
+.sequence-participant {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.sequence-participant-boite.sequence-participant-acteur {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border-color: transparent;
+  background: transparent;
+  overflow: visible;
+  font-size: 0.78rem;
+  padding: 0 0.3rem;
+}
+
+.sequence-bonhomme {
+  flex: none;
+}
+
+.merise-editor .sequence-note-texte {
+  flex: 1 1 18rem;
+  max-width: 30rem;
+}
+
+.merise-editor .sequence-identite {
+  grid-template-columns: 92px minmax(160px, 1fr) 74px minmax(160px, 2fr);
+}
+
+/* ───── Changer un participant de place par glisser-déposer ───── */
+
+.sequence-participants {
+  position: relative;
+}
+
+.sequence-participant-boite[draggable='true'] {
+  cursor: grab;
+}
+
+.sequence-participant-boite[draggable='true']:active {
+  cursor: grabbing;
+}
+
+/* Barre verticale qui indique où le participant sera déposé. */
+.sequence-insertion {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--accent, #8b7cf8);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #8b7cf8) 30%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ───── Norme UML : participants créés, cadre sd ───── */
+
+.sequence-diagram-contenu {
+  position: relative;
+}
+
+/* Boîte d'un participant créé en cours de route (posée au niveau de la flèche de création). */
+.sequence-participant-creee {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sequence-participant-creee .sequence-participant-boite {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sequence-participant-creee .sequence-participant-boite.sequence-participant-acteur {
+  flex-direction: column;
+}
+
+.sequence-cadre-sd {
+  z-index: 0;
+}
+
+/* ───── Réordonner les messages à la souris ───── */
+
+.sequence-poignee {
+  display: inline-block;
+  margin-right: 2px;
+  cursor: grab;
+  opacity: 0.6;
+  user-select: none;
+}
+
+.sequence-poignee:hover {
+  opacity: 1;
+}
+
+.is-glisse {
+  opacity: 0.45;
+}
+
+.is-insertion-avant {
+  box-shadow: 0 -3px 0 0 var(--accent, #8b7cf8);
+}
+
+.is-insertion-apres {
+  box-shadow: 0 3px 0 0 var(--accent, #8b7cf8);
+}
+
+/* Options du diagramme (cadre sd, numérotation) */
+.sequence-options {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  padding: 0.35rem 0.1rem;
+  font-size: 0.8rem;
+}
+
+.sequence-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Liste générale des messages : le champ de texte garde une largeur utile, la ligne passe à la
+ * suivante plutôt que d'écraser le champ (et de le faire grandir démesurément). */
+.sequence-liste-ligne {
+  flex-wrap: wrap;
+}
+
+.sequence-liste-texte {
+  flex: 1 1 200px;
+  min-width: 160px;
+  box-sizing: border-box;
+  resize: none;
+  overflow: hidden;
+}

@@ -1,0 +1,22 @@
+/** Types SQL proposés dans l'éditeur MPD (la saisie reste libre : DECIMAL(12,4), ENUM(...), etc.). */
+export const MERISE_TYPES_SQL = [
+  'BIGINT',
+  'INT',
+  'SMALLINT',
+  'TINYINT',
+  'VARCHAR(255)',
+  'CHAR(1)',
+  'TEXT',
+  'LONGTEXT',
+  'BOOLEAN',
+  'DATE',
+  'DATETIME',
+  'TIMESTAMP',
+  'TIME',
+  'DECIMAL(10,2)',
+  'FLOAT',
+  'DOUBLE',
+  'UUID',
+  'JSON',
+  'BLOB',
+]

@@ -11,6 +11,8 @@ export interface ProfilInfos {
   /** Informative only, never inserted into the Word export: an exam usually spans several days. */
   dateExamenDebut: string
   dateExamenFin: string
+  /** Speaking pace (words/minute) used for every oral duration estimate and the teleprompter. */
+  wpm: number
 }
 
 export const EMPTY_PROFIL: ProfilInfos = {
@@ -25,6 +27,7 @@ export const EMPTY_PROFIL: ProfilInfos = {
   dateFinStage: '',
   dateExamenDebut: '',
   dateExamenFin: '',
+  wpm: 155,
 }
 
 export interface DossierReponse {
@@ -97,6 +100,8 @@ export const STORAGE_KEYS = {
   questionnaire: 'profil:questionnaire',
   caracteristiques: 'dossier:caracteristiques',
   competences: 'dossier:competences',
+  /** Ids de tâches masquées par l'utilisateur (non pertinentes pour son projet) — n'efface jamais la réponse déjà rédigée, que démasquer restaure telle quelle. */
+  tachesMasquees: 'dossier:taches-masquees',
   oralPresentation: 'oral:presentation',
   oralAnnexes: 'oral:annexes',
   oralTheme: 'oral:theme',
@@ -107,6 +112,8 @@ export const STORAGE_KEYS = {
    */
   codeExtraits: 'code:extraits',
   codeReglages: 'code:reglages',
+  /** "Mes schémas" (module schemas, React Flow) : même pattern que codeExtraits — vraie table CRUD, pas l'entrepôt générique. */
+  diagrammes: 'schemas:diagrammes',
   /** "Quizz révision" : seul le meilleur score cumulé est conservé (comme dans la version d'origine). */
   quiz: 'quiz:meilleur-score',
 } as const

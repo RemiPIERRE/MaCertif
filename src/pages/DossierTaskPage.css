@@ -48,15 +48,6 @@
   color: var(--ink-soft);
 }
 
-.task-counter.warn {
-  color: var(--amber);
-}
-
-.task-counter-hint {
-  font-size: 0.78rem;
-  color: var(--amber);
-}
-
 .task-editor textarea {
   width: 100%;
   font-family: inherit;

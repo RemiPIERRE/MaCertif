@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLocalStorage } from '../../lib/useLocalStorage'
 import { useDisclaimer } from '../../lib/useDisclaimer'
 import { flattenActivePresentation } from '../../lib/oralMutations'
-import { filledSlidesStats, formatMinutes, presentationDuration, pacingStatus } from '../../lib/oralTime'
+import { DEFAULT_WPM, filledSlidesStats, formatMinutes, presentationDuration, pacingStatus } from '../../lib/oralTime'
 import { createDefaultPresentation, createDefaultAnnexes } from '../../data/oralDefaults'
 import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos } from '../../types/storage'
 import { DisclaimerModal } from '../../components/DisclaimerModal'
@@ -13,14 +13,14 @@ import './OralHomePage.css'
 export function OralHomePage() {
   const [sections] = useLocalStorage<OralSection[]>(STORAGE_KEYS.oralPresentation, createDefaultPresentation())
   const [annexes] = useLocalStorage<OralAnnexCategory[]>(STORAGE_KEYS.oralAnnexes, createDefaultAnnexes())
-  const [profil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
+  const [profil, setProfil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
   const navigate = useNavigate()
   const disclaimer = useDisclaimer('disclaimer:oral')
   const [exporting, setExporting] = useState(false)
   const [exportingPptx, setExportingPptx] = useState(false)
 
   const stats = filledSlidesStats(sections)
-  const duration = presentationDuration(sections)
+  const duration = presentationDuration(sections, profil.wpm || DEFAULT_WPM)
   const status = pacingStatus(duration)
 
   const goToPresentation = () => {
@@ -62,7 +62,19 @@ export function OralHomePage() {
       <header className="page-header oral-home-header">
         <div>
           <div className="page-eyebrow">Ma certification</div>
-          <h1>Mon oral</h1>
+          <div className="oral-home-title-row">
+            <h1>Mon oral</h1>
+            <label className="oral-home-wpm">
+              <span>Vitesse du prompteur :</span>
+              <input
+                type="number"
+                min={80}
+                max={220}
+                value={profil.wpm || DEFAULT_WPM}
+                onChange={(e) => setProfil((prev) => ({ ...prev, wpm: Number(e.target.value) || DEFAULT_WPM }))}
+              />
+            </label>
+          </div>
           <p className="page-lede">
             Préparez le support de votre soutenance : {TARGET_TEXT}. Seules les slides de la Présentation comptent
             dans le temps ; les Annexes sont consultées librement pendant les questions du jury.

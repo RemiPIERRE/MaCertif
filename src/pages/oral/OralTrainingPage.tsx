@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLocalStorage } from '../../lib/useLocalStorage'
-import { STORAGE_KEYS } from '../../types/storage'
+import { STORAGE_KEYS, EMPTY_PROFIL, type ProfilInfos } from '../../types/storage'
 import { createDefaultPresentation } from '../../data/oralDefaults'
 import type { OralSection } from '../../types/oral'
 import { flattenActivePresentation } from '../../lib/oralMutations'
-import { assessFinalChrono, formatMinutes, slideDuration, WPM_MAX, WPM_MIN } from '../../lib/oralTime'
+import { DEFAULT_WPM, assessFinalChrono, formatMinutes, slideDuration } from '../../lib/oralTime'
 import './OralTrainingPage.css'
-
-const SCROLL_WPM = (WPM_MIN + WPM_MAX) / 2
 
 /** Where the fixed reading line sits, as a fraction of the prompter's height from the top. */
 const READING_LINE_RATIO = 0.3
@@ -35,6 +33,8 @@ export function OralTrainingPage({ mode }: TrainingPageProps) {
   const { slideId } = useParams<{ slideId: string }>()
   const navigate = useNavigate()
   const [sections] = useLocalStorage<OralSection[]>(STORAGE_KEYS.oralPresentation, createDefaultPresentation())
+  const [profil] = useLocalStorage<ProfilInfos>(STORAGE_KEYS.profil, EMPTY_PROFIL)
+  const scrollWpm = profil.wpm || DEFAULT_WPM
   const flat = flattenActivePresentation(sections)
   const index = flat.findIndex((e) => e.slide.id === slideId)
   const entry = flat[index]
@@ -88,7 +88,7 @@ export function OralTrainingPage({ mode }: TrainingPageProps) {
     const text = scrollTextRef.current
     if (!m || !text) return
 
-    const durationMs = (m.words / SCROLL_WPM) * 60 * 1000
+    const durationMs = (m.words / scrollWpm) * 60 * 1000
     const startTime = performance.now()
 
     function tick(now: number) {
@@ -102,7 +102,7 @@ export function OralTrainingPage({ mode }: TrainingPageProps) {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [started, finished, entry?.slide.id, mode])
+  }, [started, finished, entry?.slide.id, mode, scrollWpm])
 
   const goNext = () => {
     if (!started || finished) return
@@ -157,7 +157,7 @@ export function OralTrainingPage({ mode }: TrainingPageProps) {
     )
   }
 
-  const est = slideDuration(entry.slide.discours)
+  const est = slideDuration(entry.slide.discours, scrollWpm)
   const isLast = index === flat.length - 1
 
   return (

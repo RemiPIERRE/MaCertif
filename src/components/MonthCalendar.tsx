@@ -12,11 +12,23 @@ interface MonthCalendarProps {
   onPrev: () => void
   onNext: () => void
   onToday: () => void
+  /** Appelé au clic sur le fond d'une cellule jour (pas sur une puce d'échéance) pour un ajout rapide. */
+  onDayClick?: (date: Date) => void
 }
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+/** Au-delà de ce nombre d'échéances sur un même jour, le reste est résumé en "+N" plutôt que de déborder la cellule. */
+const MAX_VISIBLE_EVENTS = 3
+/** Longueur max d'un intitulé affiché dans une cellule — la grille (colonnes 1fr) s'agrandit
+ * sinon pour accueillir le texte au lieu de le tronquer par ellipsis CSS, donc on tronque
+ * explicitement la chaîne ; le texte complet reste disponible via l'attribut title. */
+const MAX_LABEL_LENGTH = 7
 
-export function MonthCalendar({ monthDate, events, onPrev, onNext, onToday }: MonthCalendarProps) {
+function truncateLabel(label: string): string {
+  return label.length > MAX_LABEL_LENGTH ? `${label.slice(0, MAX_LABEL_LENGTH)}...` : label
+}
+
+export function MonthCalendar({ monthDate, events, onPrev, onNext, onToday, onDayClick }: MonthCalendarProps) {
   const year = monthDate.getFullYear()
   const month = monthDate.getMonth()
   const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7
@@ -66,22 +78,32 @@ export function MonthCalendar({ monthDate, events, onPrev, onNext, onToday }: Mo
       </div>
 
       <div className="month-calendar-grid">
-        {cells.map((day, i) => (
-          <div key={i} className={`month-calendar-cell${day === null ? ' empty' : ''}${day && isToday(day) ? ' today' : ''}`}>
-            {day !== null && (
-              <>
-                <div className="month-calendar-daynum">{day}</div>
-                <div className="month-calendar-events">
-                  {(eventsByDay.get(day) ?? []).map((event, idx) => (
-                    <div key={idx} className={`month-calendar-event event-${event.kind}`} title={event.label}>
-                      {event.label}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        ))}
+        {cells.map((day, i) => {
+          const dayEvents = day !== null ? (eventsByDay.get(day) ?? []) : []
+          const visibleEvents = dayEvents.slice(0, MAX_VISIBLE_EVENTS)
+          const hiddenCount = dayEvents.length - visibleEvents.length
+          return (
+            <div
+              key={i}
+              className={`month-calendar-cell${day === null ? ' empty' : ''}${day && isToday(day) ? ' today' : ''}${day !== null && onDayClick ? ' clickable' : ''}`}
+              onClick={day !== null && onDayClick ? () => onDayClick(new Date(year, month, day)) : undefined}
+            >
+              {day !== null && (
+                <>
+                  <div className="month-calendar-daynum">{day}</div>
+                  <div className="month-calendar-events">
+                    {visibleEvents.map((event, idx) => (
+                      <div key={idx} className={`month-calendar-event event-${event.kind}`} title={event.label}>
+                        {truncateLabel(event.label)}
+                      </div>
+                    ))}
+                    {hiddenCount > 0 && <div className="month-calendar-event-more">+{hiddenCount}</div>}
+                  </div>
+                </>
+              )}
+            </div>
+          )
+        })}
       </div>
 
       <div className="month-calendar-legend">

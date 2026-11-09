@@ -8,6 +8,7 @@
   min-width: 0;
   padding: 2.25rem 3rem 4rem;
   max-width: 1000px;
+  margin: 0 auto;
 }
 
 @media (max-width: 900px) {

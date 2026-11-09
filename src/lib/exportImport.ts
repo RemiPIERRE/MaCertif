@@ -337,6 +337,22 @@ const VALIDATORS: Record<string, (value: unknown) => string | null> = {
     return null
   },
   [STORAGE_KEYS.oralTheme]: (v) => (isString(v) ? null : 'Le thème choisi pour Mon oral doit être une chaîne de caractères.'),
+  [STORAGE_KEYS.tachesMasquees]: (v) => {
+    if (!Array.isArray(v)) return 'Les tâches masquées doivent être une liste.'
+    for (const id of v) {
+      if (!isString(id)) return 'Un identifiant de tâche masquée est mal formé.'
+    }
+    return null
+  },
+  [STORAGE_KEYS.diagrammes]: (v) => {
+    if (!Array.isArray(v)) return '« Mes schémas » doit être une liste.'
+    for (const item of v) {
+      if (!isPlainObject(item) || !isString(item.id) || !isString(item.nom) || !isString(item.creeLe) || !isString(item.modifieLe)) {
+        return 'Un schéma est mal formé.'
+      }
+    }
+    return null
+  },
   // STORAGE_KEYS.codeExtraits / codeReglages ("Mes extraits de code") have no entry
   // here on purpose: the code-image module re-normalizes both on every read (see
   // normalizeExtraits/normalizeReglages, called from its own useExtraits hook), so a
