@@ -166,6 +166,10 @@ export interface Disposition {
   vies: VieLigne[];
   barres: BarreActivation[];
   xLigneDeVie: (participantId: string) => number | null;
+  /** Largeur réelle de la colonne d'un participant (voir largeurColonneParticipant) — toujours >= COLONNE_LARGEUR. */
+  largeurColonne: (participantId: string) => number;
+  /** Abscisse de départ (bord gauche) de chaque colonne, dans l'ordre des participants — pour le glisser-déposer des en-têtes. */
+  offsetsColonnes: number[];
 }
 
 export interface OptionsDisposition {
@@ -209,6 +213,47 @@ export function etiquetteFragment(
 
 function largeurTexte(lignes: string[]): number {
   return Math.max(0, ...lignes.map((l) => l.length)) * LARGEUR_CARACTERE;
+}
+
+/** Police effective de .sequence-participant-boite (sequence.css) : même famille que le reste
+ * de l'appli (voir --font-sans dans index.css), même taille/graisse que la règle CSS. */
+const POLICE_PARTICIPANT = "600 13.12px 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
+let canvasMesure: HTMLCanvasElement | null = null;
+
+/**
+ * Largeur réelle du texte le plus long (Canvas 2D, police ci-dessus) — plus fiable qu'une
+ * estimation au nombre de caractères pour un texte en casse mixte (une majuscule n'a pas la
+ * même largeur qu'un « i »). Dégrade sur `largeurTexte` si Canvas est indisponible (tests).
+ */
+function mesurerLargeurMax(lignes: string[]): number {
+  try {
+    canvasMesure ??= document.createElement("canvas");
+    const ctx = canvasMesure.getContext("2d");
+    if (!ctx) return largeurTexte(lignes);
+    ctx.font = POLICE_PARTICIPANT;
+    const largeur = Math.max(0, ...lignes.map((l) => ctx.measureText(l).width));
+    return largeur > 0 ? largeur : largeurTexte(lignes);
+  } catch {
+    return largeurTexte(lignes);
+  }
+}
+
+/**
+ * Marge ajoutée à la largeur de texte mesurée pour obtenir la largeur de colonne : le padding
+ * horizontal de .sequence-participant (0.6rem × 2 = 19.2px, schemas.css) + celui de
+ * .sequence-participant-boite (0.5rem × 2 = 16px) + sa bordure (1.5px × 2 = 3px, sequence.css),
+ * plus une petite marge de sécurité. Un seul endroit à ajuster si ce CSS change.
+ */
+const MARGE_COLONNE_PARTICIPANT = 19.2 + 16 + 3 + 4;
+
+/**
+ * Largeur de la colonne d'un participant : assez large pour que son étiquette tienne sur une
+ * seule ligne par retour-à-la-ligne manuel (Entrée), sans jamais couper un mot au milieu. Ne
+ * descend jamais sous COLONNE_LARGEUR (étiquettes courtes : comportement inchangé).
+ */
+function largeurColonneParticipant(p: SequenceParticipant): number {
+  const lignes = etiquetteParticipant(p).split("\n");
+  return Math.max(COLONNE_LARGEUR, mesurerLargeurMax(lignes) + MARGE_COLONNE_PARTICIPANT);
 }
 
 function hauteurBoiteCreee(p: SequenceParticipant | undefined): number {
@@ -356,9 +401,32 @@ export function calculerDisposition(
   options: OptionsDisposition = {},
 ): Disposition {
   const colonne = new Map(participants.map((p, i) => [p.id, i]));
+  /* Largeur de chaque colonne : au moins COLONNE_LARGEUR, plus si l'étiquette du participant
+   * (retours à la ligne manuels compris) ne tiendrait pas sinon — voir largeurColonneParticipant.
+   * Colonnes posées bord à bord (offsets cumulés) : xLigneDeVie en est le centre. */
+  const largeursColonnes = participants.map(largeurColonneParticipant);
+  const offsetsColonnes: number[] = [];
+  {
+    let cumul = 0;
+    for (const l of largeursColonnes) {
+      offsetsColonnes.push(cumul);
+      cumul += l;
+    }
+  }
+  const largeurColonnesTotale =
+    0 === largeursColonnes.length
+      ? 0
+      : offsetsColonnes[offsetsColonnes.length - 1] +
+        largeursColonnes[largeursColonnes.length - 1];
   const xLigneDeVie = (id: string) => {
     const i = colonne.get(id);
-    return undefined === i ? null : i * COLONNE_LARGEUR + COLONNE_LARGEUR / 2;
+    return undefined === i
+      ? null
+      : offsetsColonnes[i] + largeursColonnes[i] / 2;
+  };
+  const largeurColonne = (id: string): number => {
+    const i = colonne.get(id);
+    return undefined === i ? COLONNE_LARGEUR : largeursColonnes[i];
   };
 
   const idVersIndex = new Map(messages.map((m, i) => [m.id, i]));
@@ -458,7 +526,7 @@ export function calculerDisposition(
         : (messages[messages.length - 1]?.id ?? null);
     notesParApres.set(cle, [...(notesParApres.get(cle) ?? []), n]);
   });
-  let droiteMax = participants.length * COLONNE_LARGEUR;
+  let droiteMax = largeurColonnesTotale;
 
   let courant = HAUT_CORPS;
   const poserNotes = (cle: string | null, apresIndex: number) => {
@@ -714,8 +782,9 @@ export function calculerDisposition(
         }
       });
       if (!Number.isFinite(gauche)) {
-        gauche = COLONNE_LARGEUR / 2 - marge;
-        droite = COLONNE_LARGEUR / 2 + marge;
+        const centre = largeursColonnes.length > 0 ? largeursColonnes[0] / 2 : COLONNE_LARGEUR / 2;
+        gauche = centre - marge;
+        droite = centre + marge;
       }
       gauche = Math.max(4, gauche);
 
@@ -747,6 +816,15 @@ export function calculerDisposition(
           y: tops[op.index] + rangSep * BANDEAU_OPERANDE,
           garde: formaterGarde(op.garde),
         };
+      });
+      // La garde d'un opérande suivant (ex. « sinon ») démarre à la même abscisse que celle du
+      // premier opérande (voir le rendu, SequenceContentNode) : le cadre doit rester assez large
+      // pour elle aussi, pas seulement pour la garde du premier opérande.
+      separateurs.forEach((s) => {
+        droite = Math.max(
+          droite,
+          gauche + etiquetteLargeur + 8 + s.garde.length * LARGEUR_CARACTERE + 12,
+        );
       });
 
       droiteMax = Math.max(droiteMax, droite + 8);
@@ -794,6 +872,8 @@ export function calculerDisposition(
     vies,
     barres,
     xLigneDeVie,
+    largeurColonne,
+    offsetsColonnes,
   };
 }
 

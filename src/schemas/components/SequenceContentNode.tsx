@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react'
 import type { NodeProps, Node } from '@xyflow/react'
-import { BARRE_LARGEUR, BOUCLE_LARGEUR, COLONNE_LARGEUR, CROIX_DEMI, etiquetteParticipant, HAUTEUR_ENTETE, INTERLIGNE, MARGE_CONTENU, SD_ETIQUETTE_HAUTEUR, type CadreFragment, type Disposition, type DureeMiseEnPage, type NoteMiseEnPage } from '../lib/sequenceLayout'
+import { BARRE_LARGEUR, BOUCLE_LARGEUR, CROIX_DEMI, etiquetteParticipant, HAUTEUR_ENTETE, INTERLIGNE, MARGE_CONTENU, SD_ETIQUETTE_HAUTEUR, type CadreFragment, type Disposition, type DureeMiseEnPage, type NoteMiseEnPage } from '../lib/sequenceLayout'
 import type { SequenceParticipant } from '../types'
 
 /** Ce qui est sélectionné (et ouvre un éditeur sous le canevas). */
@@ -168,7 +168,9 @@ function Cadre({ cadre, selectionne, onSelectionner, partie }: { cadre: CadreFra
         <g key={s.operandeId} onClick={ouvrir} className="sequence-fragment-separateur">
           <line x1={x} y1={s.y} x2={x + largeur} y2={s.y} style={{ stroke: contour, strokeWidth: 1.6, strokeDasharray: dash }} />
           {'' !== s.garde && (
-            <text x={x + 10} y={s.y + 15} style={{ fill: texteGarde, fontSize: 11, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer' }}>
+            // Même abscisse que la garde du premier opérande (x + t + 8, juste après le pentagone
+            // "alt"/"loop"…) : sinon elle démarre plus à gauche et chevauche la première ligne de vie.
+            <text x={x + t + 8} y={s.y + 15} style={{ fill: texteGarde, fontSize: 11, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer' }}>
               {s.garde}
             </text>
           )}
@@ -213,19 +215,36 @@ export function SequenceContentNode({ data }: Props) {
   const [insertion, setInsertion] = useState<number | null>(null)
   const enteteRef = useRef<HTMLDivElement | null>(null)
 
-  /** Emplacement d'insertion sous le pointeur, correct quel que soit le zoom du canevas. */
+  const { largeur, hauteur, hauteurCorps, lignes, cadres, notes, durees, creations, vies, barres, xLigneDeVie, largeurColonne, offsetsColonnes, extra, sd } = disposition
+  // Bord gauche de chaque colonne, plus le bord droit de la dernière : une limite par position
+  // d'insertion possible (0 = tout à gauche, participants.length = tout à droite).
+  const limitesColonnes =
+    0 === participants.length
+      ? [0]
+      : [...offsetsColonnes, offsetsColonnes[offsetsColonnes.length - 1] + largeurColonne(participants[participants.length - 1].id)]
+
+  /** Emplacement d'insertion sous le pointeur, correct quel que soit le zoom du canevas (colonnes de largeur variable : on cherche la limite la plus proche). */
   const indexSousPointeur = (clientX: number): number => {
     const rect = enteteRef.current?.getBoundingClientRect()
-    if (!rect || 0 === rect.width || 0 === participants.length) return 0
-    const echelle = rect.width / (participants.length * COLONNE_LARGEUR)
-    const index = Math.round((clientX - rect.left) / echelle / COLONNE_LARGEUR)
-    return Math.max(0, Math.min(participants.length, index))
+    const largeurTotale = limitesColonnes[limitesColonnes.length - 1]
+    if (!rect || 0 === rect.width || 0 === participants.length || 0 === largeurTotale) return 0
+    const echelle = rect.width / largeurTotale
+    const xLogique = (clientX - rect.left) / echelle
+    let meilleur = 0
+    let distanceMini = Infinity
+    limitesColonnes.forEach((limite, i) => {
+      const distance = Math.abs(limite - xLogique)
+      if (distance < distanceMini) {
+        distanceMini = distance
+        meilleur = i
+      }
+    })
+    return meilleur
   }
   const finGlisser = () => {
     setGlisse(null)
     setInsertion(null)
   }
-  const { largeur, hauteur, hauteurCorps, lignes, cadres, notes, durees, creations, vies, barres, xLigneDeVie, extra, sd } = disposition
   const creeId = new Set(creations.map((c) => c.participantId))
   const parId = new Map(participants.map((p) => [p.id, p]))
 
@@ -307,9 +326,9 @@ export function SequenceContentNode({ data }: Props) {
           finGlisser()
         }}
       >
-        {null !== glisse && null !== insertion && <div className="sequence-insertion" style={{ left: insertion * COLONNE_LARGEUR }} />}
+        {null !== glisse && null !== insertion && <div className="sequence-insertion" style={{ left: limitesColonnes[insertion] ?? 0 }} />}
         {participants.map((p) => (
-          <div key={p.id} className="sequence-participant" style={{ width: COLONNE_LARGEUR }}>
+          <div key={p.id} className="sequence-participant" style={{ width: largeurColonne(p.id) }}>
             {!creeId.has(p.id) && boiteParticipant(p)}
           </div>
         ))}

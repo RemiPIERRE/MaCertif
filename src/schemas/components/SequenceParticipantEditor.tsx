@@ -80,9 +80,22 @@ export function SequenceParticipantEditor({
       style={participant.style}
       onStyle={onStyle}
       onClose={onClose}
-      autoFocusNom
       cles={CLES_PARTICIPANT}
       libellesStyle={LIBELLES_PARTICIPANT}
+      champEntete={
+        <label className="me-champ-nom">
+          <span className="me-etiquette">Nom du participant</span>
+          <ChampTexteAuto
+            className="me-input me-input--titre me-textarea"
+            value={participant.nom}
+            onChange={(e) => onNom(e.target.value)}
+            placeholder="Participant (Entrée = nouvelle ligne, sans couper les mots)"
+            autoFocus
+            onFocus={(e) => e.currentTarget.select()}
+            spellCheck={false}
+          />
+        </label>
+      }
       actions={
         <>
           <button type="button" className="me-bouton me-bouton--icone" onClick={() => onDeplacer(-1)} disabled={!peutDeplacer.gauche} title="Déplacer d'une place vers la gauche (ou glisser l'en-tête)" aria-label="Déplacer vers la gauche">
