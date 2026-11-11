@@ -41,7 +41,7 @@ export function ClasseNode({ id, data, selected }: Props) {
         </span>
       </div>
 
-      <div className="schema-node-section" style={{ gridTemplateColumns: gabarit }}>
+      <div className="schema-node-section schema-node-section--classe" style={{ gridTemplateColumns: gabarit }}>
         {0 === attributs.length ? (
           <div className="schema-node-empty">Aucun attribut</div>
         ) : (
@@ -55,7 +55,7 @@ export function ClasseNode({ id, data, selected }: Props) {
         )}
       </div>
 
-      <div className="schema-node-section" style={{ gridTemplateColumns: gabarit }}>
+      <div className="schema-node-section schema-node-section--classe schema-node-section--methodes" style={{ gridTemplateColumns: gabarit }}>
         {0 === methodes.length ? (
           <div className="schema-node-empty">Aucune méthode</div>
         ) : (

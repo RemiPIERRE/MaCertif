@@ -85,6 +85,21 @@
   opacity: 0.85;
 }
 
+/* Diagramme de classes : deux compartiments (attributs, méthodes) dans le même .schema-node
+ * que les tables/entités — mais schemas.css leur donne `flex: 1` à chacun (flex-basis: 0%),
+ * ce qui les force à se partager l'espace à parts ÉGALES quel que soit leur nombre de lignes
+ * (un attribut en trop se retrouve écrasé contre la première méthode dès que le nœud est
+ * redimensionné à la main en dessous de sa hauteur naturelle). `flex: 0 0 auto` : chaque
+ * compartiment prend sa taille de contenu réelle, plus un séparateur net entre les deux
+ * (plus marqué que le simple filet gris entre deux lignes d'un même compartiment). */
+.schema-node-classe .schema-node-section--classe {
+  flex: 0 0 auto;
+}
+
+.schema-node-classe .schema-node-section--methodes {
+  border-top: 2px solid var(--line-strong, #999);
+}
+
 /* Diagramme de classes : symbole de visibilité (+/-/#/~), stéréotype au-dessus du nom,
    attribut/méthode statique soulignés, classe/méthode abstraite en italique (convention UML). */
 .schema-node-merise .schema-cell--visibilite {
