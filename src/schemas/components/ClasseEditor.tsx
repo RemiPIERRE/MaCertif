@@ -47,6 +47,17 @@ export function ClasseEditor({ data, onChange, onClose }: Props) {
       style={data.style}
       onStyle={(style) => onChange({ style })}
       onClose={onClose}
+      actions={
+        <button
+          type="button"
+          className={`me-bouton me-bouton--petit${data.sansMethode ? ' is-actif' : ''}`}
+          aria-pressed={Boolean(data.sansMethode)}
+          onClick={() => onChange({ sansMethode: !data.sansMethode })}
+          title="Masque le compartiment méthodes tant qu'il est vide (évite le message « Aucune méthode » à l'impression) — réapparaît dès qu'une méthode est ajoutée"
+        >
+          Sans méthode
+        </button>
+      }
     >
       <div className="me-tableau sequence-editor">
         <div className="me-ligne me-ligne--portee sequence-identite">

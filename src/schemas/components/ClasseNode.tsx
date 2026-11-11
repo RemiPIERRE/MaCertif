@@ -14,7 +14,10 @@ export function ClasseNode({ id, data, selected }: Props) {
   const methodes = (data.methodes ?? []).filter((m) => 'object' === typeof m && null !== m)
   const style: ElementStyle = resoudreStyle(data.style)
   const gabarit = 'max-content minmax(60px, 1fr) max-content'
-  const nbLignes = Math.max(1, attributs.length) + Math.max(1, methodes.length)
+  // « Sans méthode » ne masque que le compartiment VIDE (message « Aucune méthode », gênant à
+  // l'impression) : dès qu'une méthode existe, le compartiment réapparaît de lui-même.
+  const masquerMethodes = Boolean(data.sansMethode) && 0 === methodes.length
+  const nbLignes = Math.max(1, attributs.length) + (masquerMethodes ? 0 : Math.max(1, methodes.length))
 
   return (
     <div
@@ -55,21 +58,23 @@ export function ClasseNode({ id, data, selected }: Props) {
         )}
       </div>
 
-      <div className="schema-node-section schema-node-section--classe schema-node-section--methodes" style={{ gridTemplateColumns: gabarit }}>
-        {0 === methodes.length ? (
-          <div className="schema-node-empty">Aucune méthode</div>
-        ) : (
-          methodes.map((m) => (
-            <div key={m.id} className="schema-ligne" style={{ backgroundColor: style.couleurFondLigne }}>
-              <span className="schema-cell schema-cell--visibilite">{VISIBILITE_SYMBOLES[m.visibilite]}</span>
-              <span className={`schema-cell schema-cell--nom${m.statique ? ' is-souligne' : ''}${m.abstraite ? ' is-abstraite' : ''}`}>
-                {(m.nom || 'methode') + `(${m.parametres})`}
-              </span>
-              <span className="schema-cell schema-cell--type">{m.typeRetour.trim() ? `: ${m.typeRetour}` : ''}</span>
-            </div>
-          ))
-        )}
-      </div>
+      {!masquerMethodes && (
+        <div className="schema-node-section schema-node-section--classe schema-node-section--methodes" style={{ gridTemplateColumns: gabarit }}>
+          {0 === methodes.length ? (
+            <div className="schema-node-empty">Aucune méthode</div>
+          ) : (
+            methodes.map((m) => (
+              <div key={m.id} className="schema-ligne" style={{ backgroundColor: style.couleurFondLigne }}>
+                <span className="schema-cell schema-cell--visibilite">{VISIBILITE_SYMBOLES[m.visibilite]}</span>
+                <span className={`schema-cell schema-cell--nom${m.statique ? ' is-souligne' : ''}${m.abstraite ? ' is-abstraite' : ''}`}>
+                  {(m.nom || 'methode') + `(${m.parametres})`}
+                </span>
+                <span className="schema-cell schema-cell--type">{m.typeRetour.trim() ? `: ${m.typeRetour}` : ''}</span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   )
 }

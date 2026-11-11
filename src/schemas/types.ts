@@ -220,6 +220,9 @@ export interface ClasseNodeData extends Record<string, unknown> {
   stereotype?: string;
   /** Nom affiché en italique (classe abstraite), sans incidence sur les méthodes. */
   abstraite?: boolean;
+  /** Masque le compartiment méthodes tant qu'il est vide (évite le message « Aucune méthode »
+   * sur un schéma imprimé/exporté) ; réapparaît de lui-même dès qu'une méthode est ajoutée. */
+  sansMethode?: boolean;
   attributs: ClasseAttribut[];
   methodes: ClasseMethode[];
   style?: Partial<ElementStyle>;

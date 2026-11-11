@@ -353,6 +353,13 @@
   background-color: color-mix(in srgb, var(--me-danger) 12%, var(--me-fond));
 }
 
+/* Bouton bascule (ex. « Sans méthode ») : même logique que .me-bouton--apparence.is-ouvert. */
+.merise-editor .me-bouton.is-actif {
+  border-color: var(--me-bordure-vive);
+  background-color: color-mix(in srgb, var(--me-accent) 16%, var(--me-fond));
+  color: var(--me-accent);
+}
+
 .merise-editor .me-bouton--principal {
   background-color: var(--me-accent);
   border-color: var(--me-accent);

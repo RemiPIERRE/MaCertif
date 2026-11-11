@@ -261,6 +261,7 @@ function normaliserNoeud(brut: unknown, kind: FlowKind): SchemaNode | null {
         nom: texte(donnees.nom),
         stereotype: texte(donnees.stereotype) || undefined,
         abstraite: vrai(donnees.abstraite) || undefined,
+        sansMethode: vrai(donnees.sansMethode) || undefined,
         attributs: liste(donnees.attributs, normaliserAttribut),
         methodes: liste(donnees.methodes, normaliserMethode),
         style: normaliserStyle(donnees.style),
