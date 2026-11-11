@@ -1,5 +1,7 @@
 import { generateId } from "../../lib/id";
 import type {
+  ClasseAttribut,
+  ClasseMethode,
   CoteLienFk,
   LienFkEdgeType,
   McdPropriete,
@@ -28,6 +30,14 @@ export function nouvelleColonne(patch: Partial<TableColonne> = {}): TableColonne
 
 export function nouvellePropriete(patch: Partial<McdPropriete> = {}): McdPropriete {
   return { id: generateId(), nom: "", type: "", identifiant: false, ...patch };
+}
+
+export function nouvelAttribut(patch: Partial<ClasseAttribut> = {}): ClasseAttribut {
+  return { id: generateId(), nom: "", type: "", visibilite: "prive", ...patch };
+}
+
+export function nouvelleMethode(patch: Partial<ClasseMethode> = {}): ClasseMethode {
+  return { id: generateId(), nom: "", parametres: "", typeRetour: "", visibilite: "public", ...patch };
 }
 
 const SUFFIXES_HANDLE_LIGNE = ["-gauche", "-droite"] as const;

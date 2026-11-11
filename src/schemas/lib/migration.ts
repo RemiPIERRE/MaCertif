@@ -1,5 +1,8 @@
 import { generateId } from "../../lib/id";
 import type {
+  ClasseAttribut,
+  ClasseMethode,
+  ClasseVisibilite,
   ElementStyle,
   FkAction,
   FlowKind,
@@ -36,6 +39,7 @@ const TYPES_PAR_KIND: Record<FlowKind, ReadonlySet<string>> = {
   mcd: new Set(["mcdEntite", "mcdAssociation"]),
   mld: new Set(["table"]),
   mpd: new Set(["table"]),
+  classe: new Set(["classe"]),
   casUtilisation: new Set(["acteur", "casUtilisation", "cuStructure"]),
   activite: new Set(["activite"]),
 };
@@ -64,6 +68,14 @@ const FORMES_ACTIVITE: ReadonlySet<string> = new Set([
 ]);
 
 const RELATIONS_PAR_KIND: Partial<Record<FlowKind, ReadonlySet<string>>> = {
+  classe: new Set([
+    "association",
+    "heritage",
+    "composition",
+    "agregation",
+    "dependance",
+    "lien",
+  ]),
   casUtilisation: new Set([
     "association",
     "heritage",
@@ -163,6 +175,41 @@ function colonneVide(id: string, nom: string): TableColonne {
   };
 }
 
+const VISIBILITES: ReadonlySet<string> = new Set([
+  "public",
+  "prive",
+  "protege",
+  "paquet",
+]);
+
+function normaliserVisibilite(v: unknown): ClasseVisibilite {
+  return VISIBILITES.has(texte(v)) ? (v as ClasseVisibilite) : "prive";
+}
+
+function normaliserAttribut(brut: unknown): ClasseAttribut | null {
+  if (!estObjet(brut)) return null;
+  return {
+    id: texte(brut.id) || generateId(),
+    nom: texte(brut.nom),
+    type: texte(brut.type),
+    visibilite: normaliserVisibilite(brut.visibilite),
+    statique: vrai(brut.statique) || undefined,
+  };
+}
+
+function normaliserMethode(brut: unknown): ClasseMethode | null {
+  if (!estObjet(brut)) return null;
+  return {
+    id: texte(brut.id) || generateId(),
+    nom: texte(brut.nom),
+    parametres: texte(brut.parametres),
+    typeRetour: texte(brut.typeRetour),
+    visibilite: normaliserVisibilite(brut.visibilite),
+    statique: vrai(brut.statique) || undefined,
+    abstraite: vrai(brut.abstraite) || undefined,
+  };
+}
+
 function liste<T>(v: unknown, convertir: (x: unknown) => T | null): T[] {
   return (Array.isArray(v) ? v : [])
     .map(convertir)
@@ -206,6 +253,16 @@ function normaliserNoeud(brut: unknown, kind: FlowKind): SchemaNode | null {
       data = {
         nom: texte(donnees.nom),
         proprietes: liste(donnees.proprietes, normaliserPropriete),
+        style: normaliserStyle(donnees.style),
+      };
+      break;
+    case "classe":
+      data = {
+        nom: texte(donnees.nom),
+        stereotype: texte(donnees.stereotype) || undefined,
+        abstraite: vrai(donnees.abstraite) || undefined,
+        attributs: liste(donnees.attributs, normaliserAttribut),
+        methodes: liste(donnees.methodes, normaliserMethode),
         style: normaliserStyle(donnees.style),
       };
       break;

@@ -27,6 +27,7 @@ import type {
   ActiviteForme,
   ActiviteNodeData,
   ActeurNodeData,
+  ClasseNodeData,
   CuStructureForme,
   FlowContenu,
   FlowKind,
@@ -43,7 +44,7 @@ import type {
   TableNodeData,
 } from '../types'
 import { ACTIVITE_ZONES, CU_ZONES, RELATION_LABELS } from '../types'
-import { aretesFk, coteDuHandle, idLigneDuHandle, nouvelleColonne, nouvellePropriete } from '../lib/modele'
+import { aretesFk, coteDuHandle, idLigneDuHandle, nouvelleColonne, nouvellePropriete, nouvelAttribut } from '../lib/modele'
 import { dupliquerNoeud, TYPES_DUPLIQUABLES } from '../lib/dupliquerEntite'
 import { genererPng, OPTIONS_EXPORT_DEFAUT, type OptionsExport } from '../lib/exportPng'
 import { ApercuExport, signatureSchema, useZoneApercu } from './ApercuExport'
@@ -51,6 +52,7 @@ import { signatureSansEtatVisuel, useHistorique } from './useHistorique'
 import { McdEntiteNode } from './McdEntiteNode'
 import { McdAssociationNode } from './McdAssociationNode'
 import { TableNode } from './TableNode'
+import { ClasseNode } from './ClasseNode'
 import { ActeurNode } from './ActeurNode'
 import { CasUtilisationNode } from './CasUtilisationNode'
 import { ActiviteNode } from './ActiviteNode'
@@ -60,6 +62,7 @@ import { LienMcdEdge } from './LienMcdEdge'
 import { RelationEdge, SchemaMarkers } from './RelationEdge'
 import { McdEditor } from './McdEditor'
 import { TableEditor, type TableResume } from './TableEditor'
+import { ClasseEditor } from './ClasseEditor'
 import { LienFkEditor } from './LienFkEditor'
 import { NiveauContext } from './NiveauContext'
 import { EditionContext } from './EditionContext'
@@ -70,6 +73,7 @@ const NODE_TYPES = {
   mcdEntite: McdEntiteNode,
   mcdAssociation: McdAssociationNode,
   table: TableNode,
+  classe: ClasseNode,
   acteur: ActeurNode,
   casUtilisation: CasUtilisationNode,
   cuStructure: CuStructureNode,
@@ -78,8 +82,9 @@ const NODE_TYPES = {
 const EDGE_TYPES = { relation: RelationEdge, lienMcd: LienMcdEdge, fk: FkEdge }
 const VIEWPORT_PAR_DEFAUT: Viewport = { x: 0, y: 0, zoom: 1 }
 
-/** Relations libres (cas d'utilisation, activité) : chaque famille ne propose que ses notations. */
+/** Relations libres (classes, cas d'utilisation, activité) : chaque famille ne propose que ses notations. */
 const RELATIONS_PAR_KIND: Partial<Record<FlowKind, RelationType[]>> = {
+  classe: ['association', 'heritage', 'composition', 'agregation', 'dependance', 'lien'],
   casUtilisation: ['association', 'heritage', 'inclut', 'etend', 'dependance', 'lien'],
   activite: ['flux', 'interruption', 'lien'],
 }
@@ -180,10 +185,11 @@ const TAILLE_ACTIVITE: Record<ActiviteForme, Taille> = {
   note: { width: 150, height: 64 },
 }
 
-const TAILLE_PAR_TYPE: Record<'mcdEntite' | 'mcdAssociation' | 'table' | 'acteur' | 'casUtilisation', Taille> = {
+const TAILLE_PAR_TYPE: Record<'mcdEntite' | 'mcdAssociation' | 'table' | 'classe' | 'acteur' | 'casUtilisation', Taille> = {
   mcdEntite: { width: 220 },
   mcdAssociation: { width: 200 },
   table: { width: 240 },
+  classe: { width: 220 },
   acteur: { width: 100, height: 110 },
   casUtilisation: { width: 170, height: 80 },
 }
@@ -462,6 +468,9 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
           true,
         )
         break
+      case 'classe':
+        placerEtAjouter({ id, type, data: { nom: '', attributs: [nouvelAttribut({ nom: 'id', type: 'int' })], methodes: [] } }, taille, true)
+        break
       case 'acteur':
       case 'casUtilisation':
         placerEtAjouter({ id, type, data: { nom: '' } }, taille)
@@ -667,6 +676,11 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
     if (patch.proprietes) reinitialiserHauteur(idNoeud)
   }
 
+  const majClasse = (idNoeud: string, patch: Partial<ClasseNodeData>) => {
+    instance.updateNodeData(idNoeud, patch)
+    if (patch.attributs || patch.methodes) reinitialiserHauteur(idNoeud)
+  }
+
   const fermerEditeur = () => {
     setEditionId(null)
     setNodes((nds) => nds.map((n) => (n.selected ? { ...n, selected: false } : n)))
@@ -711,7 +725,7 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
 
   /** Double-clic sur une forme : ouvre son édition (éditeur du bas pour les tables et le MCD ; texte et palette pour l'activité). */
   const surDoubleClicNoeud: NodeMouseHandler = (_e, noeud) => {
-    if (!['table', 'mcdEntite', 'mcdAssociation', 'activite', 'acteur', 'casUtilisation', 'cuStructure'].includes(String(noeud.type))) return
+    if (!['table', 'classe', 'mcdEntite', 'mcdAssociation', 'activite', 'acteur', 'casUtilisation', 'cuStructure'].includes(String(noeud.type))) return
     setEdgeEditionId(null)
     setNodes((nds) => nds.map((n) => (n.id === noeud.id ? { ...n, selected: true } : n.selected ? { ...n, selected: false } : n)))
     setEditionId(noeud.id)
@@ -883,6 +897,11 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
                         Table
                       </button>
                     )}
+                    {'classe' === kind && (
+                      <button type="button" onClick={() => ajouterNoeud('classe')}>
+                        Classe
+                      </button>
+                    )}
                     {'casUtilisation' === kind &&
                       ELEMENTS_CU.map((e) => (
                         <button key={e.cle} type="button" onClick={() => { ajouterCu(e.ajout); setMenuAjoutOuvert(false) }}>
@@ -958,7 +977,8 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
                     ⇄ Inverser
                   </button>
                 </div>
-                {'casUtilisation' === kind && 'association' === arete.data?.relationType && (
+                {(('casUtilisation' === kind && 'association' === arete.data?.relationType) ||
+                  ('classe' === kind && ['association', 'composition', 'agregation'].includes(String(arete.data?.relationType)))) && (
                   <div className="schema-relation-panel-row">
                     <label>
                       Multiplicité côté source
@@ -1041,6 +1061,14 @@ export function SchemaCanvas({ nom, contenu, onChange }: Props) {
           genre={'mcdEntite' === selectionUnique.type ? 'entite' : 'association'}
           data={selectionUnique.data}
           onChange={(patch) => majMcd(selectionUnique.id, patch)}
+          onClose={fermerEditeur}
+        />
+      )}
+      {'classe' === selectionUnique?.type && (
+        <ClasseEditor
+          key={selectionUnique.id}
+          data={selectionUnique.data}
+          onChange={(patch) => majClasse(selectionUnique.id, patch)}
           onClose={fermerEditeur}
         />
       )}

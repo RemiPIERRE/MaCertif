@@ -85,6 +85,33 @@
   opacity: 0.85;
 }
 
+/* Diagramme de classes : symbole de visibilité (+/-/#/~), stéréotype au-dessus du nom,
+   attribut/méthode statique soulignés, classe/méthode abstraite en italique (convention UML). */
+.schema-node-merise .schema-cell--visibilite {
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+  border-right: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.schema-node-stereotype {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 400;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.schema-node-merise .schema-cell--nom.is-souligne {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.schema-node-titre .is-abstraite,
+.schema-node-merise .schema-cell--nom.is-abstraite {
+  font-style: italic;
+}
+
 /* Association du MCD : rectangle arrondi. */
 .schema-node-mcd-association {
   border-radius: 18px;
@@ -486,6 +513,14 @@
 
 .merise-editor .me-ligne--mcd-association {
   grid-template-columns: 38px minmax(120px, 1.4fr) minmax(100px, 1fr) 28px;
+}
+
+.merise-editor .me-ligne--classe-attribut {
+  grid-template-columns: 38px 118px minmax(120px, 1.4fr) minmax(100px, 1fr) 28px;
+}
+
+.merise-editor .me-ligne--classe-methode {
+  grid-template-columns: 38px 118px minmax(110px, 1.2fr) minmax(130px, 1.3fr) minmax(90px, 0.8fr) 28px;
 }
 
 /* Cases à cocher (PK, NN, UQ, AI, identifiant). */

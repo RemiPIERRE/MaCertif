@@ -175,6 +175,56 @@ export interface LienFkData extends Record<string, unknown> {
   enfant: CardinaliteFk;
 }
 
+/* ═══════════════════════════ Diagramme de classes (UML) ═══════════════════════════ */
+
+export type ClasseVisibilite = "public" | "prive" | "protege" | "paquet";
+
+export const VISIBILITE_SYMBOLES: Record<ClasseVisibilite, string> = {
+  public: "+",
+  prive: "-",
+  protege: "#",
+  paquet: "~",
+};
+
+export const VISIBILITE_LABELS: Record<ClasseVisibilite, string> = {
+  public: "Public (+)",
+  prive: "Privé (-)",
+  protege: "Protégé (#)",
+  paquet: "Paquet (~)",
+};
+
+export interface ClasseAttribut {
+  id: string;
+  nom: string;
+  /** Type (facultatif, libre). */
+  type: string;
+  visibilite: ClasseVisibilite;
+  statique?: boolean;
+}
+
+export interface ClasseMethode {
+  id: string;
+  nom: string;
+  /** Paramètres en texte libre, ex. « id: int, nom: string ». */
+  parametres: string;
+  /** Type de retour (facultatif, libre ; vide = void). */
+  typeRetour: string;
+  visibilite: ClasseVisibilite;
+  statique?: boolean;
+  abstraite?: boolean;
+}
+
+export interface ClasseNodeData extends Record<string, unknown> {
+  nom: string;
+  /** « interface », « enumeration »… affiché entre guillemets au-dessus du nom. */
+  stereotype?: string;
+  /** Nom affiché en italique (classe abstraite), sans incidence sur les méthodes. */
+  abstraite?: boolean;
+  attributs: ClasseAttribut[];
+  methodes: ClasseMethode[];
+  style?: Partial<ElementStyle>;
+}
+
 /* ═══════════════════════ Cas d'utilisation / Activité ═══════════════════════ */
 
 export interface ActeurNodeData extends Record<string, unknown> {
@@ -274,20 +324,24 @@ export type McdAssociationNodeType = Node<
   "mcdAssociation"
 >;
 export type TableNodeType = Node<TableNodeData, "table">;
+export type ClasseNodeType = Node<ClasseNodeData, "classe">;
 
 export type SchemaNode =
   | McdEntiteNodeType
   | McdAssociationNodeType
   | TableNodeType
+  | ClasseNodeType
   | Node<ActeurNodeData, "acteur">
   | Node<CasUtilisationNodeData, "casUtilisation">
   | Node<CuStructureNodeData, "cuStructure">
   | Node<ActiviteNodeData, "activite">;
 
-/** Notations de relation des diagrammes de cas d'utilisation et d'activité. */
+/** Notations de relation des diagrammes de classes, cas d'utilisation et d'activité. */
 export type RelationType =
   | "association"
   | "heritage"
+  | "composition"
+  | "agregation"
   | "inclut"
   | "etend"
   | "flux"
@@ -316,7 +370,7 @@ export type SchemaEdge = RelationEdgeType | LienMcdEdgeType | LienFkEdgeType;
 
 /** Les familles de diagramme "libre" (nœuds + arêtes sur un canevas pannable/zoomable,
  * un seul éditeur — SchemaCanvas) ; chacune n'expose que ses propres éléments. */
-export type FlowKind = "mcd" | "mld" | "mpd" | "casUtilisation" | "activite";
+export type FlowKind = "mcd" | "mld" | "mpd" | "classe" | "casUtilisation" | "activite";
 
 export interface FlowContenu {
   kind: FlowKind;
@@ -485,6 +539,8 @@ export interface Diagramme {
 export const RELATION_LABELS: Record<RelationType, string> = {
   association: "Association",
   heritage: "Héritage",
+  composition: "Composition",
+  agregation: "Agrégation",
   inclut: "Inclusion",
   etend: "Extension",
   flux: "Flux",
@@ -566,6 +622,7 @@ export const DIAGRAM_KIND_LABELS: Record<FlowKind | "sequence", string> = {
   mcd: "MCD — Modèle conceptuel",
   mld: "MLD — Modèle logique",
   mpd: "MPD — Modèle physique",
+  classe: "Diagramme de classes",
   sequence: "Diagramme de séquence",
   activite: "Diagramme d'activité",
   casUtilisation: "Diagramme de cas d'utilisation",

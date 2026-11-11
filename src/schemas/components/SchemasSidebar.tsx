@@ -6,6 +6,7 @@ const BADGE_LABELS: Record<FlowKind | 'sequence', string> = {
   mcd: 'MCD',
   mld: 'MLD',
   mpd: 'MPD',
+  classe: 'Classe',
   casUtilisation: "Cas d'util.",
   activite: 'Activité',
   sequence: 'Séquence',

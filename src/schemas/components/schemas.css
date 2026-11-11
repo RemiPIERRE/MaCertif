@@ -615,6 +615,19 @@
   stroke-width: 1.5;
 }
 
+/* Diagramme de classes : losange plein (composition) ou creux (agrégation), convention UML. */
+.schema-marker-composition {
+  fill: var(--ink, #222);
+  stroke: var(--ink, #222);
+  stroke-width: 1.5;
+}
+
+.schema-marker-agregation {
+  fill: var(--surface, #fff);
+  stroke: var(--ink, #222);
+  stroke-width: 1.5;
+}
+
 .schema-marker-composition {
   fill: var(--ink, #222);
 }

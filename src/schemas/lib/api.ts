@@ -14,6 +14,7 @@ const FLOW_KINDS_CONNUS = new Set<string>([
   "mcd",
   "mld",
   "mpd",
+  "classe",
   "casUtilisation",
   "activite",
 ]);

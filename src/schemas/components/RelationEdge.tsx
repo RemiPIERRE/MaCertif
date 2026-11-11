@@ -13,6 +13,13 @@ const MARKER_END: Record<string, string | undefined> = {
   dependance: 'url(#schema-marker-fleche)',
 }
 
+/** Composition/agrégation (diagramme de classes) : losange côté « tout », à l'extrémité SOURCE
+ * (⇄ Inverser échange les deux bouts si le sens posé n'est pas le bon) ; pas de pointe à l'autre bout. */
+const MARKER_START: Record<string, string | undefined> = {
+  composition: 'url(#schema-marker-composition)',
+  agregation: 'url(#schema-marker-agregation)',
+}
+
 /** Inclusion/extension (cas d'utilisation) se notent par une flèche en pointillés, comme le lien d'une note. */
 const POINTILLES = new Set(['inclut', 'etend', 'lien', 'dependance'])
 
@@ -63,6 +70,7 @@ export function RelationEdge({ id, sourceX, sourceY, targetX, targetY, sourcePos
       <BaseEdge
         id={id}
         path={edgePath}
+        markerStart={MARKER_START[relationType]}
         markerEnd={MARKER_END[relationType]}
         style={{ strokeWidth: selected ? 2.5 : 1.5, strokeDasharray: POINTILLES.has(relationType) ? '6 4' : undefined }}
       />
@@ -114,6 +122,14 @@ export function SchemaMarkers() {
         {/* Flèche simple ouverte : inclusion/extension (cas d'utilisation), flux (activité), lien FK du MLD. */}
         <marker id="schema-marker-fleche" viewBox="0 0 16 16" markerWidth="14" markerHeight="14" refX="14" refY="8" orient="auto-start-reverse">
           <path d="M 2 2 L 14 8 L 2 14" className="schema-marker-fleche" />
+        </marker>
+
+        {/* Composition/agrégation (diagramme de classes) : losange côté « tout », plein ou creux. */}
+        <marker id="schema-marker-composition" viewBox="0 0 24 14" markerWidth="22" markerHeight="13" refX="22" refY="7" orient="auto-start-reverse">
+          <path d="M 2 7 L 12 1 L 22 7 L 12 13 Z" className="schema-marker-composition" />
+        </marker>
+        <marker id="schema-marker-agregation" viewBox="0 0 24 14" markerWidth="22" markerHeight="13" refX="22" refY="7" orient="auto-start-reverse">
+          <path d="M 2 7 L 12 1 L 22 7 L 12 13 Z" className="schema-marker-agregation" />
         </marker>
 
         {/* Pattes d'oie (MPD). Dessinées pour un trait qui arrive de la gauche : x = 28 est le bord de la table.

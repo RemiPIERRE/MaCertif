@@ -6,6 +6,7 @@ export const TYPES_DUPLIQUABLES: ReadonlySet<string> = new Set([
   "mcdEntite",
   "mcdAssociation",
   "table",
+  "classe",
   "activite",
   "acteur",
   "casUtilisation",
@@ -71,6 +72,14 @@ export function dupliquerNoeud(source: SchemaNode, decalage = 40): SchemaNode {
         ...p,
         id: generateId(),
       })),
+    };
+  } else if ("classe" === source.type && "classe" === copie.type) {
+    copie.data = {
+      ...source.data,
+      nom: suffixer(source.data.nom),
+      style: source.data.style ? { ...source.data.style } : undefined,
+      attributs: source.data.attributs.map((a) => ({ ...a, id: generateId() })),
+      methodes: source.data.methodes.map((m) => ({ ...m, id: generateId() })),
     };
   }
 
